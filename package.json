@@ -11,7 +11,10 @@
   "dependencies": {
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.15"
+    "next": "14.2.15",
+    "prisma": "^5.20.0",
+    "@prisma/client": "^5.20.0",
+    "@prisma/studio": "^0.502.0"
   },
   "devDependencies": {
     "typescript": "^5",
