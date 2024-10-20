@@ -1,4 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+// EXAMPLE OF A LOGGED IN PROTECTED PATH
 
 import { verifyToken } from "@/utils/auth";
 
