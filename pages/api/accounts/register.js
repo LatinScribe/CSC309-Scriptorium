@@ -8,8 +8,8 @@ export default async function handler(req, res) {
 
     const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
 
-    // currently only requiring username, password, and role
-    if (!username || !role || !password) {
+    // currently only requiring username, password, email, and role
+    if (!username || !role || !password || !email) {
         return res.status(400).json({
             error: "Please provide all the required fields",
         });
