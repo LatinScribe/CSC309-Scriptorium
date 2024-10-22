@@ -12,3 +12,87 @@ datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
 }
+
+model User {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  password    String
+  firstName   String?
+  lastName    String?
+  // email       String   @unique
+  email       String
+  avatar      String?
+  phoneNumber String?
+  role        String   @default("USER")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // blogPosts     BlogPost[]
+  // comments      Comment[]
+  // codeTemplates CodeTemplate[]
+  // BlogPost      BlogPost?      @relation(fields: [blogPostId], references: [id])
+  // blogPostId    Int?
+  // commentId     Int?
+  // BlogPost      BlogPost?      @relation(fields: [blogPostId], references: [id])
+  //Comment       Comment?       @relation(fields: [commentId], references: [id])
+}
+
+model CodeTemplate {
+  id             Int      @id @default(autoincrement())
+  title          String
+  explanation    String
+  //tags           String[]
+  //forkedSource   CodeTemplate? @relation("ForkedSource", fields: [forkedSourceId], references: [id])
+  forkedSourceId Int?
+  //author         User          @relation(fields: [authorId], references: [id])
+  authorId       Int
+  modifiedAt     DateTime @default(now())
+  content        String
+
+  blogPosts      BlogPost[]
+  //CodeTemplate   CodeTemplate[]
+  codeTemplateId Int?
+}
+
+model BlogPost {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String
+  //tags           String[]
+  createdAt     DateTime       @default(now())
+  flagged       Boolean        @default(false)
+  //upvotedUsers   User[]         @relation("UpvotedBlogPosts")
+  //downvotedUsers User[]         @relation("DownvotedBlogPosts")
+  codeTemplates CodeTemplate[]
+  reportsCount  Int            @default(0)
+  hidden        Boolean        @default(false)
+  //author         User           @relation(fields: [authorId], references: [id])
+  authorId      Int
+
+  comments Comment[]
+  Report   Report[]
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  blogPost     BlogPost @relation(fields: [blogPostId], references: [id])
+  blogPostId   Int
+  createdAt    DateTime @default(now())
+  //author         User     @relation(fields: [authorId], references: [id])
+  authorId     Int
+  content      String
+  //upvotedUsers   User[]   @relation("UpvotedComments")
+  //downvotedUsers User[]   @relation("DownvotedComments")
+  reportsCount Int      @default(0)
+  hidden       Boolean  @default(false)
+  Report       Report[]
+}
+
+model Report {
+  id         Int       @id @default(autoincrement())
+  content    String
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  blogPostId Int?
+  comment    Comment?  @relation(fields: [commentId], references: [id])
+  commentId  Int?
+}
