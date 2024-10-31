@@ -41,6 +41,7 @@ model CodeTemplate {
   authorId       Int
   modifiedAt     DateTime @default(now())
   content        String
+  language       String
 
   blogPosts BlogPost[]
 }

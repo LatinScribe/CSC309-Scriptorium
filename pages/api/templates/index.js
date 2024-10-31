@@ -1,6 +1,8 @@
 import prisma from "@/utils/db";
 import { verifyToken } from "@/utils/auth";
 
+const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "c++", "c"];
+
 export default async function handler(req, res) {
     // GET: return template metadata list based on filters (title, tags, content, author)
     if (req.method === "GET") {
@@ -78,7 +80,7 @@ export default async function handler(req, res) {
     // I'm intending this to be run before the user types any code
     // (e.g. a popup where the user will first define tht title, explanation, tags, etc)
     if (req.method === "POST") {
-        const { title, explanation, tags, forkedSourceId } = req.body;
+        const { title, explanation, tags, forkedSourceId, language } = req.body;
         if (!title) {
             return res.status(400).json({
             error: "Please provide a title",
@@ -93,19 +95,53 @@ export default async function handler(req, res) {
         if (tags) {
             tagsString = tags.join(",");
         }
+        if (forkedSourceId && typeof forkedSourceId !== "number") {
+            return res.status(400).json({
+            error: "Forked source id should be a number",
+            });
+        }
+        if (language && typeof language !== "string") {
+            return res.status(400).json({
+            error: "Language should be a string",
+            });
+        }
+        if (language && !SUPPORTED_LANGUAGES.includes(language)) {
+            return res.status(400).json({
+            error: "Invalid language",
+            });
+        }
+
+        let content = "";
+        let templateLanguage = language;
+
+        if (forkedSourceId) {
+            const source = await prisma.codeTemplate.findUnique({
+            where: {
+                id: forkedSourceId,
+            },
+            });
+            if (!source) {
+                return res.status(404).json({
+                    message: "Source template not found",
+                });
+            }
+            content = source.content;
+            templateLanguage = source.language;
+        }
         // the token only contains the username, so we need to query the user to get the id
         const template = await prisma.codeTemplate.create({
             data: {
             title,
             explanation,
             tags: tagsString,
-            content: "",
+            content,
             author: {
                 connect: {
                 id: user.id,
                 },
             },
             forkedSourceId,
+            language: templateLanguage,
             },
         });
         return res.status(201).json(template);
