@@ -1,4 +1,5 @@
 import { hashPassword, generateSalt } from "@/utils/auth";
+import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
@@ -21,6 +22,49 @@ export default async function handler(req, res) {
     }
 
     try {
+        // verify all inputs
+        if (!verifyEmail(email)) {
+            return res.status(400).json({
+                error: "INVALID EMAIL FORMAT",
+            });
+        }
+
+        if (firstName && !verifyFirstname(firstName)) {
+            return res.status(400).json({
+                error: "FIRSTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+            });
+        }
+
+        if (lastName && !verifyLastname(lastName)) {
+            return res.status(400).json({
+                error: "LASTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+            });
+        }
+
+        if (phoneNumber && !verifyPhonenumber(phoneNumber)) {
+            return res.status(400).json({
+                error: "INVALID PHONENUMBER FORMAT",
+            });
+        }
+
+        if (!verifyPassword(password)) {
+            return res.status(400).json({
+                error: "PASSWORD SHOULD BE AT LEAST 8 Characters, with 1 uppercase, 1 lowercase, 1 number, 1 special char",
+            });
+        }
+
+        if (!verifyUsername(username)) {
+            return res.status(400).json({
+                error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+            });
+        }
+
+        if (!verifyRole(role)) {
+            return res.status(400).json({
+                error: "ROLE MUST BE EITHER USER OR ADMIN",
+            })
+        }
+
         // check if user already exists
         const userExists = await prisma.user.findUnique({
             where: {
@@ -84,7 +128,7 @@ export default async function handler(req, res) {
         console.log(error);
         return res.status(500).json({
             error: "Error creating user! Unsuccessful! Please try again!",
-           
+
         });
     }
 }

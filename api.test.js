@@ -25,14 +25,14 @@ describe("JWT and permissions API tests", () => {
     // Create an admin user and a regular user for testing
     await request(BASE_URL).post("/api/accounts/register").send({
       username: adminUsername,
-      password: "adminPass",
+      password: "adminPass123$",
       role: "ADMIN",
       email:  admin_email,
     });
 
     await request(BASE_URL).post("/api/accounts/register").send({
       username: regularUsername,
-      password: "userPass",
+      password: "userPass123&",
       role: "USER",
       email: reg_email,
     });
@@ -42,7 +42,7 @@ describe("JWT and permissions API tests", () => {
       .post("/api/accounts/login")
       .send({
         username: adminUsername,
-        password: "adminPass",
+        password: "adminPass123$",
         email: admin_email,
       });
     adminAccessToken = adminLoginResponse.body.accessToken;
@@ -51,7 +51,7 @@ describe("JWT and permissions API tests", () => {
       .post("/api/accounts/login")
       .send({
         username: regularUsername,
-        password: "userPass",
+        password: "userPass123&",
         email: reg_email,
       });
     userAccessToken = userLoginResponse.body.accessToken;
@@ -64,7 +64,7 @@ describe("JWT and permissions API tests", () => {
         .post("/api/accounts/register")
         .send({
           username: testUsername,
-          password: "testPass",
+          password: "testPass123*",
           role: "USER",
           email: test_email,
         });
@@ -79,7 +79,7 @@ describe("JWT and permissions API tests", () => {
         .post("/api/accounts/register")
         .send({
           username: testUsername,
-          password: "anotherPass",
+          password: "anotherPass123(",
           email: reg_email,
         });
 
@@ -92,7 +92,7 @@ describe("JWT and permissions API tests", () => {
     it("should log in and return a JWT", async () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
-        password: "testPass",
+        password: "testPass123*",
         email: test_email,
       });
 
@@ -103,7 +103,7 @@ describe("JWT and permissions API tests", () => {
     it("should fail to log in with incorrect credentials", async () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
-        password: "wrongPass",
+        password: "wrongPass123(",
         email: test_email,
       });
 
@@ -193,7 +193,7 @@ describe("API Tests for users", () => {
     it("should create a new user", async () => {
       const response = await request(BASE_URL).post("/api/accounts/users").send({
         username: regularUsername,
-        password: "myPass",
+        password: "myPass123&&",
         email: email,
         firstName: "Henry",
         lastName: "Chen",
@@ -217,7 +217,7 @@ describe("API Tests for users", () => {
     it("should fail to create a user with an existing username", async () => {
       const response = await request(BASE_URL).post("/api/accounts/users").send({
         username: regularUsername,
-        password: "myPass",
+        password: "myPass123&&",
         email: email,
         firstName: "Henry",
         lastName: "Chen",
@@ -252,7 +252,7 @@ describe("API Tests for users", () => {
 
     it("should fail to retrieve a non-existent username", async () => {
       const response = await request(BASE_URL).get("/api/accounts/users").send({
-        username: "J",
+        username: "JEE",
       });
 
       expect(response.status).toBe(200);
@@ -308,12 +308,12 @@ describe("API Tests for users", () => {
 
       const response = await request(BASE_URL).put("/api/accounts/users").send({
         username: regularUsername,
-        password: "myUpdatedPass",
+        password: "myUpdatedPass123&",
         email: "updated" + email,
-        firstName: "H",
-        lastName: "C",
+        firstName: "HE",
+        lastName: "CC",
         avatar: "UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg",
-        phoneNumber: "UPDATED123+456+7899",
+        phoneNumber: "122+456+7899",
         role: "USER",
       });
 
@@ -322,10 +322,10 @@ describe("API Tests for users", () => {
       expect(response.body.updated_user).toHaveProperty("createdAt");
       expect(response.body.updated_user.username).toBe(regularUsername);
       expect(response.body.updated_user.email).toBe("updated" + email);
-      expect(response.body.updated_user.firstName).toBe("H");
-      expect(response.body.updated_user.lastName).toBe("C");
+      expect(response.body.updated_user.firstName).toBe("HE");
+      expect(response.body.updated_user.lastName).toBe("CC");
       expect(response.body.updated_user.avatar).toBe("UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.updated_user.phoneNumber).toBe("UPDATED123+456+7899");
+      expect(response.body.updated_user.phoneNumber).toBe("122+456+7899");
       expect(response.body.updated_user.role).toBe("USER");
     });
 
@@ -338,7 +338,7 @@ describe("API Tests for users", () => {
       // expect(response.body.firstName).toBe("Jane");
       const response = await request(BASE_URL).put("/api/accounts/users").send({
         username: regularUsername,
-        firstName: "HE",
+        firstName: "HERR",
       });
 
       expect(response.status).toBe(201);
@@ -346,10 +346,10 @@ describe("API Tests for users", () => {
       expect(response.body.updated_user).toHaveProperty("createdAt");
       expect(response.body.updated_user.username).toBe(regularUsername);
       expect(response.body.updated_user.email).toBe("updated" + email);
-      expect(response.body.updated_user.firstName).toBe("HE");
-      expect(response.body.updated_user.lastName).toBe("C");
+      expect(response.body.updated_user.firstName).toBe("HERR");
+      expect(response.body.updated_user.lastName).toBe("CC");
       expect(response.body.updated_user.avatar).toBe("UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.updated_user.phoneNumber).toBe("UPDATED123+456+7899");
+      expect(response.body.updated_user.phoneNumber).toBe("122+456+7899");
       expect(response.body.updated_user.role).toBe("USER");
       
     });

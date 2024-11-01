@@ -2,6 +2,7 @@
 
 import { hashPassword, generateSalt } from "@/utils/auth";
 import prisma from "@/utils/db";
+import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 
 // pages/api/accounts/user
 export default async function handler(req, res) {
@@ -26,6 +27,50 @@ export default async function handler(req, res) {
         }
 
         try {
+
+            // verify all inputs
+            if (!verifyEmail(email)) {
+                return res.status(400).json({
+                    error: "INVALID EMAIL FORMAT",
+                });
+            }
+
+            if (firstName && !verifyFirstname(firstName)) {
+                return res.status(400).json({
+                    error: "FIRSTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+                });
+            }
+
+            if (lastName && !verifyLastname(lastName)) {
+                return res.status(400).json({
+                    error: "LASTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+                });
+            }
+
+            if (phoneNumber && !verifyPhonenumber(phoneNumber)) {
+                return res.status(400).json({
+                    error: "INVALID PHONENUMBER FORMAT",
+                });
+            }
+
+            if (!verifyPassword(password)) {
+                return res.status(400).json({
+                    error: "PASSWORD SHOULD BE AT LEAST 8 Characters, with 1 uppercase, 1 lowercase, 1 number, 1 special char",
+                });
+            }
+
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
+
+            if (!verifyRole(role)) {
+                return res.status(400).json({
+                    error: "ROLE MUST BE EITHER USER OR ADMIN",
+                })
+            }
+
             // check if user already exists
             const userExists = await prisma.user.findUnique({
                 where: {
@@ -100,6 +145,13 @@ export default async function handler(req, res) {
             });
         }
         try {
+            // verify username 
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
+
             const user = await prisma.user.findUnique({
                 where: {
                     username: username,
@@ -118,13 +170,56 @@ export default async function handler(req, res) {
             });
         }
     } else if (req.method === "PUT") {
+        const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
         try {
             // Mofify the account to have the provided info
-            const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
             if (!username) {
                 return res.status(400).json({
                     error: "Please provide all the required fields",
                 });
+            }
+
+            // verify all inputs
+            if (email && !verifyEmail(email)) {
+                return res.status(400).json({
+                    error: "INVALID EMAIL FORMAT",
+                });
+            }
+
+            if (firstName && !verifyFirstname(firstName)) {
+                return res.status(400).json({
+                    error: "FIRSTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+                });
+            }
+
+            if (lastName && !verifyLastname(lastName)) {
+                return res.status(400).json({
+                    error: "LASTNAME SHOULD BE ALPHABETICAL CHARACTERS of at least length 2",
+                });
+            }
+
+            if (phoneNumber && !verifyPhonenumber(phoneNumber)) {
+                return res.status(400).json({
+                    error: "INVALID PHONENUMBER FORMAT",
+                });
+            }
+
+            if (password && !verifyPassword(password)) {
+                return res.status(400).json({
+                    error: "PASSWORD SHOULD BE AT LEAST 8 Characters, with 1 uppercase, 1 lowercase, 1 number, 1 special char",
+                });
+            }
+
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
+
+            if (role && !verifyRole(role)) {
+                return res.status(400).json({
+                    error: "ROLE MUST BE EITHER USER OR ADMIN",
+                })
             }
 
             const user = await prisma.user.findUnique({
@@ -188,12 +283,17 @@ export default async function handler(req, res) {
 
     } else if (req.method === "DELETE") {
         try {
-            // TODO: Use Prisma Client to retrieve and filter authors
             const { username } = req.body;
-
             if (!username) {
                 return res.status(400).json({
                     error: "Please provide all the required fields",
+                });
+            }
+
+            // verify username
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
                 });
             }
 
