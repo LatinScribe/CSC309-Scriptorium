@@ -182,7 +182,6 @@ export default async function handler(req, res) {
             },
             forkedSourceId,
             language: templateLanguage,
-            deleted: false,
             },
         });
         return res.status(201).json(template);

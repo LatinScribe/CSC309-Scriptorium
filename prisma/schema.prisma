@@ -42,7 +42,7 @@ model CodeTemplate {
   modifiedAt     DateTime @default(now())
   content        String
   language       String
-  deleted        Boolean
+  deleted        Boolean @default(false)
 
   blogPosts BlogPost[]
 }
