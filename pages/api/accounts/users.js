@@ -162,6 +162,12 @@ export default async function handler(req, res) {
                     message: "Requested user could not be found",
                 });
             }
+
+            if (user.deleted) {
+                return res.status(401).json({
+                    error: "User has been deleted! Please contact Support!",
+                });
+            } 
             res.status(200).json({ user });
         } catch (error) {
             console.log(error);
@@ -233,6 +239,13 @@ export default async function handler(req, res) {
                     error: "Requested user could not be found",
                 });
             }
+
+            if (user.deleted) {
+                return res.status(401).json({
+                    error: "User has been deleted! Please contact Support!",
+                });
+            } 
+
             const salt = user.salt
 
             var new_password = undefined
@@ -308,9 +321,38 @@ export default async function handler(req, res) {
                 });
             }
 
-            await prisma.user.delete({
+            if (user.deleted) {
+                return res.status(200).json({
+                    error: "User has already been deleted! Please contact Support!",
+                });
+            } 
+
+            // await prisma.user.delete({
+            //     where: {
+            //         username: username,
+            //     },
+            // });
+
+            const updated_user = await prisma.user.update({
                 where: {
                     username: username,
+                },
+                data: {
+                    deleted: true,
+                },
+                select: {
+                    id: true,
+                    username: true,
+                    role: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    avatar: true,
+                    phoneNumber: true,
+                    role: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    deleted: true,
                 },
             });
             return res.status(200).json({ message: "User deleted successfully" });

@@ -24,6 +24,7 @@ model User {
   avatar      String? // optional, expecting a URL or a encoded image
   phoneNumber String? // optional, valid phone number
   role        String   @default("USER") // USER or ADMIN
+  deleted     Boolean  @default(false) // store whether user deleted for soft delete
   createdAt   DateTime @default(now()) // this should not be manually modified
   updatedAt   DateTime @updatedAt // this should not be manually modified
 

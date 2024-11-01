@@ -39,6 +39,12 @@ export default async function handler(req, res) {
             },
         });
 
+        if (!user) {
+            return res.status(400).json({
+                error: "Invalid Credentials",
+            });
+        }
+
         const hashed_pass = await hashPasswordSaltOnly(password, user.salt)
 
         // console.log("password: ", password)
@@ -48,6 +54,12 @@ export default async function handler(req, res) {
                 error: "Invalid credentials",
             });
         }
+
+        if (user.deleted) {
+            return res.status(401).json({
+                error: "User has been deleted! Please contact Support!",
+            });
+        } 
 
         // credentials valid, generating access and refresh tokens....
         // set to be an hour from now
