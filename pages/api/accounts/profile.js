@@ -158,29 +158,17 @@ export default async function handler(req, res) {
             });
         }
     } else if (req.method === "DELETE") {
+        // only delete their own account
         try {
-            const { username } = req.body;
-            if (!username) {
-                return res.status(400).json({
-                    error: "Please provide all the required fields",
-                });
-            }
-
-            // verify username
-            if (!verifyUsername(username)) {
-                return res.status(400).json({
-                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
-                });
-            }
 
             const user = await prisma.user.findUnique({
                 where: {
-                    username: username,
+                    username: payload.username,
                 },
             })
             if (!user) {
-                return res.status(200).json({
-                    message: "Requested user could not be found",
+                return res.status(400).json({
+                    message: "Requested user could not be found! This is not expected, please contact support!",
                 });
             }
 
@@ -198,7 +186,7 @@ export default async function handler(req, res) {
 
             const updated_user = await prisma.user.update({
                 where: {
-                    username: username,
+                    username: payload.username,
                 },
                 data: {
                     deleted: true,
@@ -218,7 +206,7 @@ export default async function handler(req, res) {
                     deleted: true,
                 },
             });
-            return res.status(200).json({ message: "User deleted successfully" });
+            return res.status(200).json({ message: "Account deleted successfully" });
         } catch (error) {
             console.log(error);
             return res.status(500).json({

@@ -1,5 +1,6 @@
-// THIS IS AN EXAMPLE FILE! DO NOT USE THIS ENDPOINT NORMALLY. USE THIS FOR TESTING ONLY!!
+// THIS IS A DEPRECATED FILE! DO NOT USE THIS ENDPOINT NORMALLY. USE THIS FOR TESTING ONLY!!
 // THIS FILE CONTAINS API CALLS TO UPDATE USER / PROFILE INFO
+
 
 import { hashPassword, generateSalt } from "@/utils/auth";
 import prisma from "@/utils/db";
@@ -168,7 +169,7 @@ export default async function handler(req, res) {
                 return res.status(401).json({
                     error: "User has been deleted! Please contact Support!",
                 });
-            }
+            } 
             res.status(200).json({ user });
         } catch (error) {
             console.log(error);
@@ -245,7 +246,7 @@ export default async function handler(req, res) {
                 return res.status(401).json({
                     error: "User has been deleted! Please contact Support!",
                 });
-            }
+            } 
 
             const salt = user.salt
 
@@ -296,12 +297,24 @@ export default async function handler(req, res) {
         }
 
     } else if (req.method === "DELETE") {
-        // can only delete themselves.
         try {
+            const { username } = req.body;
+            if (!username) {
+                return res.status(400).json({
+                    error: "Please provide all the required fields",
+                });
+            }
+
+            // verify username
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
 
             const user = await prisma.user.findUnique({
                 where: {
-                    username: payload.username,
+                    username: username,
                 },
             })
             if (!user) {
@@ -314,7 +327,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({
                     error: "User has already been deleted! Please contact Support!",
                 });
-            }
+            } 
 
             // await prisma.user.delete({
             //     where: {
@@ -324,7 +337,7 @@ export default async function handler(req, res) {
 
             const updated_user = await prisma.user.update({
                 where: {
-                    username: payload.username,
+                    username: username,
                 },
                 data: {
                     deleted: true,
@@ -344,7 +357,7 @@ export default async function handler(req, res) {
                     deleted: true,
                 },
             });
-            return res.status(200).json({ message: "Account deleted successfully!" });
+            return res.status(200).json({ message: "User deleted successfully" });
         } catch (error) {
             console.log(error);
             return res.status(500).json({
