@@ -1,5 +1,5 @@
 import prisma from "@/utils/db";
-import { comparePassword, generateAccessToken, generateRefreshToken, verifyTokenLocal } from "@/utils/auth";
+import { comparePassword, generateAccessToken, generateRefreshToken, verifyTokenLocal, hashPasswordSaltOnly } from "@/utils/auth";
 
 export default async function handler(req, res) {
     // only allows for POST
@@ -16,6 +16,7 @@ export default async function handler(req, res) {
         });
     }
 
+    try {
     // check if username + password valid
     const user = await prisma.user.findUnique({
         where: {
@@ -23,7 +24,11 @@ export default async function handler(req, res) {
         },
     });
 
-    if (!user || !(await comparePassword(password, user.password))) {
+    const hashed_pass = await hashPasswordSaltOnly(password, user.salt)
+
+    // console.log("password: ", password)
+    // console.log("hashed_pass: ", hashed_pass)
+    if (!user || !(await comparePassword(hashed_pass, user.password))) {
         return res.status(401).json({
             error: "Invalid credentials",
         });
@@ -61,4 +66,10 @@ export default async function handler(req, res) {
         "accessToken": Accesstoken,
         "refreshToken": Refreshtoken
     });
+} catch (error) {
+    console.log(error);
+    return res.status(500).json({
+        error: "Error logging in! Unsuccessful! Please try again!",
+    });
+}
 }

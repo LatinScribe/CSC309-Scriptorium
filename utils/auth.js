@@ -2,12 +2,20 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS);
+const SALT_LENGTH = parseInt(process.env.SALT_LENGTH);
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN_ACCESS = process.env.JWT_EXPIRES_IN_ACCESS;
 const JWT_EXPIRES_IN_REFRESH = process.env.JWT_EXPIRES_IN_REFRESH;
 
-export async function hashPassword(password) {
-  return await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+export async function hashPassword(password, salt) {
+  // double hashing with a salt as suggested by TA Amir during Mentor session
+  const hashed = await bcrypt.hash(password, salt);
+  return await bcrypt.hash(hashed, BCRYPT_SALT_ROUNDS);
+}
+
+export async function hashPasswordSaltOnly(password, salt) {
+  // double hashing with a salt as suggested by TA
+  return await bcrypt.hash(password, salt);
 }
 
 export async function comparePassword(password, hash) {
@@ -18,6 +26,10 @@ export function generateAccessToken(obj) {
   return jwt.sign(obj, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN_ACCESS,
   });
+}
+
+export async function generateSalt() {
+  return await bcrypt.genSalt(SALT_LENGTH)
 }
 
 export function generateRefreshToken(obj) {

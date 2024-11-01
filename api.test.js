@@ -14,7 +14,9 @@ describe("JWT and permissions API tests", () => {
   const testUsername =
     "test_user_" + Math.random().toString(36).substring(2, 15);
   
-  const email = "user@example.com"
+  const reg_email = "user"+regularUsername+"@example.com"
+  const test_email = "user"+testUsername+"@example.com"
+  const admin_email = "user"+adminUsername+"@example.com"
   let adminAccessToken;
   let userAccessToken;
   let userRefreshToken;
@@ -25,14 +27,14 @@ describe("JWT and permissions API tests", () => {
       username: adminUsername,
       password: "adminPass",
       role: "ADMIN",
-      email: email,
+      email:  admin_email,
     });
 
     await request(BASE_URL).post("/api/accounts/register").send({
       username: regularUsername,
       password: "userPass",
       role: "USER",
-      email: email,
+      email: reg_email,
     });
 
     // Log in as admin and user to obtain tokens
@@ -41,7 +43,7 @@ describe("JWT and permissions API tests", () => {
       .send({
         username: adminUsername,
         password: "adminPass",
-        email: email,
+        email: admin_email,
       });
     adminAccessToken = adminLoginResponse.body.accessToken;
 
@@ -50,7 +52,7 @@ describe("JWT and permissions API tests", () => {
       .send({
         username: regularUsername,
         password: "userPass",
-        email: email,
+        email: reg_email,
       });
     userAccessToken = userLoginResponse.body.accessToken;
     userRefreshToken = userLoginResponse.body.refreshToken;
@@ -64,7 +66,7 @@ describe("JWT and permissions API tests", () => {
           username: testUsername,
           password: "testPass",
           role: "USER",
-          email: email,
+          email: test_email,
         });
 
       expect(response.status).toBe(201);
@@ -78,7 +80,7 @@ describe("JWT and permissions API tests", () => {
         .send({
           username: testUsername,
           password: "anotherPass",
-          email: email,
+          email: reg_email,
         });
 
       expect(response.status).toBe(400);
@@ -91,7 +93,7 @@ describe("JWT and permissions API tests", () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
         password: "testPass",
-        email: email,
+        email: test_email,
       });
 
       expect(response.status).toBe(200);
@@ -102,7 +104,7 @@ describe("JWT and permissions API tests", () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
         password: "wrongPass",
-        email: email,
+        email: test_email,
       });
 
       expect(response.status).toBe(401);
@@ -185,7 +187,7 @@ describe("API Tests for users", () => {
   const testUsername =
     "test_user_" + Math.random().toString(36).substring(2, 15);
   
-    const email = "user@example.com"
+    const email = "user@example"+Math.random().toString(36).substring(2, 15) +".com"
 
   describe("6: User creation", () => {
     it("should create a new user", async () => {
