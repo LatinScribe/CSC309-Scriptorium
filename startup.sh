@@ -14,3 +14,9 @@ sqlite3 prisma/dev.db
 
 INSERT INTO User(username, password, salt, email, role)
 VALUES('SUDOMASTER', '$2b$10$rMBi0flXfzj5CM.b48pHxOZTdwAUdg7CyVcRcbEy3xOw1zcdouPe2', '$2b$04$Dj4CSejxfO4vg4yvYN6LPe', 'SUDOMASTER@MASTER.com', 'ADMIN');
+
+# npm run dev
+
+# recommended to run test suite for checking
+# in a new terminal
+# npx jest
