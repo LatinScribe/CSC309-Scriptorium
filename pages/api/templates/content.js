@@ -14,7 +14,7 @@ export default async function handler(req, res) {
                 id: parseInt(id),
             }
         });
-        if (!template) {
+        if (!template || template.deleted) {
             return res.status(404).json({
                 error: "Template not found",
             });

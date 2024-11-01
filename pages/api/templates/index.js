@@ -67,8 +67,11 @@ export default async function handler(req, res) {
             tags: true,
             explanation: true,
             author: true,
+            deleted: true,
             },
         });
+        // filter out all deleted templates
+        templates = templates.filter((template) => !template.deleted);
         // filter all templates that have all the tags
         if (tags) {
             templates = templates.filter((template) => {
@@ -78,7 +81,10 @@ export default async function handler(req, res) {
         const start = (page - 1) * pageSize;
         const end = start + pageSize;
         const paginatedTemplates = templates.slice(start, end);
-        // note: currently it returns the entire author object (including hashed password), yikes!
+        // filter out author password
+        paginatedTemplates.forEach((template) => {
+            delete template.author.password;
+        });
         return res.status(200).json(paginatedTemplates);
     }
 
@@ -176,6 +182,7 @@ export default async function handler(req, res) {
             },
             forkedSourceId,
             language: templateLanguage,
+            deleted: false,
             },
         });
         return res.status(201).json(template);
@@ -187,6 +194,11 @@ export default async function handler(req, res) {
         if (!id) {
             return res.status(400).json({
                 error: "Please provide a template id",
+            });
+        }
+        if (isNaN(parseInt(id))) {
+            return res.status(400).json({
+                error: "Template id should be a number",
             });
         }
         if (title && typeof title !== "string") {
@@ -219,7 +231,7 @@ export default async function handler(req, res) {
                 id: id,
             },
         });
-        if (!template) {
+        if (!template || template.deleted) {
             return res.status(404).json({
                 error: "Template not found",
             });
@@ -246,11 +258,15 @@ export default async function handler(req, res) {
     // DELETE: delete an existing template
     if (req.method === "DELETE") {
         const { id } = req.body;
-        console.log(id);
         if (!id && id !== 0) {
             console.log(req.body.id);
             return res.status(400).json({
             error: "Please provide a template id",
+            });
+        }
+        if (isNaN(parseInt(id))) {
+            return res.status(400).json({
+            error: "Template id should be a number",
             });
         }
         // check if the template exists
@@ -259,23 +275,28 @@ export default async function handler(req, res) {
                 id: id,
             },
         });
-        if (!template) {
+        if (!template || template.deleted) {
             return res.status(404).json({
                 error: "Template not found",
             });
         }
+        console.log(template.authorId);
         // check if the user is the author, or is an admin
-        if (template.authorId !== payload.id && user.role !== "ADMIN") {
+        if (template.authorId !== user.id && user.role !== "ADMIN") {
             return res.status(403).json({
                 error: "You are not the author of this template",
             });
         }
-        await prisma.codeTemplate.delete({
+        // set the deleted flag to true
+        await prisma.codeTemplate.update({
             where: {
                 id: id,
             },
+            data: {
+                deleted: true,
+            },
         });
-        return res.status(200).json({ error: "Template deleted" });
+        return res.status(200).json({ message: "Template deleted" });
     }
     return res.status(405).json({ error: "Method not allowed" });
 }
