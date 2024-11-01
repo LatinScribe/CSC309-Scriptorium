@@ -6,7 +6,7 @@ export default async function handler(req, res) {
         const { id } = req.query;
         if (!id) {
             return res.status(400).json({
-                message: "Please provide the template id",
+                error: "Please provide the template id",
             });
         }
         const template = await prisma.codeTemplate.findUnique({
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         });
         if (!template) {
             return res.status(404).json({
-                message: "Template not found",
+                error: "Template not found",
             });
         }
         return res.status(200).json(template);

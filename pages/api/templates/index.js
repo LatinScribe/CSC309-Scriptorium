@@ -6,7 +6,32 @@ const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "c++", "c"];
 export default async function handler(req, res) {
     // GET: return template metadata list based on filters (title, tags, content, author)
     if (req.method === "GET") {
-        const { title, tag, content, author, page, pageSize } = req.query;
+        const { title, tags, content, author, page, pageSize } = req.query;
+        if (tags && typeof tags !== "string") {
+            return res.status(400).json({
+                error: "Tags should be a string",
+            });
+        }
+        if (page && isNaN(parseInt(page))) {
+            return res.status(400).json({
+                error: "Page should be a number",
+            });
+        }
+        if (pageSize && isNaN(parseInt(pageSize))) {
+            return res.status(400).json({
+                error: "Page size should be a number",
+            });
+        }
+        if (content && typeof content !== "string") {
+            return res.status(400).json({
+                error: "Content should be a string",
+            });
+        }
+        if (author && typeof author !== "string") {
+            return res.status(400).json({
+                error: "Author should be a string",
+            });
+        }
         let where = {};
         if (title) {
             where.title = {
@@ -22,12 +47,16 @@ export default async function handler(req, res) {
         }
         if (author) {
             where.author = {
-                equals: author,
+                is: {
+                    username: {
+                        equals: author,
+                    },
+                },
             };
         }
         if (!page || !pageSize) {
             return res.status(400).json({
-                message: "Please provide page and page size",
+                error: "Please provide page and page size",
             });
         }
         let templates = await prisma.codeTemplate.findMany({
@@ -40,10 +69,10 @@ export default async function handler(req, res) {
             author: true,
             },
         });
-        // filter all templates that have the tag
-        if (tag) {
+        // filter all templates that have all the tags
+        if (tags) {
             templates = templates.filter((template) => {
-                return template.tags.includes(tag);
+                return template.tags && tags.split(',').every(tag => template.tags.split(',').includes(tag));
             });
         }
         const start = (page - 1) * pageSize;
@@ -60,12 +89,12 @@ export default async function handler(req, res) {
     } catch (err) {
         console.log(err);
         return res.status(401).json({
-            message: "Unauthorized",
+            error: "Unauthorized",
         });
     }
     if (!payload) {
         return res.status(401).json({
-            message: "Unauthorized",
+            error: "Unauthorized",
         });
     }
     const user = await prisma.user.findUnique({
@@ -91,13 +120,14 @@ export default async function handler(req, res) {
             error: "Tags should be an array of strings",
             });
         }
-    
-        if (tags) {
-            tagsString = tags.join(",");
-        }
         if (forkedSourceId && typeof forkedSourceId !== "number") {
             return res.status(400).json({
             error: "Forked source id should be a number",
+            });
+        }
+        if (!forkedSourceId && !language) {
+            return res.status(400).json({
+            error: "Please provide a language",
             });
         }
         if (language && typeof language !== "string") {
@@ -111,6 +141,10 @@ export default async function handler(req, res) {
             });
         }
 
+        if (tags) {
+            tagsString = tags.join(",");
+        }
+
         let content = "";
         let templateLanguage = language;
 
@@ -122,7 +156,7 @@ export default async function handler(req, res) {
             });
             if (!source) {
                 return res.status(404).json({
-                    message: "Source template not found",
+                    error: "Source template not found",
                 });
             }
             content = source.content;
@@ -155,6 +189,21 @@ export default async function handler(req, res) {
                 error: "Please provide a template id",
             });
         }
+        if (title && typeof title !== "string") {
+            return res.status(400).json({
+            error: "Title should be a string",
+            });
+        }
+        if (explanation && typeof explanation !== "string") {
+            return res.status(400).json({
+            error: "Explanation should be a string",
+            });
+        }
+        if (content && typeof content !== "string") {
+            return res.status(400).json({
+            error: "Content should be a string",
+            });
+        }
         if (tags && !Array.isArray(tags)) {
             console.log(tags);
             return res.status(400).json({
@@ -172,12 +221,12 @@ export default async function handler(req, res) {
         });
         if (!template) {
             return res.status(404).json({
-                message: "Template not found",
+                error: "Template not found",
             });
         }
         if (template.authorId !== user.id && user.role !== "ADMIN") {
             return res.status(403).json({
-                message: "You are not the author of this template",
+                error: "You are not the author of this template",
             });
         }
         const updatedTemplate = await prisma.codeTemplate.update({
@@ -212,13 +261,13 @@ export default async function handler(req, res) {
         });
         if (!template) {
             return res.status(404).json({
-                message: "Template not found",
+                error: "Template not found",
             });
         }
         // check if the user is the author, or is an admin
         if (template.authorId !== payload.id && user.role !== "ADMIN") {
             return res.status(403).json({
-                message: "You are not the author of this template",
+                error: "You are not the author of this template",
             });
         }
         await prisma.codeTemplate.delete({
@@ -226,7 +275,7 @@ export default async function handler(req, res) {
                 id: id,
             },
         });
-        return res.status(200).json({ message: "Template deleted" });
+        return res.status(200).json({ error: "Template deleted" });
     }
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
 }
