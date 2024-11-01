@@ -23,27 +23,27 @@ describe("JWT and permissions API tests", () => {
 
   beforeAll(async () => {
     // Create an admin user and a regular user for testing
-    await request(BASE_URL).post("/api/accounts/register").send({
-      username: adminUsername,
-      password: "adminPass123$",
-      role: "ADMIN",
-      email:  admin_email,
-    });
+    // await request(BASE_URL).post("/api/accounts/register").send({
+    //   username: adminUsername,
+    //   password: "adminPass123$",
+    //   role: "ADMIN",
+    //   email:  admin_email,
+    // });
 
     await request(BASE_URL).post("/api/accounts/register").send({
-      username: regularUsername,
-      password: "userPass123&",
-      role: "USER",
-      email: reg_email,
+    username: regularUsername,
+    password: "userPass123&",
+    role: "USER",
+    email: reg_email,
     });
 
     // Log in as admin and user to obtain tokens
     const adminLoginResponse = await request(BASE_URL)
       .post("/api/accounts/login")
       .send({
-        username: adminUsername,
-        password: "adminPass123$",
-        email: admin_email,
+        username: "SUDOMASTER",
+        password: "SUDOMaSTER123$$$",
+        email: "SUDOMASTER@MASTER.com",
       });
     adminAccessToken = adminLoginResponse.body.accessToken;
 
@@ -81,6 +81,7 @@ describe("JWT and permissions API tests", () => {
           username: testUsername,
           password: "anotherPass123(",
           email: reg_email,
+          role: "USER",
         });
 
       expect(response.status).toBe(400);
@@ -116,7 +117,7 @@ describe("JWT and permissions API tests", () => {
     it("should allow access to protected route with valid token", async () => {
       const response = await request(BASE_URL)
         .get("/api/protected")
-        .set("authorization", `Bearer ${userAccessToken}`);
+        .set("authorization", `Bearer ${adminAccessToken}`);
 
       expect(response.status).toBe(200);
     });

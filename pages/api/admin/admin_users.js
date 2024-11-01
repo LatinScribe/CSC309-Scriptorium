@@ -1,7 +1,7 @@
-// THIS IS AN EXAMPLE FILE! DO NOT USE THIS ENDPOINT NORMALLY. USE THIS FOR TESTING ONLY!!
-// THIS FILE CONTAINS API CALLS TO UPDATE USER / PROFILE INFO
+// THIS FILE CONTAINS API CALLS TO UPDATE USER / PROFILE INFO FOR ADMINS
+// This endpoint has MORE PERMS THAN USUAL USER. CAN MODIFY EVERYONE!!!!!
 
-import { hashPassword, generateSalt } from "@/utils/auth";
+import { hashPassword, generateSalt, verifyToken } from "@/utils/auth";
 import prisma from "@/utils/db";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 
@@ -11,7 +11,31 @@ export default async function handler(req, res) {
     //     return res.status(405).json({ error: "Method not allowed" });
     //   }
 
-    // CREATE A USER, SHOULD USE REGISTER NORMALLY
+    // api middleware
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        console.log(err)
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    if (!payload) {
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+
+    if (payload.role !== "ADMIN") {
+        return res.status(403).json({
+            error: "Forbidden",
+        });
+    }
+
+    // actual api starts
+
+    // CREATE A USER Manually
     if (req.method === "POST") {
         const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
 
@@ -173,7 +197,7 @@ export default async function handler(req, res) {
         } catch (error) {
             console.log(error);
             return res.status(500).json({
-                error: "Error logging in! Unsuccessful! Please try again!",
+                error: "ERROR GETTING USER, PLEASE TRY AGAIN",
             });
         }
     } else if (req.method === "PUT") {
@@ -291,17 +315,29 @@ export default async function handler(req, res) {
         } catch (error) {
             console.log(error);
             return res.status(500).json({
-                error: "Error logging in! Unsuccessful! Please try again!",
+                error: "ERROR MODIFYING USER! PLEASE TRY AGAIN!",
             });
         }
 
     } else if (req.method === "DELETE") {
-        // can only delete themselves.
         try {
+            const { username } = req.body;
+            if (!username) {
+                return res.status(400).json({
+                    error: "Please provide all the required fields",
+                });
+            }
+
+            // verify username
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
 
             const user = await prisma.user.findUnique({
                 where: {
-                    username: payload.username,
+                    username: username,
                 },
             })
             if (!user) {
@@ -324,7 +360,7 @@ export default async function handler(req, res) {
 
             const updated_user = await prisma.user.update({
                 where: {
-                    username: payload.username,
+                    username: username,
                 },
                 data: {
                     deleted: true,
@@ -344,11 +380,11 @@ export default async function handler(req, res) {
                     deleted: true,
                 },
             });
-            return res.status(200).json({ message: "Account deleted successfully!" });
+            return res.status(200).json({ message: "User deleted successfully" });
         } catch (error) {
             console.log(error);
             return res.status(500).json({
-                error: "Error deleting account! Unsuccessful! Please try again or contact support!",
+                error: "Error deleting user! Unsuccessful! Please try again!",
             });
         }
     } else {

@@ -1,3 +1,4 @@
+// THIS ENDPOINT IS USED BY BOTH USERS AND ADMINS TO LOGIN
 import prisma from "@/utils/db";
 import { comparePassword, generateAccessToken, generateRefreshToken, verifyTokenLocal, hashPasswordSaltOnly } from "@/utils/auth";
 import { verifyPassword, verifyUsername } from "@/utils/verification";

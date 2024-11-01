@@ -26,7 +26,7 @@ model User {
   role        String   @default("USER") // USER or ADMIN
   deleted     Boolean  @default(false) // store whether user deleted for soft delete
   createdAt   DateTime @default(now()) // this should not be manually modified
-  updatedAt   DateTime @updatedAt // this should not be manually modified
+  updatedAt   DateTime @updatedAt @default(now()) // this should not be manually modified
 
   blogPosts     BlogPost[]
   comments      Comment[]

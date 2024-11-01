@@ -1,11 +1,36 @@
-// THIS ENDPOINT TO BE USED BY USERS TO REGISTER FOR A NEW ACCOUNT
-// NOT FOR ADMINS TO REGISTER ADMIN ACCOUNTS
+// MUST BE AN ADMIN TO USE THIS ENDPOINT
+// CAN BE USED TO REGISTER BOTH USERS AND ADMINS
 
-import { hashPassword, generateSalt } from "@/utils/auth";
+import { hashPassword, generateSalt, verifyToken } from "@/utils/auth";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
+
+    // api middleware
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        console.log(err)
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    if (!payload) {
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+
+    if (payload.role !== "ADMIN") {
+        return res.status(403).json({
+            error: "Forbidden",
+        });
+    }
+
+    // actual api starts
+
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
@@ -18,9 +43,9 @@ export default async function handler(req, res) {
             error: "Please provide all the required fields",
         });
     }
-    if (role !== "USER") {
+    if (role !== "USER" && role !== "ADMIN") {
         return res.status(400).json({
-            error: "ROLE MUST BE USER",
+            error: "ROLE MUST BE USER or ADMIN",
         });
     }
 
