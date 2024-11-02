@@ -1,26 +1,65 @@
 // MUST BE AN ADMIN TO USE THIS ENDPOINT
 // CAN BE USED TO REGISTER BOTH USERS AND ADMINS
 
-import { hashPassword, generateSalt, verifyToken } from "@/utils/auth";
+import { hashPassword, generateSalt, verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
 
     // api middleware
+    const { x_refreshToken } = req.headers;
     var payload = null
     try {
         payload = verifyToken(req.headers.authorization);
     } catch (err) {
-        console.log(err)
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        try {
+            // attempt to refresh access token using refresh token
+            console.log(err)
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
     }
     if (!payload) {
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        try {
+            // attempt to refresh access token with refresh token
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
     }
 
     if (payload.role !== "ADMIN") {
@@ -41,7 +80,7 @@ export default async function handler(req, res) {
     // check if user wants output. Default to false!
     if (!output || typeof output !== "boolean") {
         output = false
-    } 
+    }
 
     // currently only requiring username, password, email, and role
     if (!username || !role || !password || !email) {

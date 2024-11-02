@@ -3,24 +3,63 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 // EXAMPLE OF A LOGGED IN PROTECTED PATH
 
-import { verifyToken } from "@/utils/auth";
+import { verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
 
 export default async function handler(req, res) {
 
     // api middleware
+    const { x_refreshToken } = req.headers;
     var payload = null
     try {
         payload = verifyToken(req.headers.authorization);
     } catch (err) {
-        console.log(err)
-        return res.status(401).json({
-            message: "Unauthorized",
-        });
+        try {
+            // attempt to refresh access token using refresh token
+            console.log(err)
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
     }
     if (!payload) {
-        return res.status(401).json({
-            message: "Unauthorized",
-        });
+        try {
+            // attempt to refresh access token with refresh token
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
     }
 
     // actual api starts

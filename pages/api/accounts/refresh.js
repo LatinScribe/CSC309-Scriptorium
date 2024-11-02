@@ -1,5 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-// GENERATE A ACCESS TOKEN FOR THE GIVEN REFRESH TOKEN
+// This endpoint is used to GENERATE A ACCESS TOKEN FOR THE GIVEN REFRESH TOKEN
 
 import { verifyToken, generateAccessToken, verifyTokenLocal } from "@/utils/auth";
 
