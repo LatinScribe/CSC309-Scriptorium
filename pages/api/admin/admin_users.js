@@ -163,6 +163,7 @@ export default async function handler(req, res) {
 
     } else if (req.method === "GET") {
         // FILTER A RETRIEVE A USER based on username
+        // For Admins, they recieve all the Data on the user!
         const { username } = req.body;
 
         if (!username) {
@@ -369,16 +370,6 @@ export default async function handler(req, res) {
                 select: {
                     id: true,
                     username: true,
-                    role: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                    avatar: true,
-                    phoneNumber: true,
-                    role: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    deleted: true,
                 },
             });
             return res.status(200).json({ message: "User deleted successfully" });

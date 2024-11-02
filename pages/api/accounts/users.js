@@ -5,7 +5,7 @@
 // import { hashPassword, generateSalt } from "@/utils/auth";
 import prisma from "@/utils/db";
 //import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
-import {verifyUsername} from "@/utils/verification";
+import { verifyUsername } from "@/utils/verification";
 
 // pages/api/accounts/user
 export default async function handler(req, res) {
@@ -42,33 +42,33 @@ export default async function handler(req, res) {
         // check if user wants output. Default to false!
         if (!firstname || typeof firstname !== "boolean") {
             firstname = false
-        } 
+        }
         var lastName = lastName_bool
         // check if user wants output. Default to false!
         if (!lastName || typeof lastName !== "boolean") {
             lastName = false
-        } 
+        }
         var email = email_bool
         // check if user wants output. Default to false!
         if (!email || typeof email !== "boolean") {
             email = false
-        } 
+        }
         var avatar = avatar_bool
         // check if user wants output. Default to false!
         if (!avatar || typeof avatar !== "boolean") {
             avatar = false
-        } 
+        }
         var phonenumber = phoneNumber_bool
         // check if user wants output. Default to false!
         if (!phonenumber || typeof phonenumber !== "boolean") {
             phonenumber = false
-        } 
+        }
 
         var createdat = createdAt_bool
         // check if user wants output. Default to false!
         if (!createdat || typeof createdat !== "boolean") {
             createdat = false
-        } 
+        }
 
         var role = role_bool
         // check if user wants output. Default to false!
@@ -99,7 +99,7 @@ export default async function handler(req, res) {
                     avatar: avatar,
                     phoneNumber: phonenumber,
                     createdAt: createdat,
-                    deleted:true,
+                    deleted: true,
                     role: role,
                 },
             })

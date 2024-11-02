@@ -26,12 +26,22 @@ export default async function handler(req, res) {
     // actual api starts
     if (req.method === "GET") {
         // Retrieve the profile of the logged in user
-
         try {
 
             const user = await prisma.user.findUnique({
                 where: {
                     username: payload.username,
+                }, select: {
+                    username: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    avatar: true,
+                    phoneNumber: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    deleted: true,
+                    role: true,
                 },
             })
             if (!user) {
@@ -57,6 +67,7 @@ export default async function handler(req, res) {
     } else if (req.method === "PUT") {
         // edit profile of currently logged in user
         // cannot edit email or role!
+        // returns the newly modified profile
         const { username, password, firstName, lastName, avatar, phoneNumber } = req.body;
         try {
             // Mofify the account to have the provided info
@@ -138,7 +149,6 @@ export default async function handler(req, res) {
                     role,
                 },
                 select: {
-                    id: true,
                     username: true,
                     firstName: true,
                     lastName: true,
@@ -148,6 +158,7 @@ export default async function handler(req, res) {
                     role: true,
                     createdAt: true,
                     updatedAt: true,
+                    deleted: true,
                 },
             });
             res.status(201).json({ updated_user });
@@ -192,18 +203,7 @@ export default async function handler(req, res) {
                     deleted: true,
                 },
                 select: {
-                    id: true,
                     username: true,
-                    role: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                    avatar: true,
-                    phoneNumber: true,
-                    role: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    deleted: true,
                 },
             });
             return res.status(200).json({ message: "Account deleted successfully" });
