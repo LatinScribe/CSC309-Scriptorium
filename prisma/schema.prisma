@@ -52,13 +52,16 @@ model BlogPost {
   tags             String
   createdAt        DateTime       @default(now())
   flagged          Boolean        @default(false)
-  upvotedUserIds   String
-  downvotedUserIds String
+  upvotedUserId    Int[]         
+  downvotedUserId  Int[]         
+  upvoteCount      Int
+  downvoteCount    Int
   codeTemplates    CodeTemplate[]
   reportsCount     Int            @default(0)
   hidden           Boolean        @default(false)
   author           User           @relation(fields: [authorId], references: [id])
   authorId         Int
+  deleted          Boolean
 
   comments Comment[]
   Report   Report[]
@@ -72,10 +75,17 @@ model Comment {
   author           User     @relation(fields: [authorId], references: [id])
   authorId         Int
   content          String
-  upvotedUserIds   String
-  downvotedUserIds String
+  upvotedUserId    Int[]         
+  downvotedUserId  Int[]         
+  upvoteCount      Int
+  downvoteCount    Int
   reportsCount     Int      @default(0)
   hidden           Boolean  @default(false)
+  parentCommentId  Int?
+  parentComment    Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies          Comment[] @relation("CommentReplies")
+
+  deleted          Boolean
 
   Report Report[]
 }
