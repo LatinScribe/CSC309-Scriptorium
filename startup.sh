@@ -12,7 +12,7 @@ npx prisma migrate dev --name init
 
 sqlite3 prisma/dev.db <<EOF
 INSERT OR IGNORE INTO User(username, password, salt, email, role)
-VALUES('SUDOMASTER', '$2b$10$rMBi0flXfzj5CM.b48pHxOZTdwAUdg7CyVcRcbEy3xOw1zcdouPe2', '$2b$04$Dj4CSejxfO4vg4yvYN6LPe', 'SUDOMASTER@MASTER.com', 'ADMIN');
+VALUES('SUDOMASTER', '\$2b\$10\$rMBi0flXfzj5CM.b48pHxOZTdwAUdg7CyVcRcbEy3xOw1zcdouPe2', '\$2b\$04\$Dj4CSejxfO4vg4yvYN6LPe', 'SUDOMASTER@MASTER.com', 'ADMIN');
 EOF
 
 
