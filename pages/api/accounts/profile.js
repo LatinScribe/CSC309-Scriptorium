@@ -1,9 +1,10 @@
 // THIS ENDPOINT TO BE USED BY LOGGED IN USERS TO EDIT THEIR PROFILE
 // CAN BE USED BY USERS AND ADMINS
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 // EXAMPLE OF A LOGGED IN PROTECTED PATH
 
+import prisma from "@/utils/db";
 import { verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
+import { verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername } from "@/utils/verification";
 
 export default async function handler(req, res) {
 
@@ -182,10 +183,8 @@ export default async function handler(req, res) {
                     salt: salt,
                     firstName,
                     lastName,
-                    email,
                     avatar,
                     phoneNumber,
-                    role,
                 },
                 select: {
                     username: true,
