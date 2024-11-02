@@ -2,9 +2,10 @@
 // currently only handles searching / filtering for users (only finds non-deleted users).
 
 
-import { hashPassword, generateSalt } from "@/utils/auth";
+// import { hashPassword, generateSalt } from "@/utils/auth";
 import prisma from "@/utils/db";
-import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
+//import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
+import {verifyUsername} from "@/utils/verification";
 
 // pages/api/accounts/user
 export default async function handler(req, res) {
