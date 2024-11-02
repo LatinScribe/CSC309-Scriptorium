@@ -16,9 +16,7 @@ export default async function handler(req, res) {
     // check if user wants output. Default to false!
     if (!output || typeof output !== "boolean") {
         output = false
-    } else {
-        output = true
-    }
+    } 
 
     // currently only requiring username, password, email, and role
     if (!username || !role || !password || !email) {

@@ -239,19 +239,26 @@ describe("API Tests for users", () => {
     it("should retrieve specified user", async () => {
       const response = await request(BASE_URL).get("/api/accounts/users").send({
         username: regularUsername,
+        firstName_bool: true,
+        lastName_bool: true,
+        email_bool: true,
+        avatar_bool: true,
+        phoneNumber_bool: true,
+        role_bool: true,
+        createdAt_bool: true,
       });
 
       expect(response.status).toBe(200);
-      expect(response.body.user).toHaveProperty("id");
-      expect(response.body.user).toHaveProperty("createdAt");
-      expect(response.body.user).toHaveProperty("updatedAt");
-      expect(response.body.user.username).toBe(regularUsername);
-      expect(response.body.user.email).toBe(email);
-      expect(response.body.user.firstName).toBe("Henry");
-      expect(response.body.user.lastName).toBe("Chen");
-      expect(response.body.user.avatar).toBe("https://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.user.phoneNumber).toBe("123+456+7899");
-      expect(response.body.user.role).toBe("ADMIN");
+      expect(response.body[0]).toHaveProperty("username");
+      expect(response.body[0]).toHaveProperty("createdAt");
+      // expect(response.body[0]).toHaveProperty("updatedAt");
+      expect(response.body[0].username).toBe(regularUsername);
+      expect(response.body[0].email).toBe(email);
+      expect(response.body[0].firstName).toBe("Henry");
+      expect(response.body[0].lastName).toBe("Chen");
+      expect(response.body[0].avatar).toBe("https://henrytchen.com/images/Profile3_compressed.jpg");
+      expect(response.body[0].phoneNumber).toBe("123+456+7899");
+      expect(response.body[0].role).toBe("ADMIN");
     });
 
     it("should fail to retrieve a non-existent username", async () => {
@@ -260,7 +267,7 @@ describe("API Tests for users", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Requested user could not be found");
+      expect(response.body.message).toBe("No users could be found!");
     });
 
   //   it("should retrieve users filtered by firstName", async () => {
