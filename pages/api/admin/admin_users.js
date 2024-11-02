@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
     // actual api starts
 
-    // CREATE A USER Manually
+    // CREATE A USER Manually by Admin (somewhat redundant with admin_register endpoint)
     if (req.method === "POST") {
         const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
 

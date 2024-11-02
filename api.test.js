@@ -6,6 +6,10 @@ const request = require("supertest");
 
 const BASE_URL = `http://localhost:${process.env.PORT || 3000}`;
 
+let adminAccessToken;
+let userAccessToken;
+let userRefreshToken;
+
 describe("JWT and permissions API tests", () => {
   const regularUsername =
     "regular_user_" + Math.random().toString(36).substring(2, 15);
@@ -17,9 +21,6 @@ describe("JWT and permissions API tests", () => {
   const reg_email = "user"+regularUsername+"@example.com"
   const test_email = "user"+testUsername+"@example.com"
   const admin_email = "user"+adminUsername+"@example.com"
-  let adminAccessToken;
-  let userAccessToken;
-  let userRefreshToken;
 
   beforeAll(async () => {
     // Create an admin user and a regular user for testing
@@ -182,7 +183,7 @@ describe("JWT and permissions API tests", () => {
 
 describe("API Tests for users", () => {
   const regularUsername =
-  "regular_user_" + Math.random().toString(36).substring(2, 15);
+  "regular_user_to_be_deleted" + Math.random().toString(36).substring(2, 15);
   const adminUsername =
     "regular_user_" + Math.random().toString(36).substring(2, 15);
   const testUsername =
@@ -190,9 +191,9 @@ describe("API Tests for users", () => {
   
     const email = "user@example"+Math.random().toString(36).substring(2, 15) +".com"
 
-  describe("6: User creation", () => {
-    it("should create a new user", async () => {
-      const response = await request(BASE_URL).post("/api/accounts/users").send({
+  describe("6: Admin Account creation", () => {
+    it("should create a new ADMIN user", async () => {
+      const response = await request(BASE_URL).post("/api/admin/admin_register").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
         password: "myPass123&&",
         email: email,
@@ -216,7 +217,7 @@ describe("API Tests for users", () => {
     });
 
     it("should fail to create a user with an existing username", async () => {
-      const response = await request(BASE_URL).post("/api/accounts/users").send({
+      const response = await request(BASE_URL).post("/api/admin/admin_register").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
         password: "myPass123&&",
         email: email,
@@ -294,7 +295,7 @@ describe("API Tests for users", () => {
   //   });
   });
 
-  describe("8: Updating an existing user", () => {
+  describe("8: Updating an existing user using ADMIN PERMS", () => {
     it("should update an existing user", async () => {
       // const response = await request(BASE_URL)
       //   .put(`/api/users/${username}`)
@@ -307,7 +308,7 @@ describe("API Tests for users", () => {
       // expect(response.body.firstName).toBe("Jane");
       // expect(response.body.bio).toBe("Updated bio");
 
-      const response = await request(BASE_URL).put("/api/accounts/users").send({
+      const response = await request(BASE_URL).put("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
         password: "myUpdatedPass123&",
         email: "updated" + email,
@@ -330,14 +331,14 @@ describe("API Tests for users", () => {
       expect(response.body.updated_user.role).toBe("USER");
     });
 
-    it("should update an user with partial data", async () => {
+    it("should update an user with partial data using ADMIN PERMS", async () => {
       // const response = await request(BASE_URL)
       //   .put(`/api/users/${username}`)
       //   .send({});
 
       // expect(response.status).toBe(200);
       // expect(response.body.firstName).toBe("Jane");
-      const response = await request(BASE_URL).put("/api/accounts/users").send({
+      const response = await request(BASE_URL).put("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
         firstName: "HERR",
       });
@@ -398,10 +399,10 @@ describe("API Tests for users", () => {
     // });
   });
 
-  describe("9: Delete USER", () => {
-    it("should delete an user and ensure all their books are also deleted", async () => {
+  describe("9: Delete USER using ADMIN PERMS", () => {
+    it("should soft delete a user", async () => {
       // Delete the user
-      const deleteuserResponse = await request(BASE_URL).delete("/api/accounts/users").send({
+      const deleteuserResponse = await request(BASE_URL).delete("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
       });
 
