@@ -52,8 +52,8 @@ model BlogPost {
   tags             String
   createdAt        DateTime       @default(now())
   flagged          Boolean        @default(false)
-  upvotedUserId    Int[]         
-  downvotedUserId  Int[]         
+  upvotedUserIds    Int[]         
+  downvotedUserIds  Int[]         
   upvoteCount      Int
   downvoteCount    Int
   codeTemplates    CodeTemplate[]
@@ -75,8 +75,8 @@ model Comment {
   author           User     @relation(fields: [authorId], references: [id])
   authorId         Int
   content          String
-  upvotedUserId    Int[]         
-  downvotedUserId  Int[]         
+  upvotedUserIds    Int[]         
+  downvotedUserIds  Int[]         
   upvoteCount      Int
   downvoteCount    Int
   reportsCount     Int      @default(0)
@@ -91,10 +91,13 @@ model Comment {
 }
 
 model Report {
-  id         Int       @id @default(autoincrement())
-  content    String
-  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
-  blogPostId Int?
-  comment    Comment?  @relation(fields: [commentId], references: [id])
-  commentId  Int?
+  id            Int       @id @default(autoincrement())
+  explanation   String
+  content       String
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id])
+  blogPostId    Int?
+  comment       Comment?  @relation(fields: [commentId], references: [id])
+  commentId     Int?
+  createdAt     DateTime  @default(now())
+
 }

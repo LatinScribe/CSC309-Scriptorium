@@ -1,10 +1,14 @@
+/* Create new blog post
+*/
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { title, description, tags, authorId } = req.body;
-    let upvotedUserIds = "";
-    let downvotedUserIds = ""; // initialize upvotes and downvotes??
+    let upvotedUserIds = [];
+    let downvotedUserIds = []; // initialize upvotes and downvotes??
+    let upvoteCount = 0;
+    let downvoteCount = 0;
     try {
       const newBlogPost = await prisma.BlogPost.create({
         data: {
@@ -14,6 +18,8 @@ export default async function handler(req, res) {
           authorId,
           upvotedUserIds,
           downvotedUserIds,
+          upvoteCount,
+          downvoteCount,
         },
       });
       res.status(200).json(newBlogPost);
