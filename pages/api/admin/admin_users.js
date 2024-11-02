@@ -1,5 +1,6 @@
 // THIS FILE CONTAINS API CALLS TO UPDATE USER / PROFILE INFO FOR ADMINS
 // This endpoint has MORE PERMS THAN USUAL USER. CAN MODIFY EVERYONE!!!!!
+// This endpoint assumes a admin/debugging role, so most amount of output is assumed to be required.
 
 import { hashPassword, generateSalt, verifyToken } from "@/utils/auth";
 import prisma from "@/utils/db";

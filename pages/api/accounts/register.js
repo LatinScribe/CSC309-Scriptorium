@@ -10,7 +10,15 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
+    const { username, password, firstName, lastName, email, avatar, phoneNumber, role, output_bool } = req.body;
+
+    var output = output_bool
+    // check if user wants output. Default to false!
+    if (!output || typeof output !== "boolean") {
+        output = false
+    } else {
+        output = true
+    }
 
     // currently only requiring username, password, email, and role
     if (!username || !role || !password || !email) {
@@ -126,7 +134,11 @@ export default async function handler(req, res) {
             },
         });
 
-        return res.status(201).json({ user });
+        if (output) {
+            return res.status(201).json({ user });
+        } else {
+            return res.status(201).json({ message: "User created sucessfully!" })
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({

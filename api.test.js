@@ -68,6 +68,7 @@ describe("JWT and permissions API tests", () => {
           password: "testPass123*",
           role: "USER",
           email: test_email,
+          output_bool: true,
         });
 
       expect(response.status).toBe(201);
@@ -202,6 +203,7 @@ describe("API Tests for users", () => {
         avatar: "https://henrytchen.com/images/Profile3_compressed.jpg",
         phoneNumber: "123+456+7899",
         role: "ADMIN",
+        output_bool: true,
       });
 
       expect(response.status).toBe(201);
