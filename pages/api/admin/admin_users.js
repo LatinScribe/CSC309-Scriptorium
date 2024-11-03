@@ -294,6 +294,34 @@ export default async function handler(req, res) {
                 })
             }
 
+            if (username) {
+                // check if user already exists
+                const userExists = await prisma.user.findUnique({
+                    where: {
+                        username: username,
+                    },
+                })
+                if (userExists) {
+                    return res.status(400).json({
+                        error: "USER ALREADY EXISTS",
+                    });
+                }
+            }
+
+            if (email) {
+                // check for email uniqueness
+                const userExists2 = await prisma.user.findUnique({
+                    where: {
+                        email: email,
+                    },
+                })
+                if (userExists2) {
+                    return res.status(400).json({
+                        error: "USER ALREADY EXISTS",
+                    });
+                }
+            }
+
             const user = await prisma.user.findUnique({
                 where: {
                     username: username,
