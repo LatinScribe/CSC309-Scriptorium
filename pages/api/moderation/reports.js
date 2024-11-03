@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     try {
         // a report should include either a blogpostid or commentid?
         const reportData = {
-            reason,
+            explanation,
         };
 
         if ((!blogPostId && !commentId) || (blogPostId && commentId)) {
@@ -31,7 +31,6 @@ export default async function handler(req, res) {
         });
         res.status(200).json(report);
     } catch (error) {
-        console.error("Error creating report:", error);
-        res.status(500).json({ error: 'Could not create report', details: error.message });
+        res.status(500).json({ error: 'Could not create report' });
     }
 }

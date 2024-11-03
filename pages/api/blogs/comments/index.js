@@ -41,8 +41,7 @@ export default async function handler(req, res) {
 
             res.status(200).json(comments); 
         } catch (error) {
-            console.error("Error fetching comments:", error);
-            res.status(500).json({ error: 'Could not fetch comments', details: error.message });
+            res.status(500).json({ error: 'Could not fetch comments' });
         }
     } else if (req.method === 'POST') { // handle comment creation
         const { authorId, content, parentCommentId } = req.body; // extract from req body
@@ -69,10 +68,9 @@ export default async function handler(req, res) {
             },
           });
     
-          res.status(201).json(newComment);
+          res.status(200).json(newComment);
         } catch (error) {
-          console.error("Error creating comment:", error);
-          res.status(500).json({ error: "Could not create comment", details: error.message });
+          res.status(500).json({ error: "Could not create comment" });
         }
     } else {
       res.setHeader('Allow', ['GET', 'POST']);

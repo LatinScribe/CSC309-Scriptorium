@@ -48,54 +48,81 @@ model CodeTemplate {
 }
 
 model BlogPost {
-  id               Int            @id @default(autoincrement())
+  id               Int              @id @default(autoincrement())
   title            String
   description      String
   tags             String
-  createdAt        DateTime       @default(now())
-  flagged          Boolean        @default(false)
-  upvotedUserIds    Int[]         
-  downvotedUserIds  Int[]         
-  upvoteCount      Int
-  downvoteCount    Int
+  createdAt        DateTime         @default(now())
+  flagged          Boolean          @default(false)        
+  upvoteCount      Int              @default(0)
+  downvoteCount    Int              @default(0)
+  upvotes          BlogPostUpvote[]
+  downvotes        BlogPostDownvote[]
   codeTemplates    CodeTemplate[]
-  reportsCount     Int            @default(0)
-  hidden           Boolean        @default(false)
-  author           User           @relation(fields: [authorId], references: [id])
+  reportsCount     Int              @default(0)
+  hidden           Boolean          @default(false)
+  author           User             @relation(fields: [authorId], references: [id])
   authorId         Int
-  deleted          Boolean
+  deleted          Boolean          @default(false)
 
   comments Comment[]
   Report   Report[]
 }
 
+model BlogPostUpvote {
+  id          Int      @id @default(autoincrement())
+  blogPost    BlogPost @relation(fields: [blogPostId], references: [id])
+  blogPostId  Int
+  userId      Int
+}
+
+model BlogPostDownvote {
+  id          Int      @id @default(autoincrement())
+  blogPost    BlogPost @relation(fields: [blogPostId], references: [id])
+  blogPostId  Int
+  userId      Int
+}
+
 model Comment {
-  id               Int      @id @default(autoincrement())
-  blogPost         BlogPost @relation(fields: [blogPostId], references: [id])
+  id               Int              @id @default(autoincrement())
+  blogPost         BlogPost         @relation(fields: [blogPostId], references: [id])
   blogPostId       Int
-  createdAt        DateTime @default(now())
-  author           User     @relation(fields: [authorId], references: [id])
-  authorId         Int
-  content          String
-  upvotedUserIds    Int[]         
-  downvotedUserIds  Int[]         
-  upvoteCount      Int
-  downvoteCount    Int
-  reportsCount     Int      @default(0)
-  hidden           Boolean  @default(false)
+  createdAt        DateTime         @default(now())
+  author           User             @relation(fields: [authorId], references: [id])
+  authorId         Int        
+  content          String       
+  upvoteCount      Int              @default(0)
+  downvoteCount    Int              @default(0)
+  upvotes          CommentUpvote[]
+  downvotes        CommentDownvote[]
+  reportsCount     Int              @default(0)
+  hidden           Boolean          @default(false)
   parentCommentId  Int?
-  parentComment    Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
-  replies          Comment[] @relation("CommentReplies")
+  parentComment    Comment?         @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies          Comment[]        @relation("CommentReplies")
 
-  deleted          Boolean
+  deleted          Boolean          @default(false)
 
-  Report Report[]
+  Report           Report[]
+}
+
+model CommentUpvote {
+  id          Int      @id @default(autoincrement())
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  commentId   Int
+  userId      Int
+}
+
+model CommentDownvote {
+  id          Int      @id @default(autoincrement())
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  commentId   Int
+  userId      Int
 }
 
 model Report {
   id            Int       @id @default(autoincrement())
   explanation   String
-  content       String
   blogPost      BlogPost? @relation(fields: [blogPostId], references: [id])
   blogPostId    Int?
   comment       Comment?  @relation(fields: [commentId], references: [id])

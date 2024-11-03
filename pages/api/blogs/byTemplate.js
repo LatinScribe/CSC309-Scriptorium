@@ -2,7 +2,7 @@ import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
     if (req.method === 'GET') {
-        const { templateId } = req.query; // Get the templateId from the query parameters
+        const { templateId } = req.query; 
         
         try {
             // Fetch blog posts that mention the specified code template
@@ -25,8 +25,7 @@ export default async function handler(req, res) {
 
             res.status(200).json(blogPosts); // Return the list of blog posts
         } catch (error) {
-            console.error("Error fetching blog posts by template:", error);
-            res.status(500).json({ error: 'Could not fetch blog posts', details: error.message });
+            res.status(500).json({ error: 'Could not fetch blog posts'});
         }
     } else {
         res.setHeader('Allow', ['GET']);

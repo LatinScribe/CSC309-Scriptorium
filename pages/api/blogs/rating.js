@@ -109,6 +109,6 @@ export default async function handler(req, res) {
         return res.status(200).json(updatedPost);
     } catch (error) {
         console.error("Error creating blog post:", error); 
-        res.status(500).json({ error: 'Could not create blog post', details: error.message });
+        res.status(500).json({ error: 'Could not create blog post' });
     }
 }

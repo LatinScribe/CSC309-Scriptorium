@@ -60,8 +60,7 @@ export default async function handler(req, res) {
             }); 
             res.status(200).json(blogPosts);
         } catch (error) {
-            console.error("Error fetching blog posts:", error); // what happening
-            res.status(500).json({ error: 'Could not fetch blog posts', details: error.message });
+            res.status(500).json({ error: 'Could not fetch blog posts'});
         }
     } else if (req.method === 'POST') {
         //// users - do token check role
@@ -81,8 +80,7 @@ export default async function handler(req, res) {
             });
             res.status(200).json(newBlogPost);
         } catch (error) {
-            console.error("Error creating blog post:", error); 
-            res.status(500).json({ error: 'Could not create blog post', details: error.message });
+            res.status(500).json({ error: 'Could not create blog post' });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);
