@@ -11,6 +11,7 @@ export default async function handler(req, res) {
             // if sortByRating is not set, posts are sorted by createAt ()
             // const sortByRating = req.query.sortByRating === 'true'; //
             const sortOption = req.query.sort;
+            const templateId = req.query.templateId; // for searching by code template
 
             let orderBy; 
             if (sortOption === 'mostValuable') {
@@ -21,23 +22,36 @@ export default async function handler(req, res) {
                 orderBy = { createdAt: 'desc' }; // Default sort by creation date
             }
 
+            let whereCondition;
+
+            if (templateId) { // search by code template
+                whereCondition = {
+                    codeTemplates: {
+                        some: {
+                            id: Number(templateId),     // match blog posts that 
+                        },
+                    },
+                };
+            } else { // searches all blog posts
+                whereCondition = {
+                    OR: [ // OR allows matching of any of these fields (search could match title, description, tags)
+                        // searches are case sensitive :o
+                       { title: { contains: searchQuery} },
+                       { description: { contains: searchQuery}},
+                       { tags: {contains: searchQuery}}, 
+                       {
+                           codeTemplates: {
+                               some: {
+                               title: { contains: searchQuery },
+                               },
+                           },
+                       },
+                   ],
+                };
+            }
 
             const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
-                where: { // conditions
-                    OR: [ // OR allows matching of any of these fields (search could match title, description, tags)
-                         // searches are case sensitive :o
-                        { title: { contains: searchQuery} },
-                        { description: { contains: searchQuery}},
-                        { tags: {contains: searchQuery}}, 
-                        {
-                            codeTemplates: {
-                                some: {
-                                title: { contains: searchQuery }
-                                }
-                            }
-                        }
-                    ],
-                },
+                where: whereCondition,
                 include: { // relations
                     codeTemplates: true         // fetch each blog post and all the related code templates stored in codeTemplatse field
                 },
