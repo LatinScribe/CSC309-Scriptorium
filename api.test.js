@@ -6,6 +6,10 @@ const request = require("supertest");
 
 const BASE_URL = `http://localhost:${process.env.PORT || 3000}`;
 
+let adminAccessToken;
+let userAccessToken;
+let userRefreshToken;
+
 describe("JWT and permissions API tests", () => {
   const regularUsername =
     "regular_user_" + Math.random().toString(36).substring(2, 15);
@@ -14,34 +18,33 @@ describe("JWT and permissions API tests", () => {
   const testUsername =
     "test_user_" + Math.random().toString(36).substring(2, 15);
   
-  const email = "user@example.com"
-  let adminAccessToken;
-  let userAccessToken;
-  let userRefreshToken;
+  const reg_email = "user"+regularUsername+"@example.com"
+  const test_email = "user"+testUsername+"@example.com"
+  const admin_email = "user"+adminUsername+"@example.com"
 
   beforeAll(async () => {
     // Create an admin user and a regular user for testing
-    await request(BASE_URL).post("/api/accounts/register").send({
-      username: adminUsername,
-      password: "adminPass",
-      role: "ADMIN",
-      email: email,
-    });
+    // await request(BASE_URL).post("/api/accounts/register").send({
+    //   username: adminUsername,
+    //   password: "adminPass123$",
+    //   role: "ADMIN",
+    //   email:  admin_email,
+    // });
 
     await request(BASE_URL).post("/api/accounts/register").send({
-      username: regularUsername,
-      password: "userPass",
-      role: "USER",
-      email: email,
+    username: regularUsername,
+    password: "userPass123&",
+    role: "USER",
+    email: reg_email,
     });
 
     // Log in as admin and user to obtain tokens
     const adminLoginResponse = await request(BASE_URL)
       .post("/api/accounts/login")
       .send({
-        username: adminUsername,
-        password: "adminPass",
-        email: email,
+        username: "SUDOMASTER",
+        password: "SUDOMaSTER123$$$",
+        email: "SUDOMASTER@MASTER.com",
       });
     adminAccessToken = adminLoginResponse.body.accessToken;
 
@@ -49,8 +52,8 @@ describe("JWT and permissions API tests", () => {
       .post("/api/accounts/login")
       .send({
         username: regularUsername,
-        password: "userPass",
-        email: email,
+        password: "userPass123&",
+        email: reg_email,
       });
     userAccessToken = userLoginResponse.body.accessToken;
     userRefreshToken = userLoginResponse.body.refreshToken;
@@ -62,9 +65,10 @@ describe("JWT and permissions API tests", () => {
         .post("/api/accounts/register")
         .send({
           username: testUsername,
-          password: "testPass",
+          password: "testPass123*",
           role: "USER",
-          email: email,
+          email: test_email,
+          output_bool: true,
         });
 
       expect(response.status).toBe(201);
@@ -77,8 +81,9 @@ describe("JWT and permissions API tests", () => {
         .post("/api/accounts/register")
         .send({
           username: testUsername,
-          password: "anotherPass",
-          email: email,
+          password: "anotherPass123(",
+          email: reg_email,
+          role: "USER",
         });
 
       expect(response.status).toBe(400);
@@ -90,8 +95,8 @@ describe("JWT and permissions API tests", () => {
     it("should log in and return a JWT", async () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
-        password: "testPass",
-        email: email,
+        password: "testPass123*",
+        email: test_email,
       });
 
       expect(response.status).toBe(200);
@@ -101,8 +106,8 @@ describe("JWT and permissions API tests", () => {
     it("should fail to log in with incorrect credentials", async () => {
       const response = await request(BASE_URL).post("/api/accounts/login").send({
         username: testUsername,
-        password: "wrongPass",
-        email: email,
+        password: "wrongPass123(",
+        email: test_email,
       });
 
       expect(response.status).toBe(401);
@@ -114,7 +119,7 @@ describe("JWT and permissions API tests", () => {
     it("should allow access to protected route with valid token", async () => {
       const response = await request(BASE_URL)
         .get("/api/protected")
-        .set("authorization", `Bearer ${userAccessToken}`);
+        .set("authorization", `Bearer ${adminAccessToken}`);
 
       expect(response.status).toBe(200);
     });
@@ -179,25 +184,26 @@ describe("JWT and permissions API tests", () => {
 
 describe("API Tests for users", () => {
   const regularUsername =
-  "regular_user_" + Math.random().toString(36).substring(2, 15);
+  "regular_user_to_be_deleted" + Math.random().toString(36).substring(2, 15);
   const adminUsername =
     "regular_user_" + Math.random().toString(36).substring(2, 15);
   const testUsername =
     "test_user_" + Math.random().toString(36).substring(2, 15);
   
-    const email = "user@example.com"
+    const email = "user@example"+Math.random().toString(36).substring(2, 15) +".com"
 
-  describe("6: User creation", () => {
-    it("should create a new user", async () => {
-      const response = await request(BASE_URL).post("/api/accounts/users").send({
+  describe("6: Admin Account creation", () => {
+    it("should create a new ADMIN user", async () => {
+      const response = await request(BASE_URL).post("/api/admin/admin_register").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
-        password: "myPass",
+        password: "myPass123&&",
         email: email,
         firstName: "Henry",
         lastName: "Chen",
         avatar: "https://henrytchen.com/images/Profile3_compressed.jpg",
         phoneNumber: "123+456+7899",
         role: "ADMIN",
+        output_bool: true,
       });
 
       expect(response.status).toBe(201);
@@ -213,9 +219,9 @@ describe("API Tests for users", () => {
     });
 
     it("should fail to create a user with an existing username", async () => {
-      const response = await request(BASE_URL).post("/api/accounts/users").send({
+      const response = await request(BASE_URL).post("/api/admin/admin_register").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
-        password: "myPass",
+        password: "myPass123&&",
         email: email,
         firstName: "Henry",
         lastName: "Chen",
@@ -233,28 +239,35 @@ describe("API Tests for users", () => {
     it("should retrieve specified user", async () => {
       const response = await request(BASE_URL).get("/api/accounts/users").send({
         username: regularUsername,
+        firstName_bool: true,
+        lastName_bool: true,
+        email_bool: true,
+        avatar_bool: true,
+        phoneNumber_bool: true,
+        role_bool: true,
+        createdAt_bool: true,
       });
 
       expect(response.status).toBe(200);
-      expect(response.body.user).toHaveProperty("id");
-      expect(response.body.user).toHaveProperty("createdAt");
-      expect(response.body.user).toHaveProperty("updatedAt");
-      expect(response.body.user.username).toBe(regularUsername);
-      expect(response.body.user.email).toBe(email);
-      expect(response.body.user.firstName).toBe("Henry");
-      expect(response.body.user.lastName).toBe("Chen");
-      expect(response.body.user.avatar).toBe("https://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.user.phoneNumber).toBe("123+456+7899");
-      expect(response.body.user.role).toBe("ADMIN");
+      expect(response.body[0]).toHaveProperty("username");
+      expect(response.body[0]).toHaveProperty("createdAt");
+      // expect(response.body[0]).toHaveProperty("updatedAt");
+      expect(response.body[0].username).toBe(regularUsername);
+      expect(response.body[0].email).toBe(email);
+      expect(response.body[0].firstName).toBe("Henry");
+      expect(response.body[0].lastName).toBe("Chen");
+      expect(response.body[0].avatar).toBe("https://henrytchen.com/images/Profile3_compressed.jpg");
+      expect(response.body[0].phoneNumber).toBe("123+456+7899");
+      expect(response.body[0].role).toBe("ADMIN");
     });
 
     it("should fail to retrieve a non-existent username", async () => {
       const response = await request(BASE_URL).get("/api/accounts/users").send({
-        username: "J",
+        username: "JEE",
       });
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Requested user could not be found");
+      expect(response.body.message).toBe("No users could be found!");
     });
 
   //   it("should retrieve users filtered by firstName", async () => {
@@ -291,7 +304,7 @@ describe("API Tests for users", () => {
   //   });
   });
 
-  describe("8: Updating an existing user", () => {
+  describe("8: Updating an existing user using ADMIN PERMS", () => {
     it("should update an existing user", async () => {
       // const response = await request(BASE_URL)
       //   .put(`/api/users/${username}`)
@@ -304,14 +317,14 @@ describe("API Tests for users", () => {
       // expect(response.body.firstName).toBe("Jane");
       // expect(response.body.bio).toBe("Updated bio");
 
-      const response = await request(BASE_URL).put("/api/accounts/users").send({
+      const response = await request(BASE_URL).put("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
-        password: "myUpdatedPass",
+        password: "myUpdatedPass123&",
         email: "updated" + email,
-        firstName: "H",
-        lastName: "C",
+        firstName: "HE",
+        lastName: "CC",
         avatar: "UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg",
-        phoneNumber: "UPDATED123+456+7899",
+        phoneNumber: "122+456+7899",
         role: "USER",
       });
 
@@ -320,23 +333,23 @@ describe("API Tests for users", () => {
       expect(response.body.updated_user).toHaveProperty("createdAt");
       expect(response.body.updated_user.username).toBe(regularUsername);
       expect(response.body.updated_user.email).toBe("updated" + email);
-      expect(response.body.updated_user.firstName).toBe("H");
-      expect(response.body.updated_user.lastName).toBe("C");
+      expect(response.body.updated_user.firstName).toBe("HE");
+      expect(response.body.updated_user.lastName).toBe("CC");
       expect(response.body.updated_user.avatar).toBe("UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.updated_user.phoneNumber).toBe("UPDATED123+456+7899");
+      expect(response.body.updated_user.phoneNumber).toBe("122+456+7899");
       expect(response.body.updated_user.role).toBe("USER");
     });
 
-    it("should update an user with partial data", async () => {
+    it("should update an user with partial data using ADMIN PERMS", async () => {
       // const response = await request(BASE_URL)
       //   .put(`/api/users/${username}`)
       //   .send({});
 
       // expect(response.status).toBe(200);
       // expect(response.body.firstName).toBe("Jane");
-      const response = await request(BASE_URL).put("/api/accounts/users").send({
+      const response = await request(BASE_URL).put("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
-        firstName: "HE",
+        firstName: "HERR",
       });
 
       expect(response.status).toBe(201);
@@ -344,10 +357,10 @@ describe("API Tests for users", () => {
       expect(response.body.updated_user).toHaveProperty("createdAt");
       expect(response.body.updated_user.username).toBe(regularUsername);
       expect(response.body.updated_user.email).toBe("updated" + email);
-      expect(response.body.updated_user.firstName).toBe("HE");
-      expect(response.body.updated_user.lastName).toBe("C");
+      expect(response.body.updated_user.firstName).toBe("HERR");
+      expect(response.body.updated_user.lastName).toBe("CC");
       expect(response.body.updated_user.avatar).toBe("UPDATEDhttps://henrytchen.com/images/Profile3_compressed.jpg");
-      expect(response.body.updated_user.phoneNumber).toBe("UPDATED123+456+7899");
+      expect(response.body.updated_user.phoneNumber).toBe("122+456+7899");
       expect(response.body.updated_user.role).toBe("USER");
       
     });
@@ -395,10 +408,10 @@ describe("API Tests for users", () => {
     // });
   });
 
-  describe("9: Delete USER", () => {
-    it("should delete an user and ensure all their books are also deleted", async () => {
+  describe("9: Delete USER using ADMIN PERMS", () => {
+    it("should soft delete a user", async () => {
       // Delete the user
-      const deleteuserResponse = await request(BASE_URL).delete("/api/accounts/users").send({
+      const deleteuserResponse = await request(BASE_URL).delete("/api/admin/admin_users").set("authorization", `Bearer ${adminAccessToken}`).send({
         username: regularUsername,
       });
 

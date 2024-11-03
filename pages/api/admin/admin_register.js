@@ -1,11 +1,75 @@
-// THIS ENDPOINT TO BE USED BY USERS TO REGISTER FOR A NEW ACCOUNT
-// NOT FOR ADMINS TO REGISTER ADMIN ACCOUNTS
+// MUST BE AN ADMIN TO USE THIS ENDPOINT
+// CAN BE USED TO REGISTER BOTH USERS AND ADMINS
 
-import { hashPassword, generateSalt } from "@/utils/auth";
+import { hashPassword, generateSalt, verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
+
+    // api middleware
+    const { x_refreshToken } = req.headers;
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        try {
+            // attempt to refresh access token using refresh token
+            console.log(err)
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
+    }
+    if (!payload) {
+        try {
+            // attempt to refresh access token with refresh token
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            if (!new_accessToken) {
+                return res.status(401).json({
+                    message: "Unauthorized",
+                });
+            }
+            payload = verifyTokenLocal(new_accessToken)
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
+        }
+    }
+
+    if (payload.role !== "ADMIN") {
+        return res.status(403).json({
+            error: "Forbidden",
+        });
+    }
+
+    // actual api starts
+
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
@@ -16,7 +80,7 @@ export default async function handler(req, res) {
     // check if user wants output. Default to false!
     if (!output || typeof output !== "boolean") {
         output = false
-    } 
+    }
 
     // currently only requiring username, password, email, and role
     if (!username || !role || !password || !email) {
@@ -24,9 +88,9 @@ export default async function handler(req, res) {
             error: "Please provide all the required fields",
         });
     }
-    if (role !== "USER") {
+    if (role !== "USER" && role !== "ADMIN") {
         return res.status(400).json({
-            error: "ROLE MUST BE USER",
+            error: "ROLE MUST BE USER or ADMIN",
         });
     }
 
@@ -131,7 +195,6 @@ export default async function handler(req, res) {
                 createdAt: true,
             },
         });
-
         if (output) {
             return res.status(201).json({ user });
         } else {
@@ -141,7 +204,6 @@ export default async function handler(req, res) {
         console.log(error);
         return res.status(500).json({
             error: "Error creating user! Unsuccessful! Please try again!",
-
         });
     }
 }
