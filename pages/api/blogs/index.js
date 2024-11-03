@@ -63,9 +63,32 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Could not fetch blog posts'});
         }
     } else if (req.method === 'POST') {
-        //// users - do token check role
+        
+        // check auth
+        var payload = null
+        try {
+            payload = verifyToken(req.headers.authorization);
+        } catch (err) {
+            console.log(err);
+            return res.status(401).json({
+                error: "Unauthorized",
+            });
+        }
+        if (!payload) {
+            return res.status(401).json({
+                error: "Unauthorized",
+            });
+        }
+        const user = await prisma.user.findUnique({
+            where: {
+                username: payload.username,
+            },
+        });
+
+
         const { title, description, tags, authorId, codeTemplates } = req.body;
- 
+
+
         try {
             const newBlogPost = await prisma.blogPost.create({
                 data: {

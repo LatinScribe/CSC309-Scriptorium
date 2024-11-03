@@ -3,14 +3,36 @@
 import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
+    
     const { method } = req;
     const { id } = req.query; 
+
+    // check auth
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    if (!payload) {
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    const user = await prisma.user.findUnique({
+        where: {
+            username: payload.username,
+        },
+    });
 
     if (method === 'PUT') {
         // update blog post
 
          // check if post exists
-        const blogPost = await prisma.blogPost.findUnique({
+        let blogPost = await prisma.blogPost.findUnique({
             where: { id: parseInt(id) },
         });
 
@@ -37,7 +59,18 @@ export default async function handler(req, res) {
     } else if (method === 'DELETE') {
         // mark blog post as deleted
         try {
-            const blogPost = await prisma.blogPost.update({     // update blogPost 
+            let blogPost = await prisma.blogPost.findUnique({
+                where: { id: parseInt(id) },
+            });
+
+            if (!blogPost) {
+                return res.status(404).json({ error: "Invalid blog post ID" });
+            }
+            if (blogPost.deleted) {
+                return res.status(404).json({ error: "Blog post already deleted" });
+            }
+
+            blogPost = await prisma.blogPost.update({     // update blogPost 
               where: { id: Number(id) },
               data: { deleted: true },  // Set `hidden` to true 
             });

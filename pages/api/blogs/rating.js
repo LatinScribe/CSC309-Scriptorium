@@ -6,6 +6,27 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
+    // user auth
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    if (!payload) {
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    const user = await prisma.user.findUnique({
+        where: {
+            username: payload.username,
+        },
+    });
+
     try {
         // Expecting the body to contain action and userId 
         // action should be either 'upvote' or 'downvote'
@@ -107,8 +128,7 @@ export default async function handler(req, res) {
         });
 
         return res.status(200).json(updatedPost);
-    } catch (error) {
-        console.error("Error creating blog post:", error); 
-        res.status(500).json({ error: 'Could not create blog post' });
+    } catch (error) { 
+        res.status(500).json({ error: 'Could not rate blog post' });
     }
 }

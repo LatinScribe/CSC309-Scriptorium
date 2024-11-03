@@ -5,6 +5,27 @@ export default async function handler(req, res) {
     if (req.method !== 'PATCH') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
+
+    // user auth
+    var payload = null
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    if (!payload) {
+        return res.status(401).json({
+            error: "Unauthorized",
+        });
+    }
+    const user = await prisma.user.findUnique({
+        where: {
+            username: payload.username,
+        },
+    });
     
     const { commentId } = req.query;  // `commentId` refers to the ID of the comment
     const { userId, action } = req.body;  // `action` should be either 'upvote' or 'downvote'
