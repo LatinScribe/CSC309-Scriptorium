@@ -242,7 +242,7 @@ export default async function handler(req, res) {
             });
         }
     } else if (req.method === "PUT") {
-        const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
+        const { username, newUsername, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
         try {
             // Mofify the account to have the provided info
             if (!username) {
@@ -282,7 +282,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            if (!verifyUsername(username)) {
+            if (newUsername && !verifyUsername(newUsername)) {
                 return res.status(400).json({
                     error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
                 });
@@ -294,11 +294,11 @@ export default async function handler(req, res) {
                 })
             }
 
-            if (username) {
+            if (newUsername) {
                 // check if user already exists
                 const userExists = await prisma.user.findUnique({
                     where: {
-                        username: username,
+                        username: newUsername,
                     },
                 })
                 if (userExists) {
@@ -356,7 +356,7 @@ export default async function handler(req, res) {
                     username: username,
                 },
                 data: {
-                    username,
+                    username:newUsername,
                     password: new_password,
                     salt: salt,
                     firstName,
