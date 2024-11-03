@@ -1,5 +1,5 @@
 /* fetching comments and 
- * creating new comments on blog post with id [blogPostId]
+ * creating new comments on blog post 
 */
 
 import prisma from "@/utils/db";

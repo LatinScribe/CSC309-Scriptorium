@@ -4,10 +4,20 @@ import prisma from "@/utils/db";
 
 export default async function handler(req, res) {
     const { method } = req;
-    const { id } = req.query; // get the id from the query parameters
+    const { id } = req.query; 
 
     if (method === 'PUT') {
         // update blog post
+
+         // check if post exists
+        const blogPost = await prisma.blogPost.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!blogPost || blogPost.deleted || blogPost.hidden) {
+            return res.status(404).json({ error: "Blog post not found" });
+        }
+
         const { title, description, tags } = req.body;
 
         try {
@@ -29,16 +39,16 @@ export default async function handler(req, res) {
         try {
             const blogPost = await prisma.blogPost.update({     // update blogPost 
               where: { id: Number(id) },
-              data: { hidden: true },  // Set `hidden` to true 
+              data: { deleted: true },  // Set `hidden` to true 
             });
             // cascade to comments
             // update comments table: set comments associated with the blog post as hidden
             await prisma.comment.updateMany({       
                 where: { blogPostId: parseInt(id) },
-                data: { hidden: true }
+                data: { deleted: true }
             });
 
-            res.status(200).json({ message: 'Blog post and comments hidden successfully', blogPost });
+            res.status(200).json({ message: 'Blog post and comments set as deleted', blogPost });
         } catch (error) {
             res.status(500).json({ error: 'Failed to hide the blog post', details: error.message });
         } 
