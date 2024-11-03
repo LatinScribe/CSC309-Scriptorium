@@ -22,5 +22,8 @@ npx jest
 ```
 
 ## Usage
+Default Admin details:
+### username: SUDOMASTER
+### password: SUDOMaSTER123$$$
 
 USe our provided postman collection to test the available API endpoints! That's all. 
