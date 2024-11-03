@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         try {
             const { sortOption, pageNum = 1, pageSize = 10 } = req.query;
 
-            let orderBy = []; // Initialize as an array
+            let orderBy = []; 
             if (sortOption === 'mostValuable') {
                 orderBy = [
                   { upvoteCount: 'desc' },
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
                 ];
             } else {
                 orderBy = [
-                  { createdAt: 'desc' } // Default sort by creation time
+                  { createdAt: 'desc' } // default sort by creation time
                 ];
             }
 
@@ -33,15 +33,18 @@ export default async function handler(req, res) {
             const comments = await prisma.comment.findMany({
                 where: {
                     blogPostId: parseInt(blogPostId), // get the comments associated with the blog post
+                    hidden: false, // dont get hidden or deleted comments
+                    deleted: false 
                 },
                 orderBy: orderBy, // apply sorting order
-                skip: (pageNum - 1) * pageSize, 
-                take: pageSize, 
+                skip: (pageNum - 1) * parseInt(pageSize),
+                take: parseInt(pageSize),
             });
 
             res.status(200).json(comments); 
         } catch (error) {
-            res.status(500).json({ error: 'Could not fetch comments' });
+          // res.status(500).json({ error: "Could not fetch comment", details: error.message });
+          res.status(500).json({ error: "Could not fetch comment" });
         }
     } else if (req.method === 'POST') { // handle comment creation
         const { authorId, content, parentCommentId } = req.body; // extract from req body
@@ -70,7 +73,7 @@ export default async function handler(req, res) {
     
           res.status(200).json(newComment);
         } catch (error) {
-          res.status(500).json({ error: "Could not create comment" });
+            res.status(500).json({ error: "Could not create comment" });
         }
     } else {
       res.setHeader('Allow', ['GET', 'POST']);

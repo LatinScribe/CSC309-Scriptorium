@@ -64,23 +64,32 @@ export default async function handler(req, res) {
         }
     } else if (req.method === 'POST') {
         //// users - do token check role
-        const { title, description, tags, authorId } = req.body;
-        // let upvotedUserIds = [];
-        // let downvotedUserIds = []; // initialize upvotes and downvotes
-        // let upvoteCount = 0;
-        // let downvoteCount = 0;
+        const { title, description, tags, authorId, codeTemplates } = req.body;
+ 
         try {
             const newBlogPost = await prisma.blogPost.create({
                 data: {
-                title,
-                description,
-                tags,
-                authorId,
+                    title,
+                    description,
+                    tags,
+                    authorId,
+                    codeTemplates: {
+                        create: codeTemplates ? codeTemplates.map(template => ({
+                            title: template.title,
+                            content: template.content,
+                            language: template.language,
+                            tags: template.tags, 
+                            deleted: template.deleted,
+                            author: { 
+                                id: template.authorId
+                            },
+                        })) : [],
+                    }
                 },
             });
             res.status(200).json(newBlogPost);
         } catch (error) {
-            res.status(500).json({ error: 'Could not create blog post' });
+            res.status(500).json({ error: 'Could not create blog post', details: error.message });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);

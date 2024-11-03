@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const { userId, action } = req.body;  // `action` should be either 'upvote' or 'downvote'
 
     try {
-        if (!commentId || !action) {
+        if (!commentId || !action || !userId) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
@@ -102,6 +102,7 @@ export default async function handler(req, res) {
 
         res.status(200).json(updatedComment);
     } catch (error) {
-        return res.status(500).json({ error: 'Could not update comment ratings' });
+        // return res.status(500).json({ error: 'Could not update comment ratings', details: error.message});
+        return res.status(500).json({ error: 'Could not update comment ratings'});
     }
 }
