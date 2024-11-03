@@ -98,7 +98,7 @@ export default async function handler(req, res) {
                 });
             }
         } else {    // not downvote or upvote
-            return res.status(400).json({ error: "Invalid action" });
+            return res.status(401).json({ error: "Invalid action" });
         }
 
         // Fetch the updated blog post to return
