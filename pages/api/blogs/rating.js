@@ -1,9 +1,54 @@
 import prisma from "@/utils/db";
+import { verifyToken } from "@/utils/auth";
+import { verifyTokenLocal } from "@/utils/auth";
+import { attemptRefreshAccess } from "@/utils/auth";
 // rating blog post
 
 export default async function handler(req, res) {
     if (req.method !== 'PATCH') {
         return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
+    // user access
+    const { x_refreshToken } = req.headers;
+    let payload;
+
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        try {
+            // attempt refresh
+            console.log("Initial token verification failed:", err);
+            let newAccessToken;
+            if (x_refreshToken) {
+                newAccessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            if (!newAccessToken) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            payload = verifyTokenLocal(newAccessToken);
+        } catch (refreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+    }
+
+    if (!payload) {
+        try {
+            if (x_refreshToken) {
+                const newAccessToken = attemptRefreshAccess(x_refreshToken);
+                if (newAccessToken) {
+                    payload = verifyTokenLocal(newAccessToken);
+                }
+            }
+        } catch (finalRefreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+    }
+
+    if (payload.role !== "USER") {
+        return res.status(403).json({ error: "Forbidden" });
     }
 
     try {
@@ -98,7 +143,7 @@ export default async function handler(req, res) {
                 });
             }
         } else {    // not downvote or upvote
-            return res.status(400).json({ error: "Invalid action" });
+            return res.status(401).json({ error: "Invalid action" });
         }
 
         // Fetch the updated blog post to return
@@ -107,8 +152,7 @@ export default async function handler(req, res) {
         });
 
         return res.status(200).json(updatedPost);
-    } catch (error) {
-        console.error("Error creating blog post:", error); 
-        res.status(500).json({ error: 'Could not create blog post' });
+    } catch (error) { 
+        res.status(500).json({ error: 'Could not rate blog post' });
     }
 }
