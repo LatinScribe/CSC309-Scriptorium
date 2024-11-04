@@ -15,7 +15,7 @@ export default async function handler(req, res) {
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
 
-            const orderBy = [];
+            const orderBy = []; //
             if (sortOption === 'mostValuable') {
                 orderBy.push({ upvoteCount: 'desc' }, { downvoteCount: 'asc' }, { createdAt: 'desc' });
             } else if (sortOption === 'mostControversial') {
@@ -127,7 +127,7 @@ export default async function handler(req, res) {
                     authorId,
                     codeTemplates: {
                         connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
-                    } // 
+                    } 
                 },
             });
             res.status(200).json(newBlogPost);
