@@ -227,13 +227,13 @@ The API to save a profile to a given user.
 
 Note:
 1. This function should only be used to save the initial/first profile. If the user already
-has a profile in the system associated to their account, the updateProfile API should be used instead
+has a profile in the system associated to their account, the PUT method should be used instead
 
-**URL** : `/user`
+**URL** : `/api/accounts/users`
 
 **Method** : `POST`
 
-**Auth required** : Required in header `Authorization`.
+**Auth required** : Not required currently.
 
 **Required Request Body**
 ```json

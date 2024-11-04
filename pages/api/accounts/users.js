@@ -1,70 +1,36 @@
-// THIS FILE CONTAINS API CALLS TO UPDATE USER / PROFILE INFO
+// This endpoint contains methods to access user data that non-logged in users can access
+// currently only handles searching / filtering for users (only finds non-deleted users).
 
-import { hashPassword } from "@/utils/auth";
+
+// import { hashPassword, generateSalt } from "@/utils/auth";
 import prisma from "@/utils/db";
+//import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
+import { verifyUsername } from "@/utils/verification";
 
 // pages/api/accounts/user
 export default async function handler(req, res) {
-    // if (req.method !== "POST" && req.method !=="PUT" && req.method !=="GET" && req.method !=="DELETE") {
-    //     return res.status(405).json({ error: "Method not allowed" });
-    //   }
+    if (req.method === "GET") {
+        // FILTER and RETRIEVE USER(s) based on username
+        const { username, firstName_bool, lastName_bool, email_bool, avatar_bool, phoneNumber_bool, createdAt_bool, role_bool, page, pageSize } = req.body;
 
-    // CREATE A USER, SHOULD USE REGISTER NORMALLY
-    if (req.method === "POST") {
-        const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
-
-        // currently only requiring username, password, email, and role
-        if (!username || !role || !password || !email) {
+        if (page && isNaN(parseInt(page))) {
             return res.status(400).json({
-                error: "Please provide all the required fields",
+                error: "Page should be a number",
             });
         }
-        if (role !== "USER" && role !== "ADMIN") {
+        if (pageSize && isNaN(parseInt(pageSize))) {
             return res.status(400).json({
-                error: "Not user or admin",
+                error: "Page size should be a number",
             });
         }
-    
-        // check if user already exists
-        const userExists = await prisma.user.findUnique({
-            where: {
-                username: username,
-            },
-        })
-        if (userExists) {
-            return res.status(400).json({
-                error: "USER ALREADY EXISTS",
-            });
-        }
-    
-        const user = await prisma.user.create({
-            data: {
-                username,
-                password: await hashPassword(password),
-                firstName,
-                lastName,
-                email,
-                avatar,
-                phoneNumber,
-                role,
-            },
-            select: {
-                id: true,
-                username: true,
-                role: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                avatar: true,
-                phoneNumber: true,
-                createdAt: true,
-            },
-        });
-        res.status(201).json({ user });
 
-    } else if (req.method === "GET") {
-        // FILTER A RETRIEVE A USER based on username
-        const {username} = req.body;
+        // default to 1 and 5
+        var page_num = page
+        var pageSize_num = pageSize
+        if (!page || !pageSize) {
+            page_num = 1;
+            pageSize_num = 5;
+        }
 
         if (!username) {
             return res.status(400).json({
@@ -72,99 +38,94 @@ export default async function handler(req, res) {
             });
         }
 
-        const user = await prisma.user.findUnique({
-            where: {
-                username: username,
-            },
-        })
-        if (!user) {
-            return res.status(200).json({
-                message: "Requested user could not be found",
-            });
-        } 
-        res.status(200).json({user});
-    } else if (req.method === "PUT") {
-        // Mofify the account to have the provided info
-        const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
-        if (!username) {
-            return res.status(400).json({
-                error: "Please provide all the required fields",
-            });
+        var firstname = firstName_bool
+        // check if user wants output. Default to false!
+        if (!firstname || typeof firstname !== "boolean") {
+            firstname = false
         }
-        var new_password = undefined
-        if (password) {
-            new_password = await hashPassword(password)
+        var lastName = lastName_bool
+        // check if user wants output. Default to false!
+        if (!lastName || typeof lastName !== "boolean") {
+            lastName = false
         }
-
-        const user = await prisma.user.findUnique({
-            where: {
-                username: username,
-            },
-        })
-
-        if (!user) {
-            return res.status(400).json({
-                error: "Requested user could not be found",
-            });
-        } 
-
-        const updated_user = await prisma.user.update({
-            where: {
-                username: username,
-            },
-            data: {
-                username,
-                password: new_password,
-                firstName,
-                lastName,
-                email,
-                avatar,
-                phoneNumber,
-                role,
-            },
-            select: {
-                id: true,
-                username: true,
-                role: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                avatar: true,
-                phoneNumber: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-        res.status(201).json({updated_user});
-    }else if (req.method === "DELETE") {
-        // TODO: Use Prisma Client to retrieve and filter authors
-        const {username} = req.body;
-
-        if (!username) {
-            return res.status(400).json({
-                error: "Please provide all the required fields",
-            });
+        var email = email_bool
+        // check if user wants output. Default to false!
+        if (!email || typeof email !== "boolean") {
+            email = false
+        }
+        var avatar = avatar_bool
+        // check if user wants output. Default to false!
+        if (!avatar || typeof avatar !== "boolean") {
+            avatar = false
+        }
+        var phonenumber = phoneNumber_bool
+        // check if user wants output. Default to false!
+        if (!phonenumber || typeof phonenumber !== "boolean") {
+            phonenumber = false
         }
 
-        const user = await prisma.user.findUnique({
-            where: {
-                username: username,
-            },
-        })
-        if (!user) {
-            return res.status(200).json({
-                message: "Requested user could not be found",
+        var createdat = createdAt_bool
+        // check if user wants output. Default to false!
+        if (!createdat || typeof createdat !== "boolean") {
+            createdat = false
+        }
+
+        var role = role_bool
+        // check if user wants output. Default to false!
+        if (!role || typeof role !== "boolean") {
+            role = false
+        }
+        try {
+            // verify username 
+            if (!verifyUsername(username)) {
+                return res.status(400).json({
+                    error: "NOT A VALID USERNAME FORMAT: USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
+                });
+            }
+
+            let where = {};
+
+            where.username = {
+                contains: username,
+                // mode: "insensitive",
+            }
+            let users = await prisma.user.findMany({
+                where: where,
+                select: {
+                    username: true,
+                    firstName: firstname,
+                    lastName: lastName,
+                    email: email,
+                    avatar: avatar,
+                    phoneNumber: phonenumber,
+                    createdAt: createdat,
+                    deleted: true,
+                    role: role,
+                },
+            })
+
+            if (!users || users.length === 0) {
+                return res.status(200).json({
+                    message: "No users could be found!",
+                });
+            }
+
+            // filter out all deleted templates
+            users = users.filter((user) => !user.deleted);
+
+            // paginate 
+            const start = (page_num - 1) * pageSize_num;
+            const end = start + pageSize_num;
+            const paginatedUsers = users.slice(start, end);
+
+            res.status(200).json(paginatedUsers);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                error: "Error retrieving User(s)! Unsuccessful! Please try again!",
             });
-        } 
-        
-        await prisma.user.delete({
-            where: {
-              username: username,
-            },
-          });
-        return res.status(200).json({ message: "User deleted successfully" });
-    }else {
-      res.status(405).json({ message: "Method not allowed" });
+        }
+    } else {
+        res.status(405).json({ message: "Method not allowed" });
     }
-  }
+}

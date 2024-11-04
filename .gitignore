@@ -35,3 +35,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env
+package-lock.json
+package-lock.json
+package-lock_old.json
+prisma/dev.db
+prisma/migrations/20241020034510_/migration.sql
+prisma/migrations/20241020041631_/migration.sql
+prisma/migrations/20241020043043_/migration.sql
+prisma/migrations/migration_lock.toml
+*.sql
