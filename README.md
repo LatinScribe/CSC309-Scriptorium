@@ -33,4 +33,5 @@ Default Admin details:
 ### password: SUDOMaSTER123$$$
 
 UML diagram of our model is available in prisma-UML.png
+
 Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
