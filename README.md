@@ -9,6 +9,12 @@ First, run the startup file:
 bash startup.sh
 ```
 
+Then run the run.sh file
+
+```bash
+bash run.sh
+```
+
 This should start the next server
 
 You can veryify this by opening: [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -26,4 +32,5 @@ Default Admin details:
 ### username: SUDOMASTER
 ### password: SUDOMaSTER123$$$
 
-USe our provided postman collection to test the available API endpoints! That's all. 
+UML diagram of our model is available in prisma-UML.png
+Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
