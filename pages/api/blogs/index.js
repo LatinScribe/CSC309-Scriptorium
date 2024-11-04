@@ -132,7 +132,8 @@ export default async function handler(req, res) {
             });
             res.status(200).json(newBlogPost);
         } catch (error) {
-            res.status(500).json({ error: 'Could not create blog post', details: error.message });
+            // res.status(500).json({ error: 'Could not create blog post', details: error.message });
+            res.status(500).json({ error: 'Could not create blog post' });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);
