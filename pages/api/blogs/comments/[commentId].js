@@ -1,16 +1,64 @@
 /* rating comments */
 import prisma from "@/utils/db";
+import { verifyToken } from "@/utils/auth";
+import { verifyTokenLocal } from "@/utils/auth";
+import { attemptRefreshAccess } from "@/utils/auth";
+
 
 export default async function handler(req, res) {
     if (req.method !== 'PATCH') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
+
+    // user access
+    const { x_refreshToken } = req.headers;
+    let payload;
+
+    try {
+        payload = verifyToken(req.headers.authorization);
+    } catch (err) {
+        try {
+            // attempt refresh
+            console.log("Initial token verification failed:", err);
+            let newAccessToken;
+            if (x_refreshToken) {
+                newAccessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            if (!newAccessToken) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            payload = verifyTokenLocal(newAccessToken);
+        } catch (refreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+    }
+
+    if (!payload) {
+        try {
+            if (x_refreshToken) {
+                const newAccessToken = attemptRefreshAccess(x_refreshToken);
+                if (newAccessToken) {
+                    payload = verifyTokenLocal(newAccessToken);
+                }
+            }
+        } catch (finalRefreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+    }
+
+    if (payload.role !== "USER") {
+        return res.status(403).json({ error: "Forbidden" });
+    }
+
+
     
     const { commentId } = req.query;  // `commentId` refers to the ID of the comment
     const { userId, action } = req.body;  // `action` should be either 'upvote' or 'downvote'
 
     try {
-        if (!commentId || !action) {
+        if (!commentId || !action || !userId) {
             return res.status(400).json({ error: 'Missing parameters' });
         }
 
@@ -102,6 +150,7 @@ export default async function handler(req, res) {
 
         res.status(200).json(updatedComment);
     } catch (error) {
-        return res.status(500).json({ error: 'Could not update comment ratings' });
+        // return res.status(500).json({ error: 'Could not update comment ratings', details: error.message});
+        return res.status(500).json({ error: 'Could not update comment ratings'});
     }
 }
