@@ -1,4 +1,7 @@
 import prisma from "@/utils/db";
+import { verifyToken } from "@/utils/auth";
+import { verifyTokenLocal } from "@/utils/auth";
+import { attemptRefreshAccess } from "@/utils/auth";
 // rating blog post
 
 export default async function handler(req, res) {
@@ -6,26 +9,47 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // user auth
-    var payload = null
+    // user access
+    const { x_refreshToken } = req.headers;
+    let payload;
+
     try {
         payload = verifyToken(req.headers.authorization);
     } catch (err) {
-        console.log(err);
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        try {
+            // attempt refresh
+            console.log("Initial token verification failed:", err);
+            let newAccessToken;
+            if (x_refreshToken) {
+                newAccessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            if (!newAccessToken) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            payload = verifyTokenLocal(newAccessToken);
+        } catch (refreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
     }
+
     if (!payload) {
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        try {
+            if (x_refreshToken) {
+                const newAccessToken = attemptRefreshAccess(x_refreshToken);
+                if (newAccessToken) {
+                    payload = verifyTokenLocal(newAccessToken);
+                }
+            }
+        } catch (finalRefreshError) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
     }
-    const user = await prisma.user.findUnique({
-        where: {
-            username: payload.username,
-        },
-    });
+
+    if (payload.role !== "USER") {
+        return res.status(403).json({ error: "Forbidden" });
+    }
 
     try {
         // Expecting the body to contain action and userId 
