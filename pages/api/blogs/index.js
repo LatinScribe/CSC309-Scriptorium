@@ -15,7 +15,7 @@ export default async function handler(req, res) {
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
 
-            const orderBy = [];
+            const orderBy = []; //
             if (sortOption === 'mostValuable') {
                 orderBy.push({ upvoteCount: 'desc' }, { downvoteCount: 'asc' }, { createdAt: 'desc' });
             } else if (sortOption === 'mostControversial') {
@@ -126,22 +126,14 @@ export default async function handler(req, res) {
                     tags,
                     authorId,
                     codeTemplates: {
-                        create: codeTemplates ? codeTemplates.map(template => ({
-                            title: template.title,
-                            content: template.content,
-                            language: template.language,
-                            tags: template.tags, 
-                            deleted: template.deleted,
-                            author: { 
-                                id: template.authorId
-                            },
-                        })) : [],
-                    }
+                        connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
+                    } 
                 },
             });
             res.status(200).json(newBlogPost);
         } catch (error) {
-            res.status(500).json({ error: 'Could not create blog post', details: error.message });
+            // res.status(500).json({ error: 'Could not create blog post', details: error.message });
+            res.status(500).json({ error: 'Could not create blog post' });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);

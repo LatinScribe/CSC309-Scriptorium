@@ -1,4 +1,5 @@
 /* Hides blog post or comment 
+ * from chatGPT
 */
 import prisma from "@/utils/db";
 import { verifyToken } from "@/utils/auth";
@@ -84,27 +85,37 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Could not hide content'});
         }
     } else if (req.method === 'GET') {
+        const { type } = req.query; // get the 'type' query parameter
+
         try {
+            if (type === 'post') {
+                // get blog posts with reportsCount > 0
+                const blogPosts = await prisma.blogPost.findMany({
+                    where: { reportsCount: { gt: 0 } },
+                    orderBy: { reportsCount: 'desc' },
+                    include: {
+                        comments: {
+                            where: { reportsCount: { gt: 0 } }, // only include reported comments
+                            orderBy: { reportsCount: 'desc' },
+                        },
+                    },
+                });
+                return res.status(200).json({ blogPosts });
+            } 
             
-            // fetch sorted blog posts
-            const blogPosts = await prisma.blogPost.findMany({
-                orderBy: {
-                    reportsCount: 'desc', // sort by total reports
-                },
-                include: {
-                    comments: true,
-                },
-            });
+            else if (type === 'comment') {
+                // get comments with reportsCount > 0
+                const comments = await prisma.comment.findMany({
+                    where: { reportsCount: { gt: 0 } },
+                    orderBy: { reportsCount: 'desc' },
+                });
+                return res.status(200).json({ comments });
+            }
 
-            // fetch sorted comments 
-            const comments = await prisma.comment.findMany({
-                orderBy: {
-                    reportsCount: 'desc',
-                },
-            });
-
-            res.status(200).json(blogPosts, comments);
+            // check param
+            res.status(400).json({ error: "Invalid type parameter. Use 'post' or 'comment'." });
         } catch (error) {
+            console.error("Error fetching data:", error);
             res.status(500).json({ error: 'Could not fetch reports' });
         }
     } else {

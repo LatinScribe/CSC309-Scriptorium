@@ -75,6 +75,22 @@ export default async function handler(req, res) {
         const report = await prisma.report.create({
             data: reportData,
         });
+
+        // incrementt reportsCount in BlogPost or Comment 
+        if (blogPostId) {
+            await prisma.blogPost.update({
+                where: { id: blogPostId },
+                data: { reportsCount: { increment: 1 } },
+            });
+        }
+
+        if (commentId) {
+            await prisma.comment.update({
+                where: { id: commentId },
+                data: { reportsCount: { increment: 1 } },
+            });
+        }
+
         res.status(200).json(report);
     } catch (error) {
         res.status(500).json({ error: 'Could not create report' });
