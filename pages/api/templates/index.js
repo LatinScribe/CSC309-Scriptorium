@@ -66,7 +66,11 @@ export default async function handler(req, res) {
             title: true,
             tags: true,
             explanation: true,
-            author: true,
+            author: {
+                select: {
+                    username: true,
+                },
+            },
             deleted: true,
             },
         });
@@ -81,10 +85,6 @@ export default async function handler(req, res) {
         const start = (page - 1) * pageSize;
         const end = start + pageSize;
         const paginatedTemplates = templates.slice(start, end);
-        // filter out author password
-        paginatedTemplates.forEach((template) => {
-            delete template.author.password;
-        });
         return res.status(200).json(paginatedTemplates);
     }
 
