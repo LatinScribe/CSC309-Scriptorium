@@ -61,6 +61,11 @@ export default async function handler(req, res) {
                 take: pageSize,                
                 orderBy: orderBy, 
             }); 
+
+            if (blogPosts.length === 0) {
+                return res.status(404).json({ message: "No blog posts found matching your criteria." });
+            }
+            
             res.status(200).json(blogPosts);
         } catch (error) {
             res.status(500).json({ error: 'Could not fetch blog posts'});
