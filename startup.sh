@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Startup script
+echo installing dependencies...
+npm i
+
+echo setting up database...
 npx prisma generate
 npx prisma migrate dev --name init
 

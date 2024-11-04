@@ -242,7 +242,7 @@ export default async function handler(req, res) {
             });
         }
     } else if (req.method === "PUT") {
-        const { username, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
+        const { username, newUsername, password, firstName, lastName, email, avatar, phoneNumber, role } = req.body;
         try {
             // Mofify the account to have the provided info
             if (!username) {
@@ -282,7 +282,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            if (!verifyUsername(username)) {
+            if (newUsername && !verifyUsername(newUsername)) {
                 return res.status(400).json({
                     error: "USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
                 });
@@ -292,6 +292,34 @@ export default async function handler(req, res) {
                 return res.status(400).json({
                     error: "ROLE MUST BE EITHER USER OR ADMIN",
                 })
+            }
+
+            if (newUsername) {
+                // check if user already exists
+                const userExists = await prisma.user.findUnique({
+                    where: {
+                        username: newUsername,
+                    },
+                })
+                if (userExists) {
+                    return res.status(400).json({
+                        error: "USER ALREADY EXISTS",
+                    });
+                }
+            }
+
+            if (email) {
+                // check for email uniqueness
+                const userExists2 = await prisma.user.findUnique({
+                    where: {
+                        email: email,
+                    },
+                })
+                if (userExists2) {
+                    return res.status(400).json({
+                        error: "USER ALREADY EXISTS",
+                    });
+                }
             }
 
             const user = await prisma.user.findUnique({
@@ -328,7 +356,7 @@ export default async function handler(req, res) {
                     username: username,
                 },
                 data: {
-                    username,
+                    username:newUsername,
                     password: new_password,
                     salt: salt,
                     firstName,
