@@ -126,16 +126,7 @@ export default async function handler(req, res) {
                     tags,
                     authorId,
                     codeTemplates: {
-                        create: codeTemplates ? codeTemplates.map(template => ({
-                            title: template.title,
-                            content: template.content,
-                            language: template.language,
-                            tags: template.tags, 
-                            deleted: template.deleted,
-                            author: { 
-                                id: template.authorId
-                            },
-                        })) : [],
+                        connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
                     }
                 },
             });
