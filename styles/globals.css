@@ -4,15 +4,23 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --primary: #096e6e;
+  --text: #222;
+  --button-text: #fff;
 }
 
-@media (prefers-color-scheme: dark) {
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --primary: #096e6e;
+  --text: #ededed;
+}
+
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   color: var(--foreground);
