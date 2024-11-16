@@ -2,6 +2,7 @@ import { SessionContext } from "@/contexts/session";
 import React, { useContext, useState } from "react";
 import { login } from "@/utils/dataInterface";
 import { useRouter } from "next/router";
+import { Button } from "../ui/button";
 
 export default function LoginPage() {
     const { session, setSession } = useContext(SessionContext);
@@ -40,12 +41,11 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="p-2 border border-gray-300 rounded"
                 />
-                <button
+                <Button
                     onClick={handleLogin}
-                    className="p-2 bg-primary text-buttontext rounded"
                 >
                     Login
-                </button>
+                </Button>
             </div>
         </div>
     );

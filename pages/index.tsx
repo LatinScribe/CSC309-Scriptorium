@@ -11,6 +11,7 @@ import TemplatesPage from "@/components/pages/templates";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -60,10 +61,12 @@ export default function Home() {
   };
 
   return (
-    <>
-      <NavBar />
-      {renderPage()}
-      <Footer />
-    </>
+    <div className={`${geistSans.variable} ${geistMono.variable} font-sans bg-background text-foreground`}>
+        <NavBar />
+        <main className="min-h-screen">
+          {renderPage()}
+        </main>
+        <Footer />
+    </div>
   );
 }
