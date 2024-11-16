@@ -1,12 +1,12 @@
 export interface Session {
     accessToken: string;
     refreshToken: string;
-    user?: User;
+    user: User;
 }
 
 export interface User {
     id: number;
-    name: string;
+    username: string;
     email: string;
     firstName?: string;
     lastName?: string;

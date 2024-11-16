@@ -2,6 +2,25 @@ import { Session, User, Template, BlogPost, Comment, Report } from "./types";
 
 const API_URL = "http://localhost:3000";
 
+export async function getProfile(accessToken: string): Promise<User> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/profile`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return responseData['user'];
+    } catch (error) {
+        console.error("An error occurred while fetching profile:", error);
+        throw error;
+    }
+}
+
 export async function login(username: string, password: string): Promise<Session> {
     try {
         const response = await fetch(`${API_URL}/api/accounts/login`, {
@@ -16,6 +35,7 @@ export async function login(username: string, password: string): Promise<Session
         if (response.status !== 200) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
+        responseData.user = await getProfile(responseData.accessToken);
         return responseData;
     } catch (error) {
         console.error("An error occurred during login:", error);

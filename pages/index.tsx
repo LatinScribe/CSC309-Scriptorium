@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "next-themes";
+import Custom404 from "@/components/pages/404";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -45,6 +46,8 @@ export default function Home() {
 
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
+      case "/":
+        return <WelcomePage />;
       case "/login":
         return <LoginPage />;
       case "/blogs":
@@ -52,11 +55,7 @@ export default function Home() {
       case "/templates":
         return <TemplatesPage />;
       default:
-        if (!session) {
-          // not logged in
-          return <WelcomePage />;
-        }
-        return <WelcomePage />;
+        return <Custom404 />;
     }
   };
 
