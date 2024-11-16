@@ -11,12 +11,12 @@ export async function login(username: string, password: string): Promise<Session
             },
             body: JSON.stringify({ username, password }),
         });
-        console.log(response);
+        const responseData = await response.json();
+        console.log(responseData);
         if (response.status !== 200) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Unspecified error occured");
+            throw new Error(responseData.error || "Unspecified error occured");
         }
-        return response.json();
+        return responseData;
     } catch (error) {
         console.error("An error occurred during login:", error);
         throw error;
