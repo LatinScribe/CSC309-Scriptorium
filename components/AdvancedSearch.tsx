@@ -3,14 +3,10 @@ import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Filters } from "@/utils/types";
 
 export interface AdvancedSearchProps {
-  onFiltersChange: (filters: {
-    title: string;
-    content: string;
-    tags: string;
-    ids: string;
-  }) => void;
+  onFiltersChange: (filters: Filters) => void;
 }
 
 const AdvancedSearchModal = ({ onFiltersChange }: AdvancedSearchProps) => {
@@ -20,7 +16,12 @@ const AdvancedSearchModal = ({ onFiltersChange }: AdvancedSearchProps) => {
   const [ids, setIds] = useState("");
 
   const handleApplyFilters = () => {
-    onFiltersChange({ title, content, tags, ids });
+    onFiltersChange({ 
+      title, 
+      content, 
+      tags: tags.split(',').map(tag => tag.trim()), 
+      ids: ids.split(',').map(id => id.trim()) 
+    });
   };
 
   return (

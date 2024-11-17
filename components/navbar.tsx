@@ -97,6 +97,14 @@ export default function NavBar() {
                                                 <span>Edit Profile</span>
                                             </Link>
                                         </li>
+                                        {session?.user?.role === "ADMIN" && (
+                                            <li>
+                                                <Link href="/moderation" className="flex items-center space-x-2 text-primary">
+                                                    <FaceIcon />
+                                                    <span>(Admins) Moderation</span>
+                                                </Link>
+                                            </li>
+                                        )}
                                         <li>
                                             <AlertDialog>
                                                 <AlertDialogTrigger asChild>

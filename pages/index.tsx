@@ -8,6 +8,7 @@ import WelcomePage from "@/components/pages/welcome";
 import LoginPage from "@/components/pages/login";
 import BlogsPage from "@/components/pages/blogs";
 import TemplatesPage from "@/components/pages/templates";
+import TemplatePage from "@/components/pages/template";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
@@ -47,15 +48,18 @@ export default function Home() {
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
       case "/":
-        return <WelcomePage />;
+      return <WelcomePage />;
       case "/login":
-        return <LoginPage />;
+      return <LoginPage />;
       case "/blogs":
-        return <BlogsPage />;
+      return <BlogsPage />;
       case "/templates":
-        return <TemplatesPage />;
+      return <TemplatesPage />;
       default:
-        return <Custom404 />;
+      if (router.asPath.startsWith("/templates/")) {
+        return <TemplatePage />;
+      }
+      return <Custom404 />;
     }
   };
 
