@@ -40,17 +40,17 @@ import { toast } from "sonner";
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
 } from "@/components/ui/command"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
 } from "@/components/ui/popover"
 import Link from "next/link";
 
@@ -180,11 +180,11 @@ export default function TemplatesPage() {
         <div className="flex justify-center">
             <div className="flex flex-col justify-center container pt-10 px-5 gap-5">
                 <div className="text-2xl">Dive into the Scriptorium</div>
-                <div className="flex justify-between">
-                    <div className="flex gap-3">
+                <div className="flex justify-between flex-wrap">
+                    <div className="flex gap-3 pb-3 flex-wrap">
                         <Input
                             placeholder="Search"
-                            className="w-96 sm:w-24 md:w-48 lg:w-96 xl:w-96"
+                            className="w-36 md:w-48 lg:w-96 xl:w-96"
                             value={filters.title}
                             onChange={(e) => setFilters({ ...filters, title: e.target.value })}
                         />
@@ -198,116 +198,117 @@ export default function TemplatesPage() {
                                 Playground
                             </Button>
                         </Link>
-                    {session && (
-                        <>
-                            <Button onClick={openDialog}>
-                                <PlusIcon />
-                                Create Template
-                            </Button>
-                            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                                <DialogContent className="bg-background">
-                                    <DialogHeader>
-                                        <DialogTitle>Create Template</DialogTitle>
-                                        <DialogDescription>
-                                            Create a new code template by providing the details below.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="flex flex-col gap-3">
-                                        <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-700">
-                                            Title
-                                        </Label>
-                                        <Input
-                                            id="fork-title"
-                                            type="text"
-                                            value={templateTitle}
-                                            onChange={(e) => setTemplateTitle(e.target.value)}
-                                            className="p-2 border border-gray-300 rounded"
-                                        />
-                                        <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-700">
-                                            Explanation
-                                        </Label>
-                                        <Textarea
-                                            id="fork-explanation"
-                                            value={templateExplanation}
-                                            onChange={(e) => setTemplateExplanation(e.target.value)}
-                                            className="p-2 border border-gray-300 rounded"
-                                        />
-                                        <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-700">
-                                            Tags (comma-separated)
-                                        </Label>
-                                        <Input
-                                            id="fork-tags"
-                                            type="text"
-                                            value={templateTags}
-                                            onChange={(e) => setTemplateTags(e.target.value.split(","))}
-                                            className="p-2 border border-gray-300 rounded"
-                                        />
-                                        <Label htmlFor="fork-language" className="block text-sm font-medium text-gray-700">
-                                            Language
-                                        </Label>
-                                        <Popover open={comboOpen} onOpenChange={setComboOpen}>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    aria-expanded={comboOpen}
-                                                    className="w-full justify-between"
-                                                >
-                                                    {templateLanguage
-                                                        ? languages.find((lang) => lang.value === templateLanguage)?.label
-                                                        : "Select language..."}
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-full p-0 bg-background">
-                                                <Command>
-                                                    <CommandInput placeholder="Search language..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>No language found.</CommandEmpty>
-                                                        <CommandGroup>
-                                                            {languages.map((language) => (
-                                                                <CommandItem
-                                                                    key={language.value}
-                                                                    onSelect={() => {
-                                                                        setTemplateLanguage(language.value);
-                                                                        setComboOpen(false);
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            "mr-2 h-4 w-4",
-                                                                            templateLanguage === language.value ? "opacity-100" : "opacity-0"
-                                                                        )}
-                                                                    />
-                                                                    {language.label}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button onClick={handleCreate}>
-                                            <PlusIcon />
-                                            Create
-                                        </Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
-                        </>
-                    )}
+                        {session && (
+                            <>
+                                <Button onClick={openDialog}>
+                                    <PlusIcon />
+                                    Create Template
+                                </Button>
+                                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                                    <DialogContent className="bg-background">
+                                        <DialogHeader>
+                                            <DialogTitle>Create Template</DialogTitle>
+                                            <DialogDescription>
+                                                Create a new code template by providing the details below.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="flex flex-col gap-3">
+                                            <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-700">
+                                                Title
+                                            </Label>
+                                            <Input
+                                                id="fork-title"
+                                                type="text"
+                                                value={templateTitle}
+                                                onChange={(e) => setTemplateTitle(e.target.value)}
+                                                className="p-2 border border-gray-300 rounded"
+                                            />
+                                            <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-700">
+                                                Explanation
+                                            </Label>
+                                            <Textarea
+                                                id="fork-explanation"
+                                                value={templateExplanation}
+                                                onChange={(e) => setTemplateExplanation(e.target.value)}
+                                                className="p-2 border border-gray-300 rounded"
+                                            />
+                                            <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-700">
+                                                Tags (comma-separated)
+                                            </Label>
+                                            <Input
+                                                id="fork-tags"
+                                                type="text"
+                                                value={templateTags}
+                                                onChange={(e) => setTemplateTags(e.target.value.split(","))}
+                                                className="p-2 border border-gray-300 rounded"
+                                            />
+                                            <Label htmlFor="fork-language" className="block text-sm font-medium text-gray-700">
+                                                Language
+                                            </Label>
+                                            <Popover open={comboOpen} onOpenChange={setComboOpen}>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        aria-expanded={comboOpen}
+                                                        className="w-full justify-between"
+                                                    >
+                                                        {templateLanguage
+                                                            ? languages.find((lang) => lang.value === templateLanguage)?.label
+                                                            : "Select language..."}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-full p-0 bg-background">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search language..." />
+                                                        <CommandList>
+                                                            <CommandEmpty>No language found.</CommandEmpty>
+                                                            <CommandGroup>
+                                                                {languages.map((language) => (
+                                                                    <CommandItem
+                                                                        key={language.value}
+                                                                        onSelect={() => {
+                                                                            setTemplateLanguage(language.value);
+                                                                            setComboOpen(false);
+                                                                        }}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                "mr-2 h-4 w-4",
+                                                                                templateLanguage === language.value ? "opacity-100" : "opacity-0"
+                                                                            )}
+                                                                        />
+                                                                        {language.label}
+                                                                    </CommandItem>
+                                                                ))}
+                                                            </CommandGroup>
+                                                        </CommandList>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+                                        <DialogFooter>
+                                            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button onClick={handleCreate}>
+                                                <PlusIcon />
+                                                Create
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </>
+                        )}
                     </div>
-                    
+
                 </div>
                 <div className='flex flex-col gap-5'>
                     {templates.map((template) => (
                         <a key={template.id} className="flex flex-col gap-2 p-4 border rounded-lg" href={`/templates/${template.id}`}>
                             <div className="text-xl">{template.title}</div>
+                            <div className="text-sm">{template.explanation && template.explanation.length > 100 ? `${template.explanation.substring(0, 100)}...` : template.explanation}</div>
                             <div className="flex h-5 items-center space-x-4 text-sm">
                                 <div>
                                     {template.tags.join(", ").length > 10
@@ -318,9 +319,13 @@ export default function TemplatesPage() {
                                 <div>
                                     {template.author?.username}
                                 </div>
-                                <Separator orientation="vertical" />
-                                <div>
+                                <Separator orientation="vertical" className="hidden sm:block" />
+                                <div className="hidden sm:block">
                                     Last updated: {new Date(template.modifiedAt).toLocaleDateString()}
+                                </div>
+                                <Separator orientation="vertical" className="hidden sm:block" />
+                                <div className="hidden sm:block">
+                                    {template.language}
                                 </div>
                             </div>
                         </a>

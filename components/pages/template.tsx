@@ -165,10 +165,10 @@ export default function TemplatePage() {
                     </Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                     <div className='flex flex-col gap-3 p-4'>
                         <div className='flex flex-col gap-1'>
-                            <div className='flex justify-between'>
+                            <div className='flex justify-between flex-wrap'>
                                 {
                                     isEditing ? (
                                         <div className='flex items-center gap-3'>

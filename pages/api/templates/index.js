@@ -73,6 +73,7 @@ export default async function handler(req, res) {
                 },
                 deleted: true,
                 modifiedAt: true,
+                language: true,
             },
         });
         // filter out all deleted templates

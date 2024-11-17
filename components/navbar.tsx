@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "./ui/label";
+import { MenuIcon } from "lucide-react";
 
 export default function NavBar() {
     const { session, logout } = useContext(SessionContext);
@@ -39,23 +40,48 @@ export default function NavBar() {
     return (
         <div>
             <nav className="flex justify-between p-4 align-center items-center">
-                <ul className="flex space-x-4 items-center">
-                    <li>
-                        <Link href="/" className="font-bold hover:text-gray-300">
-                            Scriptorium
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/templates" className="hover:text-gray-300">
-                            Templates
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/blogs" className="hover:text-gray-300">
-                            Blogs
-                        </Link>
-                    </li>
-                </ul>
+                <div className="hidden md:flex space-x-4 items-center">
+                    <Link href="/" className="font-bold hover:text-gray-300">
+                        Scriptorium
+                    </Link>
+                    <Link href="/templates" className="hover:text-gray-300">
+                        Templates
+                    </Link>
+                    <Link href="/blogs" className="hover:text-gray-300">
+                        Blogs
+                    </Link>
+                </div>
+                <div className="flex md:hidden">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button>
+                                <MenuIcon />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="bg-background gap-3 flex flex-col">
+                            <SheetHeader>
+                                <SheetTitle>Scriptorium</SheetTitle>
+                            </SheetHeader>
+                            <ul className="space-y-4">
+                                <li>
+                                    <Link href="/" className="font-bold hover:text-gray-300">
+                                        Home
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/templates" className="hover:text-gray-300">
+                                        Templates
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/blogs" className="hover:text-gray-300">
+                                        Blogs
+                                    </Link>
+                                </li>
+                            </ul>
+                        </SheetContent>
+                    </Sheet>
+                </div>
                 <ul className="flex space-x-4 items-center">
                     <li>
                         <div className="flex items-center space-x-2">
@@ -76,7 +102,7 @@ export default function NavBar() {
                                 <SheetTrigger asChild>
                                     <Button>
                                         <PersonIcon />
-                                        {session?.user?.username}
+                                        <div className='hidden sm:block'>{session?.user?.username}</div>
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent className="bg-background gap-3 flex flex-col">

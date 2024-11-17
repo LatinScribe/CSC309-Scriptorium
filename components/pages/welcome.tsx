@@ -51,13 +51,13 @@ export default function WelcomePage() {
     return (
         <div className="flex flex-col items-center justify-center pt-20 gap-10">
             <div className="flex flex-col items-center gap-3">
-                <div className="text-4xl">Code. Collaborate. Create.</div>
-                <div className="text-2xl">Welcome to Scriptorium.</div>
+                <div className="text-2xl md:text-4xl">Code. Collaborate. Create.</div>
+                <div className="text-1xl md:text-2xl">Welcome to Scriptorium.</div>
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
                 <Input
                     placeholder="Search"
-                    className="w-96 sm:w-24 md:w-48 lg:w-96 xl:w-96"
+                    className="w-72 sm:w-48 md:w-48 lg:w-96 xl:w-96"
                     value={filters.title}
                     onChange={(e) => setFilters({ ...filters, title: e.target.value })}
                 />
