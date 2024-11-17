@@ -9,6 +9,7 @@ import LoginPage from "@/components/pages/login";
 import BlogsPage from "@/components/pages/blogs";
 import TemplatesPage from "@/components/pages/templates";
 import TemplatePage from "@/components/pages/template";
+import PlaygroundPage from "@/components/pages/playground";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
@@ -55,7 +56,12 @@ export default function Home() {
       return <BlogsPage />;
       case "/templates":
       return <TemplatesPage />;
+      case "/playground":
+      return <PlaygroundPage />;
       default:
+      if (router.asPath.startsWith("/templates?")) {
+        return <TemplatesPage />;
+      }
       if (router.asPath.startsWith("/templates/")) {
         return <TemplatePage />;
       }

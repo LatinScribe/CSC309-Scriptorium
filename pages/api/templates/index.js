@@ -72,6 +72,7 @@ export default async function handler(req, res) {
                     },
                 },
                 deleted: true,
+                modifiedAt: true,
             },
         });
         // filter out all deleted templates
@@ -82,8 +83,8 @@ export default async function handler(req, res) {
                 return template.tags && tags.split(',').every(tag => template.tags.split(',').includes(tag));
             });
         }
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
+        const start = (parseInt(page) - 1) * parseInt(pageSize);
+        const end = start + parseInt(pageSize);
         const paginatedTemplates = templates.slice(start, end);
         return res.status(200).json({
             templates: paginatedTemplates,

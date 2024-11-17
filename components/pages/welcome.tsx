@@ -13,38 +13,38 @@ import { Button } from "@/components/ui/button";
 import AdvancedSearchModal, { AdvancedSearchProps } from "../AdvancedSearch";
 import { fetchTemplates } from "@/utils/dataInterface";
 import { Filters } from "@/utils/types";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export default function WelcomePage() {
     const { session } = useContext(SessionContext);
     const [searchTemplate, setSearchTemplate] = useState(true);
     const [searchBlog, setSearchBlog] = useState(true);
-    const [filters, setFilters] = useState<Filters>({
-        title: "",
-        content: "",
-        tags: [],
-        ids: [],
-    });
+    const [filters, setFilters] = useState<Filters>({});
 
     const handleFiltersChange = (newFilters: Filters) => {
-        setFilters({
-            title: newFilters.title || "",
-            content: newFilters.content || "",
-            tags: newFilters.tags || [],
-            ids: newFilters.ids || [],
-        });
-        console.log("Filters:", newFilters);
+        setFilters(newFilters);
+        console.log(filters)
     };
 
     const handleSearch = () => {
         console.log(filters);
-        fetchTemplates(filters, 1, 10)
-            .then((templates) => {
-                console.log("Templates:", templates);
-            })
-            .catch((error) => {
-                console.error("Search failed:", error);
-                alert(error);
-            });
+        if (!searchTemplate && !searchBlog) {
+            toast.error("Please select at least one type of content to search.");
+            return;
+        }
+        if (searchTemplate) {
+            const queryParams = new URLSearchParams({ ...filters, page: 1 } as any).toString();
+            window.location.href = `/templates/?${queryParams}`;
+        }
     };
 
 

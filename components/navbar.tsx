@@ -11,8 +11,8 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-  } from "@/components/ui/sheet"
-  import {
+} from "@/components/ui/sheet"
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -22,7 +22,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-  } from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "./ui/label";
 
 export default function NavBar() {
     const { session, logout } = useContext(SessionContext);
@@ -36,7 +38,7 @@ export default function NavBar() {
 
     return (
         <div>
-            <nav className="flex justify-between bg-background p-4 align-center items-center">
+            <nav className="flex justify-between p-4 align-center items-center">
                 <ul className="flex space-x-4 items-center">
                     <li>
                         <Link href="/" className="font-bold hover:text-gray-300">
@@ -56,11 +58,17 @@ export default function NavBar() {
                 </ul>
                 <ul className="flex space-x-4 items-center">
                     <li>
-                        <Button
-                            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                        >
-                            {theme === "light" ? "Dark Mode" : "Light Mode"}
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                            <Label htmlFor="theme-switch">
+                                Dark Mode
+                            </Label>
+                            <Switch
+                                id="theme-switch"
+                                checked={theme === "dark"}
+                                onCheckedChange={() => setTheme(theme === "light" ? "dark" : "light")}
+                                className="bg-primary"
+                            />
+                        </div>
                     </li>
                     {session ? (
                         <li>

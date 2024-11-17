@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SessionContext } from "@/contexts/session";
 import { useContext } from "react";
-import { fetchTemplate, updateTemplate, createTemplate } from "@/utils/dataInterface";
+import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate } from "@/utils/dataInterface";
 import { AlertCircle, CodeIcon, PlayIcon, SaveIcon } from "lucide-react";
 import {
     Alert,
@@ -12,7 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Template } from "@/utils/types";
 import Link from "next/link";
-import SyntaxHighlighter from 'react-syntax-highlighter';
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/themes/prism.css';
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -26,6 +30,19 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "../ui/separator";
+import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+  } from "@/components/ui/alert-dialog"
 
 export default function TemplatePage() {
     const router = useRouter();
@@ -53,7 +70,7 @@ export default function TemplatePage() {
             }
         };
         fetchData();
-    }, [id]);
+    }, [router.query]);
 
     const handleSave = () => {
         if (!session) {
@@ -71,6 +88,7 @@ export default function TemplatePage() {
                 setForkTitle(template.title);
                 setForkExplanation(template.explanation || "");
                 setForkTags(template.tags);
+                toast.success("Template updated successfully");
             } catch (error) {
                 console.error("Failed to update template:", error);
                 setError("Failed to update template: " + (error as Error).message);
@@ -86,10 +104,15 @@ export default function TemplatePage() {
         if (!template) {
             return;
         }
+        if (!forkTitle) {
+            toast.error("Title is required");
+            return;
+        }
         const forkTemplate = async () => {
             try {
                 const newTemplate = await createTemplate(forkTitle, session, forkTags, template.language, forkExplanation, template.id);
                 router.push(`/templates/${newTemplate.id}`);
+                toast.success("Template forked successfully");
             } catch (error) {
                 console.error("Failed to fork template:", error);
                 setError("Failed to fork template: " + (error as Error).message);
@@ -97,6 +120,33 @@ export default function TemplatePage() {
         };
         forkTemplate();
         setShowForkDialog(false);
+    }
+
+    const handleDelete = () => {
+        if (!session) {
+            return;
+        }
+        if (!template) {
+            return;
+        }
+        const deleteT = async () => {
+            try {
+                await deleteTemplate(template.id, session);
+                router.push("/templates");
+                toast.success("Template deleted successfully");
+            } catch (error) {
+                console.error("Failed to delete template:", error);
+                setError("Failed to delete template: " + (error as Error).message);
+            }
+        };
+        deleteT();
+    }
+
+    const openDialog = () => {
+        setForkTitle("Fork of " + template?.title || "");
+        setForkExplanation(template?.explanation || "");
+        setForkTags(template?.tags || []);
+        setShowForkDialog(true);
     }
 
     return (
@@ -115,8 +165,8 @@ export default function TemplatePage() {
                     </Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 gap-4">
-                    <div className='flex flex-col gap-5 p-4'>
+                <div className="grid grid-cols-2 gap-3">
+                    <div className='flex flex-col gap-3 p-4'>
                         <div className='flex flex-col gap-1'>
                             <div className='flex justify-between'>
                                 {
@@ -138,9 +188,34 @@ export default function TemplatePage() {
                                     )
                                 }
                                 <div className='flex gap-3'>
-                                    {session && (
+                                    {isEditing && (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button className='bg-destructive text-primary'>
+                                                    Delete Template
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className='bg-background'>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure you want to delete this template?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>
+                                                        Cancel
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleDelete} className='bg-destructive text-primary'>
+                                                        Delete
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    )}
+                                    {session && !isEditing && (
                                         <>
-                                            <Button onClick={() => setShowForkDialog(true)}>
+                                            <Button onClick={openDialog}>
                                                 <CodeIcon />
                                                 Fork
                                             </Button>
@@ -242,10 +317,29 @@ export default function TemplatePage() {
                                         />
                                     </>
                                 ) : (
-                                    <div className="text-sm text-gray-500">Tags: {Array.isArray(template?.tags) ? template.tags.join(",") : ""}</div>
+                                    <div className='flex items-center gap-3'>
+                                        <div className="text-sm text-gray-500">Tags: {Array.isArray(template?.tags) ? (template.tags.join(", ").length > 20 ? template.tags.join(", ").substring(0, 20) + "..." : template.tags.join(", ")) : ""}</div>
+                                        <Separator orientation="vertical" />
+                                        <div className="text-sm text-gray-500">Author: {template?.author?.username}</div>
+                                        {template?.forkedSourceId && (
+                                            <Separator orientation="vertical" />)}
+                                        {template?.forkedSourceId && (
+
+                                            <div className='flex gap-2 items-center'>
+                                                <div className="text-sm text-gray-500 italic">
+                                                    This template is a fork.
+                                                </div>
+                                                {/* <Button> */}
+                                                    <Link href={`/templates/${template.forkedSourceId}`} className='text-sm text-primary italic'>
+                                                        View source
+                                                    </Link>
+                                                {/* </Button> */}
+                                            </div>
+                                        )}
+                                    </div>
                                 )
                             }
-                            {template?.forkedSourceId && (
+                            {/* {template?.forkedSourceId && (
                                 <div className='flex gap-3 items-center'>
                                     <div className="text-sm text-gray-500 italic">
                                         This template is a fork.
@@ -256,19 +350,27 @@ export default function TemplatePage() {
                                         </Link>
                                     </Button>
                                 </div>
-                            )}
+                            )} */}
                         </div>
-                        <hr className="border-t border-gray-300" />
+                        <Separator />
                         <div className="flex justify-center">
                             <Button className='p-5 text-1xl'>
                                 <PlayIcon />
                                 Run
                             </Button>
                         </div>
-                        <div className="rounded-lg border p-4 bg-gray-100">
-                            <SyntaxHighlighter language={template?.language}>
-                                {template?.content || ""}
-                            </SyntaxHighlighter>
+                        <div className="rounded-lg border">
+                            <Editor
+                                value={template?.content || ""}
+                                onValueChange={(code) => setTemplate({ ...template, content: code } as Template)}
+                                highlight={(code) => highlight(code, languages.js)}
+                                padding={10}
+                                style={{
+                                    fontFamily: '"Fira code", "Fira Mono", monospace',
+                                    fontSize: 14,
+                                }}
+                                className="w-full"
+                                />
                         </div>
                     </div>
                     <div>

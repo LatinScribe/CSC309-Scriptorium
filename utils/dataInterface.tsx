@@ -1,4 +1,4 @@
-import { Session, Pagination, Filters, User, Template, BlogPost, Comment, Report } from "./types";
+import { Session, PaginationInfo, Filters, User, Template, BlogPost, Comment, Report } from "./types";
 
 const API_URL = "http://localhost:3000";
 
@@ -43,7 +43,7 @@ export async function login(username: string, password: string): Promise<Session
     }
 }
 
-export async function fetchTemplates(filters: Filters, page: number, pageSize: number): Promise<{ templates: Template[], pagination: Pagination }> {
+export async function fetchTemplates(filters: Filters, page: number, pageSize: number): Promise<{ templates: Template[], pagination: PaginationInfo }> {
     try {
         const queryParams = new URLSearchParams();
         queryParams.append("page", page.toString());
@@ -65,6 +65,10 @@ export async function fetchTemplates(filters: Filters, page: number, pageSize: n
         if (response.status !== 200) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
+        responseData.templates = responseData.templates.map((template: any) => {
+            template.tags = template.tags.split(",");
+            return template;
+        });
         return {
             templates: responseData.templates,
             pagination: responseData.pagination,
@@ -134,6 +138,27 @@ export async function createTemplate(title: string, session: Session, tags?: str
         return responseData;
     } catch (error) {
         console.error("An error occurred while creating template:", error);
+        throw error;
+    }
+}
+
+export async function deleteTemplate(id: number, session: Session): Promise<void> {
+    console.log(id);
+    try {
+        const response = await fetch(`${API_URL}/api/templates/`, {
+            method: "DELETE",
+            headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id }),
+        });
+        const responseData = await response.json();
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+    } catch (error) {
+        console.error("An error occurred while deleting template:", error);
         throw error;
     }
 }

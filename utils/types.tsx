@@ -12,7 +12,7 @@ export interface Filters {
     author?: string;
 }
 
-export interface Pagination {
+export interface PaginationInfo {
     page: number;
     pageSize: number;
     totalPages: number;
@@ -42,7 +42,7 @@ export interface Template {
     authorId?: number;
     content: string;
     language: string;
-    modifiedAt: Date;
+    modifiedAt: string;
 }
 
 export interface BlogPost {
