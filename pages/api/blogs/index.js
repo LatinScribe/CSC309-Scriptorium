@@ -8,6 +8,7 @@ import { attemptRefreshAccess } from "@/utils/auth";
 export default async function handler(req, res) {
     if (req.method === 'GET') { // retrieve blog posts
         try {
+            // get userId if user is logged in 
             const { authorization, x_refreshToken } = req.headers;
             let payload = null;
             let username = null;
@@ -140,17 +141,31 @@ export default async function handler(req, res) {
             }); 
 
             // iterates over blogPosts array and copies all properties of the post object 
-            // plus adds a boolean field that represents whether the post is hidden and userId 
+            // plus adds isReported flag that represents whether the post is hidden and userId 
             // userId matches the authorId of the post 
-            // (this field is specific to the requestor and indicates the posts that should show as flagged)
-            const response = blogPosts.map((post) => ({     // iterate over blogPosts
-                ...post,        // copy all properties of the post in the array
+            // (this field is specific to the requestor and indicates the posts that should show as flagged
+            // to the autho)
+            let mappedBlogPosts = blogPosts.map((post) => ({    
+                ...post,       
                 isReported: post.hidden && post.authorId === userId,
             }));
 
-            if (response.length === 0) {
+            // calculating the total number of pages for pagination:
+            // count the total number of blog posts 
+            const totalPosts = await prisma.blogPost.count({
+                where: whereCondition, 
+            });
+            const totalPages = Math.ceil(totalPosts / pageSize);
+
+            if (mappedBlogPosts.length === 0) {
                 return res.status(404).json({ message: "No blog posts found matching your criteria." });
             }
+
+            const response = {
+                blogPosts: mappedBlogPosts,
+                totalPages,
+                totalPosts,
+            };
             
             res.status(200).json(response);
         } catch (error) {
