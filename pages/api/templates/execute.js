@@ -10,7 +10,7 @@ const fileExtension = {
     "javascript": "js",
     "java": "java",
     "c": "c",
-    "c++": "cpp",
+    "cpp": "cpp",
 };
 
 function getCommand(language, filePath) {
@@ -23,7 +23,7 @@ function getCommand(language, filePath) {
             return `javac ${filePath} && java ${filePath.replace(/\.java$/, "")}`;
         case "c":
             return `gcc ${filePath} -o ${filePath.replace(/\.c$/, "")} && ${filePath.replace(/\.c$/, "")}`;
-        case "c++":
+        case "cpp":
             return `g++ ${filePath} -o ${filePath.replace(/\.cpp$/, "")} && ${filePath.replace(/\.cpp$/, "")}`;
         default:
             return null;

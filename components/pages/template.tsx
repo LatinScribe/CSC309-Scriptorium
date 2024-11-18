@@ -13,10 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Template } from "@/utils/types";
 import Link from "next/link";
 import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
+import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism.css';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+// import 'prismjs/themes/prism.css';
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -43,6 +46,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function TemplatePage() {
     const router = useRouter();
@@ -166,7 +170,7 @@ export default function TemplatePage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
-                    <div className='flex flex-col gap-3 p-4'>
+                    <div className='flex flex-col gap-3 p-4 h-screen'>
                         <div className='flex flex-col gap-1'>
                             <div className='flex justify-between flex-wrap'>
                                 {
@@ -359,22 +363,19 @@ export default function TemplatePage() {
                                 Run
                             </Button>
                         </div>
-                        <div className="rounded-lg border">
+                        <ScrollArea className="rounded-lg border max-h-[50%] md:max-h-none md:flex-grow">
                             <Editor
                                 value={template?.content || ""}
                                 onValueChange={(code) => setTemplate({ ...template, content: code } as Template)}
-                                highlight={(code) => highlight(code, languages.js)}
+                                highlight={(code) => Prism.highlight(code, Prism.languages[template?.language || 'javascript'], template?.language || 'javascript')}
                                 padding={10}
                                 style={{
                                     fontFamily: '"Fira code", "Fira Mono", monospace',
                                     fontSize: 14,
                                 }}
                                 className="w-full"
-                                />
-                        </div>
-                    </div>
-                    <div>
-
+                            />
+                        </ScrollArea>
                     </div>
                 </div>
             )}

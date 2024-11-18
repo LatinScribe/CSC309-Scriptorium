@@ -71,11 +71,13 @@ export default function Home() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} font-sans bg-background text-foreground`}>
-        <NavBar />
-        <main className="min-h-screen">
-          {renderPage()}
+        <main className="min-h-screen flex flex-col">
+          <NavBar />
+          <div className="flex-grow">
+            {renderPage()}
+          </div>
+          <Footer />
         </main>
-        <Footer />
     </div>
   );
 }

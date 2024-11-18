@@ -1,7 +1,7 @@
 import prisma from "@/utils/db";
 import { verifyToken } from "@/utils/auth";
 
-const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "c++", "c"];
+const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "cpp", "c"];
 
 export default async function handler(req, res) {
     // GET: return template metadata list based on filters (title, tags, content, author)

@@ -72,7 +72,7 @@ const languages = [
         "label": "C"
     },
     {
-        "value": "c++",
+        "value": "cpp",
         "label": "C++"
     }
 ]

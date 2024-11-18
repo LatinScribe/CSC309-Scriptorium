@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Template } from "@/utils/types";
 import Link from "next/link";
 import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
+import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism.css';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
@@ -33,6 +35,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
 
 const codeLanguages = [
     {
@@ -52,7 +55,7 @@ const codeLanguages = [
         "label": "C"
     },
     {
-        "value": "c++",
+        "value": "cpp",
         "label": "C++"
     }
 ]
@@ -80,8 +83,8 @@ export default function PlaygroundPage() {
                     </Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 gap-3">
-                    <div className='flex flex-col gap-3 p-4'>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+                    <div className='flex flex-col gap-3 p-4 h-screen'>
                         <div className="flex gap-3 items-center justify-between">
                             <div className="text-2xl">Playground</div>
                             <>
@@ -138,19 +141,19 @@ export default function PlaygroundPage() {
                                 Run
                             </Button>
                         </div>
-                        <div className="rounded-lg border bg-gray-100">
+                        <ScrollArea className="rounded-lg border max-h-[50%] md:max-h-none md:flex-grow">
                             <Editor
                                 value={code}
                                 onValueChange={setCode}
-                                highlight={(code) => highlight(code, languages.js)}
+                                highlight={(code) => Prism.highlight(code, Prism.languages[templateLanguage], templateLanguage)}
                                 padding={10}
                                 style={{
                                     fontFamily: '"Fira code", "Fira Mono", monospace',
                                     fontSize: 14,
                                 }}
-                                className="h-96 w-full"
+                                className="w-full"
                             />
-                        </div>
+                        </ScrollArea>
                     </div>
                     <div>
 
