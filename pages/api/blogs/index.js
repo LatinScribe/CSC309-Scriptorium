@@ -8,6 +8,49 @@ import { attemptRefreshAccess } from "@/utils/auth";
 export default async function handler(req, res) {
     if (req.method === 'GET') { // retrieve blog posts
         try {
+            const { authorization } = req.headers;
+            var payload = null;
+            let username = null;
+
+            if (authorization) {
+                console.log("authorization");
+                try {
+                    payload = verifyToken(authorization);
+                    username = payload?.username; // Extract username
+                } catch (err) {
+                    console.log(err);
+                    return res.status(401).json({
+                        error: "Unauthorized",
+                    }); 
+                }
+            }
+            // try {
+            //     payload = verifyToken(req.headers.authorization);
+            // } catch (err) {
+            //     console.log(err);
+            //     return res.status(401).json({
+            //         error: "Unauthorized",
+            //     });
+            // }
+            // if (!payload) {
+            //     return res.status(401).json({
+            //         error: "Unauthorized",
+            //     });
+            // }
+            let userId = null;
+            if (username) {
+                // query the database to get the user id
+                const user = await prisma.user.findUnique({
+                    where: { username },
+                    // select: { id: true },
+                });
+                if (user) {
+                    userId = user.id;
+                }
+            }
+
+            
+            // const userId = payload?.id || null; // if authenticated, extract userid
             const pageNum = parseInt(req.query.page) || 1; // default to 1 
             const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
             const searchQuery = req.query.query || '';
@@ -36,21 +79,43 @@ export default async function handler(req, res) {
                 };
             } else { // searches all blog posts
                 whereCondition = {
-                    OR: [ // OR allows matching of any of these fields (search could match title, description, tags)
-                        // searches are case sensitive :o
+                    OR: [ // matching of any of these fields (search could match title, description, tags)
                        { title: { contains: searchQuery} },
                        { description: { contains: searchQuery}},
                        { tags: {contains: searchQuery}}, 
                        {
                            codeTemplates: {
                                some: {
-                               title: { contains: searchQuery },
+                                title: { contains: searchQuery },
                                },
                            },
                        },
                    ],
                 };
             }
+            
+            // manage visibility of hidden content
+            if (userId) {
+                whereCondition = {
+                    AND: [
+                        whereCondition, // (combine with previous where conditition)
+                        { OR: [
+                                { hidden: false },
+                                { authorId: userId }, // let authors see their hidden content
+                            ], },
+                        { deleted: false }, // deleted posts not shown for everyone
+                    ],
+                };
+            } else {
+                whereCondition = {
+                    AND: [
+                        whereCondition,
+                        { hidden: false }, // only non-hidden content is returned for unauthenticated users
+                        { deleted: false }, 
+                    ],
+                };
+            }
+
 
             const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
                 where: whereCondition,
@@ -62,11 +127,20 @@ export default async function handler(req, res) {
                 orderBy: orderBy, 
             }); 
 
-            if (blogPosts.length === 0) {
+            // iterates over blogPosts array and copies all properties of the post object 
+            // plus adds a boolean field that represents whether the post is hidden and userId 
+            // userId matches the authorId of the post 
+            // (this field is specific to the requestor and indicates the posts that should show as flagged)
+            const response = blogPosts.map((post) => ({     // iterate over blogPosts
+                ...post,        // copy all properties of the post in the array
+                isReported: post.hidden && post.authorId === userId,
+            }));
+
+            if (response.length === 0) {
                 return res.status(404).json({ message: "No blog posts found matching your criteria." });
             }
             
-            res.status(200).json(blogPosts);
+            res.status(200).json(response);
         } catch (error) {
             res.status(500).json({ error: 'Could not fetch blog posts'});
         }
