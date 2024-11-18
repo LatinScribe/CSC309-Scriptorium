@@ -8,20 +8,32 @@ import { attemptRefreshAccess } from "@/utils/auth";
 export default async function handler(req, res) {
     if (req.method === 'GET') { // retrieve blog posts
         try {
-            const { authorization } = req.headers;
-            var payload = null;
+            const { authorization, x_refreshToken } = req.headers;
+            let payload = null;
             let username = null;
 
             if (authorization) {
-                console.log("authorization");
                 try {
                     payload = verifyToken(authorization);
                     username = payload?.username; // Extract username
                 } catch (err) {
-                    console.log(err);
-                    return res.status(401).json({
-                        error: "Unauthorized",
-                    }); 
+                    console.log("Initial token verification failed:", err);
+
+                    // attempt to refresh the token
+                    if (x_refreshToken) {
+                        console.log("Attempting to refresh access token...");
+                        try {
+                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                            if (newAccessToken) {   // verify new access token 
+                                payload = verifyTokenLocal(newAccessToken);
+                                username = payload?.username;  // Extract username from the refreshed token
+                            } else {
+                                console.log("Refresh token failed");
+                            }
+                        } catch (refreshError) {
+                            console.log("Refresh token verification failed:", refreshError);
+                        }
+                    } 
                 }
             }
             // try {
@@ -144,7 +156,7 @@ export default async function handler(req, res) {
         } catch (error) {
             res.status(500).json({ error: 'Could not fetch blog posts'});
         }
-    } else if (req.method === 'POST') {
+    } else if (req.method === 'POST') {     // create new blog post 
 
         // user access
         const { x_refreshToken } = req.headers;
