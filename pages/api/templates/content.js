@@ -12,6 +12,22 @@ export default async function handler(req, res) {
         const template = await prisma.codeTemplate.findUnique({
             where: {
                 id: parseInt(id),
+            },
+            select: {
+                id: true,
+                title: true,
+                explanation: true,
+                tags: true,
+                content: true,
+                forkedSourceId: true,
+                author: {
+                    select: {
+                        username: true,
+                    }
+                },
+                modifiedAt: true,
+                language: true,
+                deleted: true,
             }
         });
         if (!template || template.deleted) {
