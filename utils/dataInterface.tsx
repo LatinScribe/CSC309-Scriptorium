@@ -162,3 +162,23 @@ export async function deleteTemplate(id: number, session: Session): Promise<void
         throw error;
     }
 }
+
+export async function executeCode(language: string, code: string, input: string[]): Promise<{ output: string, error: string }> {
+    try {
+        const response = await fetch(`${API_URL}/api/templates/execute`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ language, code, input }),
+        });
+        const responseData = await response.json();
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return responseData;
+    } catch (error) {
+        console.error("An error occurred while executing code:", error);
+        throw error;
+    }
+}

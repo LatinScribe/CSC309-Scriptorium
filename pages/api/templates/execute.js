@@ -13,22 +13,68 @@ const fileExtension = {
     "cpp": "cpp",
 };
 
-function getCommand(language, filePath) {
+const dockerImages = {
+    python: "custom-python:3.11",
+    javascript: "custom-node:16",
+    java: "custom-java:11",
+    c: "custom-c:11",
+    cpp: "custom-cpp:11",
+};
+
+function getDockerCommand(language, directory, fileName) {
+    const image = dockerImages[language];
+    let command;
+
     switch (language) {
         case "python":
-            return `python3 ${filePath}`;
+            command = `python3 /code/${fileName}`;
+            break;
         case "javascript":
-            return `node ${filePath}`;
+            command = `node /code/${fileName}`;
+            break;
         case "java":
-            return `javac ${filePath} && java ${filePath.replace(/\.java$/, "")}`;
+            const filePath = path.join(directory, fileName);
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const classNameMatch = fileContent.match(/public\s+class\s+(\w+)/);
+            if (classNameMatch) {
+                const className = classNameMatch[1];
+                const newFileName = `${className}.java`;
+                const newFilePath = path.join(directory, newFileName);
+                fs.renameSync(filePath, newFilePath);
+                command = `javac /code/${newFileName} && java -cp /code ${className}`;
+            } else {
+                command = `javac /code/${fileName} && java -cp /code ${fileName.replace(/\.java$/, "")}`;
+            }
+            break;
         case "c":
-            return `gcc ${filePath} -o ${filePath.replace(/\.c$/, "")} && ${filePath.replace(/\.c$/, "")}`;
+            command = `gcc /code/${fileName} -o /code/${fileName.replace(/\.c$/, "")} && /code/${fileName.replace(/\.c$/, "")} && rm /code/${fileName.replace(/\.c$/, "")}`;
+            break;
         case "cpp":
-            return `g++ ${filePath} -o ${filePath.replace(/\.cpp$/, "")} && ${filePath.replace(/\.cpp$/, "")}`;
+            command = `g++ /code/${fileName} -o /code/${fileName.replace(/\.cpp$/, "")} && /code/${fileName.replace(/\.cpp$/, "")} && rm /code/${fileName.replace(/\.cpp$/, "")}`;
+            break;
         default:
-            return null;
+            throw new Error("Unsupported language");
     }
+
+    return `docker run --rm -i -v ${directory}:/code ${image} sh -c "${command}"`;
 }
+
+// function getCommand(language, filePath) {
+//     switch (language) {
+//         case "python":
+//             return `python3 ${filePath}`;
+//         case "javascript":
+//             return `node ${filePath}`;
+//         case "java":
+//             return `javac ${filePath} && java ${filePath.replace(/\.java$/, "")}`;
+//         case "c":
+//             return `gcc ${filePath} -o ${filePath.replace(/\.c$/, "")} && ${filePath.replace(/\.c$/, "")}`;
+//         case "cpp":
+//             return `g++ ${filePath} -o ${filePath.replace(/\.cpp$/, "")} && ${filePath.replace(/\.cpp$/, "")}`;
+//         default:
+//             return null;
+//     }
+// }
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
@@ -61,17 +107,19 @@ export default async function handler(req, res) {
 
     // execute the code
     // i'm on a mac, so
-    const directory = './';
-    const fileName = path.join(directory, `${uuidv4()}.${fileExtension[language]}`);
-    console.log(fileName);
+    const directory = path.resolve("./");
+    const fileName = `${uuidv4()}.${fileExtension[language]}`;
+    const filePath = path.join(directory, fileName);
     try {
-        fs.writeFileSync(fileName, code);
+        fs.writeFileSync(filePath, code);
         console.log('file created')
 
-        const command = getCommand(language, fileName);
+        const command = getDockerCommand(language, directory, fileName);
         const child = spawn(command, { shell: true });
 
-        child.stdin.write(input.join("\n"));
+        if (input.length > 0) {
+            child.stdin.write(input.join("\n") + "\n");
+        }
         child.stdin.end();
 
         let stdout = "";
@@ -87,19 +135,15 @@ export default async function handler(req, res) {
 
         child.on("close", (code) => {
             try {
-                fs.unlinkSync(fileName);
+                console.log("Deleting file " + filePath);
+                fs.unlinkSync(filePath);
+                console.log("File deleted");
             } catch (error) {
                 console.error("Error deleting the file:", error);
             }
-
-            if (code !== 0) {
-                return res.status(400).json({
-                    message: "Error executing the code",
-                    error: stderr,
-                });
-            }
             return res.status(200).json({
                 output: stdout,
+                error: stderr
             });
         });
 

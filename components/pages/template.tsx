@@ -2,8 +2,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SessionContext } from "@/contexts/session";
 import { useContext } from "react";
-import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate } from "@/utils/dataInterface";
-import { AlertCircle, CodeIcon, PlayIcon, SaveIcon } from "lucide-react";
+import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode } from "@/utils/dataInterface";
+import { AlertCircle, CodeIcon, PlayIcon, SaveIcon, Scroll } from "lucide-react";
 import {
     Alert,
     AlertDescription,
@@ -20,7 +20,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import 'prismjs/components/prism-cpp';
 // import 'prismjs/themes/prism.css';
-import { Pencil1Icon } from "@radix-ui/react-icons";
+import { MinusIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
@@ -59,6 +59,10 @@ export default function TemplatePage() {
     const [forkTitle, setForkTitle] = useState("");
     const [forkExplanation, setForkExplanation] = useState("");
     const [forkTags, setForkTags] = useState<string[]>([]);
+    const [stdout, setStdout] = useState("");
+    const [stderr, setStderr] = useState("");
+    const [inputs, setInputs] = useState<string[]>([]);
+    const [isRunning, setIsRunning] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -153,6 +157,24 @@ export default function TemplatePage() {
         setShowForkDialog(true);
     }
 
+    const handleRun = async () => {
+        if (!template) {
+            return;
+        }
+        toast.info("Running code...");
+        setIsRunning(true);
+        try {
+            const { output, error } = await executeCode(template.language, template.content, inputs);
+            setStdout(output);
+            setStderr(error);
+            toast.success("Code executed successfully");
+        } catch (error) {
+            console.error("Failed to execute code:", error);
+            toast.error("Failed to execute code: " + (error as Error).message);
+        }
+        setIsRunning(false);
+    }
+
     return (
         <>
             {error ? (
@@ -170,7 +192,7 @@ export default function TemplatePage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
-                    <div className='flex flex-col gap-3 p-4 h-screen'>
+                    <div className='flex flex-col gap-3 p-4 max-h-screen'>
                         <div className='flex flex-col gap-1'>
                             <div className='flex justify-between flex-wrap'>
                                 {
@@ -358,10 +380,16 @@ export default function TemplatePage() {
                         </div>
                         <Separator />
                         <div className="flex justify-center">
-                            <Button className='p-5 text-1xl'>
-                                <PlayIcon />
-                                Run
-                            </Button>
+                            {isRunning ? (
+                                <Button disabled>
+                                    Running...
+                                </Button>
+                            ) : (
+                                <Button onClick={handleRun}>
+                                    <PlayIcon />
+                                    Run
+                                </Button>
+                            )}
                         </div>
                         <ScrollArea className="rounded-lg border max-h-[50%] md:max-h-none md:flex-grow">
                             <Editor
@@ -375,6 +403,53 @@ export default function TemplatePage() {
                                 }}
                                 className="w-full"
                             />
+                        </ScrollArea>
+                    </div>
+                    <div className="flex flex-col gap-3 p-4">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex justify-between items-center">
+                                <div className="text-lg font-medium">Inputs (Stdin)</div>
+                                <Button onClick={() => setInputs([...inputs, ""])}>Add Input</Button>
+                            </div>
+                              {inputs.map((input, index) => (
+                                <div key={index} className="flex items-center gap-3">
+                                    <Input
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => {
+                                            const newInputs = [...inputs];
+                                            newInputs[index] = e.target.value;
+                                            setInputs(newInputs);
+                                        }}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        variant="destructive"
+                                        onClick={() => {
+                                            const newInputs = inputs.filter((_, i) => i !== index);
+                                            setInputs(newInputs);
+                                        }}
+                                    >
+                                        <TrashIcon />
+                                    </Button>
+                                </div>
+                              ))}  
+                              {inputs.length === 0 && (
+                                <div className="text-sm text-gray-500">No inputs added.</div>
+                              )}
+                            
+                        </div>
+                        <div className="text-lg font-medium">Output (Stdout)</div>
+                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                            {stdout.split('\n').map((line, index) => (
+                                <div key={index}>{line}</div>
+                            ))}
+                        </ScrollArea>
+                        <div className="text-lg font-medium">Error (Stderr)</div>
+                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                            {stderr.split('\n').map((line, index) => (
+                                <div key={index}>{line}</div>
+                            ))}
                         </ScrollArea>
                     </div>
                 </div>
