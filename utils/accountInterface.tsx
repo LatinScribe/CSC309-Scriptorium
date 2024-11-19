@@ -159,7 +159,53 @@ export async function editProfileADMIN(username: string, accessToken: string, re
         }
         return responseData['updated_user'];
     } catch (error) {
-        console.error("An error occurred during profile editing for ${username} in ADMIN:", error);
+        console.error(`An error occurred during profile editing for ${username} in ADMIN:`, error);
+        throw error;
+    }
+}
+
+export async function deleteAccount(accessToken: string, refreshToken: string): Promise<Boolean> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/profile`, {
+            method: "DELETE",
+            headers: {
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return true;
+    } catch (error) {
+        console.error("An error occurred during account deletion:", error);
+        throw error;
+    }
+}
+
+export async function deleteAccountADMIN(username: string, accessToken: string, refreshToken: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_URL}/api/admin/admin_users`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({username}),
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return true;
+    } catch (error) {
+        console.error(`An error occurred during account deletion for ${username} in ADMIN:`, error);
         throw error;
     }
 }
