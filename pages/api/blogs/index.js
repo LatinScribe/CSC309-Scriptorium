@@ -172,7 +172,7 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Could not fetch blog posts'});
         }
     } else if (req.method === 'POST') {     // create new blog post 
-
+        console.log("creating blog post...");
         // user access
         const { x_refreshToken } = req.headers;
         let payload;
@@ -215,26 +215,43 @@ export default async function handler(req, res) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
+        let username = null;
+        username = payload?.username; // Extract username
+        let userId = null;
+        // query the database to get the user id
+        const user = await prisma.user.findUnique({
+            where: { username },
+            // select: { id: true },
+        });
+        if (user) {
+            userId = user.id;
+        }
 
-        const { title, description, tags, authorId, codeTemplates } = req.body;
+        console.log("authentication successful");
 
-
+        const { title, description, tags, codeTemplates } = req.body;
         try {
             const newBlogPost = await prisma.blogPost.create({
+                
                 data: {
                     title,
                     description,
                     tags,
-                    authorId,
+                    author: {
+                        connect: {
+                            id: userId,  
+                        },
+                    },
                     codeTemplates: {
                         connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
-                    } 
+                    }, 
                 },
             });
+            console.log("blog post created");
             res.status(200).json(newBlogPost);
         } catch (error) {
             // res.status(500).json({ error: 'Could not create blog post', details: error.message });
-            res.status(500).json({ error: 'Could not create blog post' });
+            res.status(500).json({ error: 'Could not create blog post', details: error.message });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);
