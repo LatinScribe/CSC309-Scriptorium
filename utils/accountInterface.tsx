@@ -15,7 +15,7 @@ export async function login(username: string, password: string): Promise<Session
         if (response.status !== 200) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
-        responseData.user = await getProfile(responseData.accessToken);
+        responseData.user = await getProfile(responseData.accessToken, responseData.refreshToken);
         return responseData;
     } catch (error) {
         console.error("An error occurred during login:", error);
@@ -23,7 +23,7 @@ export async function login(username: string, password: string): Promise<Session
     }
 }
 
-export async function register(username: string, firstName: string, lastName:string, password: string, email:string, avatar: string, phoneNumber: string): Promise<string> {
+export async function register(username: string, password: string, email: string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string): Promise<string> {
     try {
         const role = "USER"
         const response = await fetch(`${API_URL}/api/accounts/register`, {
@@ -31,7 +31,7 @@ export async function register(username: string, firstName: string, lastName:str
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ username, password, firstName, lastName, role, email, avatar, phoneNumber}),
+            body: JSON.stringify({ username, password, firstName, lastName, role, email, avatar, phoneNumber }),
         });
         // currently using backend for input checking!
         const responseData = await response.json();
@@ -46,7 +46,7 @@ export async function register(username: string, firstName: string, lastName:str
     }
 }
 
-export async function registerADMIN(username: string, firstName: string, lastName:string, password: string, email:string, avatar: string, phoneNumber: string, role: string, accessToken: string, refreshToken: string): Promise<string> {
+export async function registerADMIN(username: string, password: string, email: string, role: string, accessToken: string, refreshToken: string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string): Promise<string> {
     try {
         const response = await fetch(`${API_URL}/api/admin/admin_register`, {
             method: "POST",
@@ -55,7 +55,7 @@ export async function registerADMIN(username: string, firstName: string, lastNam
                 "x_refreshToken": refreshToken,
                 Authorization: `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({ username, password, firstName, lastName, role, email, avatar, phoneNumber}),
+            body: JSON.stringify({ username, password, firstName, lastName, role, email, avatar, phoneNumber }),
         });
         // currently using backend for input checking!
         const responseData = await response.json();
@@ -93,10 +93,13 @@ export async function getProfile(accessToken: string, refreshToken: string): Pro
 export async function getProfileADMIN(accessToken: string, refreshToken: string, username: string): Promise<User> {
     try {
         const response = await fetch(`${API_URL}/api/accounts/profile`, {
+            method: "GET",
             headers: {
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${accessToken}`,
                 "x_refreshToken": refreshToken,
             },
+            body: JSON.stringify({ username }),
         });
         const responseData = await response.json();
         console.log(responseData);
@@ -105,7 +108,58 @@ export async function getProfileADMIN(accessToken: string, refreshToken: string,
         }
         return responseData['user'];
     } catch (error) {
-        console.error("An error occurred while fetching profile:", error);
+        console.error(`An error occurred while fetching the profile for ${username} in ADMIN:`, error);
+        throw error;
+    }
+}
+
+// do we have search for users???
+
+
+export async function editProfile(accessToken: string, refreshToken: string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string, username?: string, password?: string): Promise<User> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/profile`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({username, password, firstName, lastName, avatar, phoneNumber }),
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return responseData['updated_user'];
+    } catch (error) {
+        console.error("An error occurred during profile editing:", error);
+        throw error;
+    }
+}
+
+export async function editProfileADMIN(username: string, accessToken: string, refreshToken: string, email?:string, role?:string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string, password?: string): Promise<User> {
+    try {
+        const response = await fetch(`${API_URL}/api/admin/admin_users`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "x_refreshToken": refreshToken,
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({username, password, firstName, lastName, avatar, phoneNumber, email, role}),
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        return responseData['updated_user'];
+    } catch (error) {
+        console.error("An error occurred during profile editing for ${username} in ADMIN:", error);
         throw error;
     }
 }
