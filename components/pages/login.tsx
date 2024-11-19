@@ -1,6 +1,6 @@
 import { SessionContext } from "@/contexts/session";
 import React, { useContext, useState } from "react";
-import { login } from "@/utils/dataInterface";
+import { login } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
 
