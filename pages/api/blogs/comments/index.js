@@ -11,7 +11,51 @@ export default async function handler(req, res) {
     
     if (req.method === 'GET') {
         try {
-            const { sortOption, pageNum = 1, pageSize = 10 } = req.query;
+            // get userId if user is logged in 
+            const { authorization, x_refreshToken } = req.headers;
+            let payload = null;
+            let username = null;
+
+            if (authorization) {
+                try {
+                    payload = verifyToken(authorization);
+                    username = payload?.username; // Extract username
+                } catch (err) {
+                    console.log("Initial token verification failed:", err);
+
+                    // attempt to refresh the token
+                    if (x_refreshToken) {
+                        console.log("Attempting to refresh access token...");
+                        try {
+                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                            if (newAccessToken) {   // verify new access token 
+                                payload = verifyTokenLocal(newAccessToken);
+                                username = payload?.username;  // Extract username from the refreshed token
+                            } else {
+                                console.log("Refresh token failed");
+                            }
+                        } catch (refreshError) {
+                            console.log("Refresh token verification failed:", refreshError);
+                        }
+                    } 
+                }
+            }
+            let userId = null;
+            if (username) {
+                // query the database to get the user id
+                const user = await prisma.user.findUnique({
+                    where: { username },
+                    // select: { id: true },
+                });
+                if (user) {
+                    userId = user.id;
+                }
+            }
+
+            
+            const { sortOption } = req.query;
+            const pageNum = parseInt(req.query.page) || 1; 
+            const pageSize = parseInt(req.query.pageSize) || 10; 
 
             let orderBy = []; 
             if (sortOption === 'mostValuable') {
@@ -31,19 +75,64 @@ export default async function handler(req, res) {
                 ];
             }
 
+
+            let whereCondition = {
+                blogPostId: parseInt(blogPostId), // get the comments associated with the blog post
+                deleted: false 
+            };
+
+            // manage visibility of hidden content
+            if (userId) {
+                whereCondition = {
+                    AND: [
+                        whereCondition, // (combine with previous where conditition)
+                        { OR: [
+                                { hidden: false },
+                                { authorId: userId }, // let authors see their hidden content
+                            ], },
+                    ],
+                };
+            } else {
+                whereCondition = {
+                    AND: [
+                        whereCondition,
+                        { hidden: false }, // only non-hidden content is returned for unauthenticated users
+                    ],
+                };
+            }
+
             // fetch comments (with pagination)
             const comments = await prisma.comment.findMany({
-                where: {
-                    blogPostId: parseInt(blogPostId), // get the comments associated with the blog post
-                    hidden: false, // dont get hidden or deleted comments
-                    deleted: false 
-                },
+                where: whereCondition, 
                 orderBy: orderBy, // apply sorting order
-                skip: (pageNum - 1) * parseInt(pageSize),
-                take: parseInt(pageSize),
+                skip: (pageNum - 1) * pageSize,
+                take: pageSize,
             });
 
-            res.status(200).json(comments); 
+            // iterates over comments array and copies all properties of the post object 
+            // plus adds isReported flag that represents whether the comment is hidden and userId 
+            // userId matches the authorId of the post 
+            // (this field is specific to the requestor and indicates the comments that should show as flagged
+            // to the author)
+            const mappedComments = comments.map((post) => ({    
+                ...post,        
+                isReported: post.hidden && post.authorId === userId,
+            }));
+
+            // calculating the total number of pages for pagination:
+            // count the total number of comments 
+            const totalPosts = await prisma.comment.count({
+                where: whereCondition,
+            });
+            const totalPages = Math.ceil(totalPosts / pageSize);
+            
+            const response = {
+                comments: mappedComments,
+                totalPages,
+                totalPosts,
+            };
+
+            res.status(200).json(response); 
         } catch (error) {
           // res.status(500).json({ error: "Could not fetch comment", details: error.message });
           res.status(500).json({ error: "Could not fetch comment" });
