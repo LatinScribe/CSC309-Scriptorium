@@ -172,6 +172,11 @@ export default function NavBar() {
                         </li>
                     ) : (
                         <li>
+                            <Link href="/register">
+                                <Button>
+                                    Signup
+                                </Button>
+                            </Link>
                             <Link href="/login">
                                 <Button>
                                     Login
