@@ -171,14 +171,14 @@ export default function NavBar() {
                             </Sheet>
                         </li>
                     ) : (
-                        <li>
+                        <li className="flex flex-col sm:flex-row sm:space-x-2">
                             <Link href="/register">
-                                <Button>
+                                <Button className="w-full sm:w-auto">
                                     Signup
                                 </Button>
                             </Link>
                             <Link href="/login">
-                                <Button>
+                                <Button className="w-full sm:w-auto">
                                     Login
                                 </Button>
                             </Link>
