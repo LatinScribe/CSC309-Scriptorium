@@ -25,6 +25,8 @@ export default function ProfilePage() {
     const [avatar, setAvatar] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [message, setSuccessMessage] = useState<string | null>(null);
+    const [updatedAt, setUpdatedAt] = useState<Date | String | null>(null);
+    const [createdAt, setCreatedAt] = useState<Date | String | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
@@ -37,7 +39,17 @@ export default function ProfilePage() {
                     setLastName(profile.lastName || "");
                     setPhoneNumber(profile.phoneNumber || "");
                     setAvatar(profile.avatar || "");
-                    setEmail(profile.email)
+                    setEmail(profile.email);
+                    setUpdatedAt(profile.updatedAt || "Unkown");
+                    setCreatedAt(profile.createdAt || "Unkown");
+
+                    if (updatedAt instanceof Date) {
+                        setUpdatedAt(updatedAt.toUTCString())
+                    }
+
+                    if (createdAt instanceof Date) {
+                        setCreatedAt(createdAt.toUTCString())
+                    }
                 })
                 .catch((error) => console.error("Failed to fetch profile:", error));
         }
@@ -63,11 +75,23 @@ export default function ProfilePage() {
                         setSession(null);
                         router.push("/login");
                     }
+
+                    setUpdatedAt(updated_profile.updatedAt || "Unkown");
+                    setCreatedAt(updated_profile.createdAt || "Unkown");
+
+                    if (updatedAt instanceof Date) {
+                        setUpdatedAt(updatedAt.toUTCString())
+                    }
+
+                    if (createdAt instanceof Date) {
+                        setCreatedAt(createdAt.toUTCString())
+                    }
                 })
                 .catch((error) => {
                     console.error("Registration failed:", error);
                     setError(error.message || "Registration failed");
                 });
+                
         } else {
             setError("Session tokens are missing");
         }
@@ -175,6 +199,19 @@ export default function ProfilePage() {
                 {message && (
                     <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4">
                         {message}
+                    </div>
+                )}
+
+            {createdAt && (
+                    <div className="col-span-1 md:col-span-2 text text-center mt-4">
+                        { 
+                        "Account created at: " + String(createdAt)}
+                    </div>
+                )}
+
+            {updatedAt && (
+                    <div className="col-span-1 md:col-span-2 text text-center mt-4">
+                        {"Account updated at: " + String(updatedAt)}
                     </div>
                 )}
             </div>
