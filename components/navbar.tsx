@@ -126,9 +126,9 @@ export default function NavBar() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/edit-profile" className="flex items-center space-x-2">
+                                            <Link href="/profile" className="flex items-center space-x-2">
                                                 <PersonIcon />
-                                                <span>Edit Profile</span>
+                                                <span>Manage Profile</span>
                                             </Link>
                                         </li>
                                         {session?.user?.role === "ADMIN" && (

@@ -16,6 +16,7 @@ import { useState } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "next-themes";
 import Custom404 from "@/components/pages/404";
+import ProfilePage from "@/components/pages/profile";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -55,6 +56,8 @@ export default function Home() {
       return <LoginPage />;
       case "/register":
       return <RegisterPage />;
+      case "/profile":
+      return <ProfilePage />;
       case "/blogs":
       return <BlogsPage />;
       case "/templates":
