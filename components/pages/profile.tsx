@@ -1,9 +1,12 @@
 import { SessionContext } from "@/contexts/session";
 import React, { useContext, useState, useEffect } from "react";
-import { login, getProfile, editProfile } from "@/utils/accountInterface";
+import { login, getProfile, editProfile, deleteAccount } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
 import { User } from "@/utils/types";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
+import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+import { Sheet } from "lucide-react";
 
 export default function ProfilePage() {
     const { session, setSession } = useContext(SessionContext);
@@ -53,7 +56,7 @@ export default function ProfilePage() {
             if (session.user.username !== username) {
                 username_in = username;
             }
-            
+
             var password_in = undefined
             if (password !== "") {
                 password_in = password
@@ -75,7 +78,36 @@ export default function ProfilePage() {
                     console.error("Registration failed:", error);
                     setError(error.message || "Registration failed");
                 });
-                
+
+        } else {
+            setError("Session tokens are missing");
+        }
+    }
+
+    function handelDeleteAccount() {
+        if (session?.accessToken && session?.refreshToken) {
+            var username_in = undefined
+            if (session.user.username !== username) {
+                username_in = username;
+            }
+
+            var password_in = undefined
+            if (password !== "") {
+                password_in = password
+            }
+
+            deleteAccount(session.accessToken, session.refreshToken)
+                .then((updated_profile) => {
+                    setError(null);
+                    setSuccessMessage("Account Deleted successfully!");
+                    setSession(null)
+                    router.push("/")
+                })
+                .catch((error) => {
+                    console.error("Registration failed:", error);
+                    setError(error.message || "Registration failed");
+                });
+
         } else {
             setError("Session tokens are missing");
         }
@@ -85,7 +117,7 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
             <h1 className="text-3xl font-semibold p-4">Profile</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg p-4">
-                <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }}/>
+                <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
                 <input
                     type="text"
                     placeholder="New Username"
@@ -153,9 +185,9 @@ export default function ProfilePage() {
                         disabled
                     />
                     <div id="tooltip-default" role="tooltip" className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                    Tooltip content
-                    <div className="tooltip-arrow" data-popper-arrow></div>
-                     </div>
+                        Tooltip content
+                        <div className="tooltip-arrow" data-popper-arrow></div>
+                    </div>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     </div>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 tooltip">
@@ -170,10 +202,38 @@ export default function ProfilePage() {
                     />
                     <label>Show Password</label>
                 </div>
-                <div className="col-span-1 md:col-span-2 flex justify-center">
-                    <Button onClick={handelProfileChange}>
+                <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
+
+                    <Button onClick={handelProfileChange} className="col-span-1">
                         Edit profile
                     </Button>
+
+                    <AlertDialog >
+                        <AlertDialogTrigger asChild>
+                            <Button>
+                                Delete Account
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-background">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Confirm Delete
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {session?.user?.username}, are you sure you want to Delete your account?
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                    Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction onClick={handelDeleteAccount} className="bg-destructive">
+                                    Delete Account
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                    
                 </div>
                 {error && (
                     <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4">
@@ -186,14 +246,14 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-            {createdAt && (
+                {createdAt && (
                     <div className="col-span-1 md:col-span-2 text text-center mt-4">
-                        { 
-                        "Account created at: " + String(createdAt)}
+                        {
+                            "Account created at: " + String(createdAt)}
                     </div>
                 )}
 
-            {updatedAt && (
+                {updatedAt && (
                     <div className="col-span-1 md:col-span-2 text text-center mt-4">
                         {"Account updated at: " + String(updatedAt)}
                     </div>
