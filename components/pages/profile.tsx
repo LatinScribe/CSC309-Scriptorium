@@ -3,13 +3,13 @@ import React, { useContext, useState, useEffect } from "react";
 import { login, getProfile, editProfile, deleteAccount } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
-import { User } from "@/utils/types";
+import { Session, User } from "@/utils/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
 import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
 import { Sheet } from "lucide-react";
 
 export default function ProfilePage() {
-    const { session, setSession } = useContext(SessionContext);
+    const { session, setSession, logout } = useContext(SessionContext);
 
     const router = useRouter();
 
@@ -67,7 +67,7 @@ export default function ProfilePage() {
                     setError(null);
                     setSuccessMessage("Profile updated successfully!");
                     if (session.user.username !== username) {
-                        setSession(null);
+                        logout();
                         router.push("/login");
                     }
 
@@ -97,11 +97,11 @@ export default function ProfilePage() {
             }
 
             deleteAccount(session.accessToken, session.refreshToken)
-                .then((updated_profile) => {
+                .then(() => {
                     setError(null);
                     setSuccessMessage("Account Deleted successfully!");
-                    setSession(null)
-                    router.push("/")
+                    logout();
+                    router.push("/");
                 })
                 .catch((error) => {
                     console.error("Registration failed:", error);
