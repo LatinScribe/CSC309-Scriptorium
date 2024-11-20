@@ -3,7 +3,7 @@
 // EXAMPLE OF A LOGGED IN PROTECTED PATH
 
 import prisma from "@/utils/db";
-import { verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
+import { verifyToken, attemptRefreshAccess, verifyTokenLocal, hashPassword } from "@/utils/auth";
 import { verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername } from "@/utils/verification";
 
 export default async function handler(req, res) {
@@ -227,7 +227,7 @@ export default async function handler(req, res) {
                     deleted: true,
                 },
             });
-            res.status(201).json({ updated_user });
+            return res.status(201).json({ updated_user });
         } catch (error) {
             console.log(error);
             return res.status(500).json({
@@ -281,5 +281,5 @@ export default async function handler(req, res) {
         }
     }
     // placeholder return
-    res.status(405).json({ message: "Method not allowed" });
+    res.status(405).json({ error: "Method not allowed" });
 }

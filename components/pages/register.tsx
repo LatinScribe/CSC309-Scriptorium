@@ -15,6 +15,7 @@ export default function RegisterPage() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [avatar, setAvatar] = useState("");
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const router = useRouter();
 
@@ -24,7 +25,7 @@ export default function RegisterPage() {
             return;
         }
 
-        register(username, password, email, firstName, lastName, phoneNumber, avatar)
+        register(username, password, email, avatar, phoneNumber, firstName, lastName)
             .then((session) => {
                 router.push("/login");
             })
@@ -46,22 +47,40 @@ export default function RegisterPage() {
                     className="p-2 border border-gray-300 rounded"
                     required
                 />
-                <input
-                    type="password"
-                    placeholder="Password *"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm Password *"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    required
-                />
+                <div className="relative">
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password *"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="p-2 border border-gray-300 rounded w-full"
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 p-2"
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
+                <div className="relative">
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Confirm Password *"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="p-2 border border-gray-300 rounded w-full"
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 p-2"
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
                 <input
                     type="email"
                     placeholder="Email *"
