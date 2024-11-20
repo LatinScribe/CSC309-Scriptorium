@@ -67,6 +67,7 @@ export default async function handler(req, res) {
             const pageNum = parseInt(req.query.page) || 1; // default to 1 
             const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
             const searchQuery = req.query.query || '';
+            const author = req.query.author;
 
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
@@ -129,11 +130,28 @@ export default async function handler(req, res) {
                 };
             }
 
+            if (author) {
+                whereCondition.AND = whereCondition.AND || [whereCondition]; 
+                whereCondition.AND.push({
+                    author: {
+                        is: {
+                            username: {
+                                equals: author,
+                            },
+                        },
+                    },
+                });
+            }
 
             const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
                 where: whereCondition,
                 include: { // relations
-                    codeTemplates: true         // fetch each blog post and all the related code templates stored in codeTemplatse field
+                    codeTemplates: true,         // fetch each blog post and all the related code templates stored in codeTemplatse field
+                    author: {
+                        select: {
+                            username: true,
+                        },
+                    },
                 },
                 skip: (pageNum - 1) * pageSize,           // pagination offset
                 take: pageSize,                
@@ -242,6 +260,7 @@ export default async function handler(req, res) {
                             id: userId,  
                         },
                     },
+                    
                     codeTemplates: {
                         connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
                     }, 
