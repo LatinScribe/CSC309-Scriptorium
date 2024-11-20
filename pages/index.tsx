@@ -10,6 +10,7 @@ import BlogsPage from "@/components/pages/blogs";
 import TemplatesPage from "@/components/pages/templates";
 import TemplatePage from "@/components/pages/template";
 import PlaygroundPage from "@/components/pages/playground";
+import RegisterPage from "@/components/pages/register";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
@@ -52,6 +53,8 @@ export default function Home() {
       return <WelcomePage />;
       case "/login":
       return <LoginPage />;
+      case "/register":
+      return <RegisterPage />;
       case "/blogs":
       return <BlogsPage />;
       case "/templates":

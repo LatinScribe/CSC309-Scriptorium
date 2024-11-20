@@ -36,7 +36,7 @@ export async function register(username: string, password: string, email: string
         // currently using backend for input checking!
         const responseData = await response.json();
         console.log(responseData);
-        if (response.status !== 200) {
+        if (response.status !== 201) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData.username;
