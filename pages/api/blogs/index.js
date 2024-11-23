@@ -8,57 +8,43 @@ import { attemptRefreshAccess } from "@/utils/auth";
 export default async function handler(req, res) {
     if (req.method === 'GET') { // retrieve blog posts
         try {
+            console.log("sending response");
             // get userId if user is logged in 
             const { authorization, x_refreshToken } = req.headers;
             let payload = null;
             let username = null;
+            let userId = null;
 
             if (authorization) {
-                try {
-                    payload = verifyToken(authorization);
-                    username = payload?.username; // Extract username
-                } catch (err) {
+                payload = verifyToken(authorization);
+                username = payload?.username; // Extract username
+                if (!payload) {
                     console.log("Initial token verification failed:", err);
 
                     // attempt to refresh the token
                     if (x_refreshToken) {
                         console.log("Attempting to refresh access token...");
-                        try {
-                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-                            if (newAccessToken) {   // verify new access token 
-                                payload = verifyTokenLocal(newAccessToken);
-                                username = payload?.username;  // Extract username from the refreshed token
-                            } else {
-                                console.log("Refresh token failed");
-                            }
-                        } catch (refreshError) {
-                            console.log("Refresh token verification failed:", refreshError);
+                        
+                        const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                        if (newAccessToken) {   // verify new access token 
+                            payload = verifyTokenLocal(newAccessToken);
+                            username = payload?.username;  // Extract username from the refreshed token
+                        } else {
+                            console.log("Refresh token failed");
                         }
                     } 
                 }
-            }
-            // try {
-            //     payload = verifyToken(req.headers.authorization);
-            // } catch (err) {
-            //     console.log(err);
-            //     return res.status(401).json({
-            //         error: "Unauthorized",
-            //     });
-            // }
-            // if (!payload) {
-            //     return res.status(401).json({
-            //         error: "Unauthorized",
-            //     });
-            // }
-            let userId = null;
-            if (username) {
-                // query the database to get the user id
-                const user = await prisma.user.findUnique({
-                    where: { username },
-                    // select: { id: true },
-                });
-                if (user) {
-                    userId = user.id;
+
+                
+                if (username) {
+                    // query the database to get the user id
+                    const user = await prisma.user.findUnique({
+                        where: { username },
+                        // select: { id: true },
+                    });
+                    if (user) {
+                        userId = user.id;
+                    }
                 }
             }
 
@@ -165,6 +151,7 @@ export default async function handler(req, res) {
             // to the autho)
             let mappedBlogPosts = blogPosts.map((post) => ({    
                 ...post,       
+                tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
                 isReported: post.hidden && post.authorId === userId,
             }));
 
@@ -176,18 +163,20 @@ export default async function handler(req, res) {
             const totalPages = Math.ceil(totalPosts / pageSize);
 
             if (mappedBlogPosts.length === 0) {
+                console.log("no results");
                 return res.status(404).json({ message: "No blog posts found matching your criteria." });
             }
 
             const response = {
                 blogPosts: mappedBlogPosts,
                 totalPages,
-                totalPosts,
+                // totalPosts,
             };
             
+            console.log("sending response");
             res.status(200).json(response);
         } catch (error) {
-            res.status(500).json({ error: 'Could not fetch blog posts'});
+            res.status(500).json({ error: 'Could not fetch blog posts', details: error.message});
         }
     } else if (req.method === 'POST') {     // create new blog post 
         console.log("creating blog post...");

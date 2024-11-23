@@ -183,31 +183,47 @@ export default async function handler(req, res) {
 
         // api start 
 
-        const { authorId, content, parentCommentId } = req.body; // extract from req body
+        const { content, parentCommentId } = req.body; // extract from req body
 
         try {
-          if (parentCommentId) {
-            // fetch parent comment and check check that it exists and is associated with this blog post
-            const parentComment = await prisma.comment.findUnique({
-                where: { id: parseInt(parentCommentId) },
+            // find the author of comment
+            let username = null;
+            username = payload?.username; // Extract username
+            let userId = null;
+            // query the database to get the user id
+            const user = await prisma.user.findUnique({
+                where: { username },
+                // select: { id: true },
+            });
+            if (user) {
+                userId = user.id;
+            } else {
+                res.status(404).json({ error: "Could not find user" });
+            }
+
+
+            if (parentCommentId) {
+                // fetch parent comment and check check that it exists and is associated with this blog post
+                const parentComment = await prisma.comment.findUnique({
+                    where: { id: parseInt(parentCommentId) },
+                });
+                if (!parentComment || parentComment.deleted || parentComment.hidden ||
+                    parentComment.blogPostId !== parseInt(blogPostId)) {
+                    return res.status(400).json({ error: "Parent comment does not belong to the specified blog post." });
+                }
+            }
+
+            // Create a new comment (or a reply if parentCommentId is provided)
+            const newComment = await prisma.comment.create({
+            data: {
+                blogPostId: parseInt(blogPostId),
+                authorId: userId, 
+                content,
+                parentCommentId: parentCommentId ? parseInt(parentCommentId) : null, // If provided, marks this as a reply
+            },
             });
 
-            if (!parentComment || parentComment.deleted || parentComment.hidden ||
-              parentComment.blogPostId !== parseInt(blogPostId)) {
-                return res.status(400).json({ error: "Parent comment does not belong to the specified blog post." });
-            }
-          }
-          // Create a new comment (or a reply if parentCommentId is provided)
-          const newComment = await prisma.comment.create({
-            data: {
-              blogPostId: parseInt(blogPostId),
-              authorId: parseInt(authorId), 
-              content,
-              parentCommentId: parentCommentId ? parseInt(parentCommentId) : null, // If provided, marks this as a reply
-            },
-          });
-    
-          res.status(200).json(newComment);
+            res.status(200).json(newComment);
         } catch (error) {
             res.status(500).json({ error: "Could not create comment" });
         }
