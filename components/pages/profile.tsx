@@ -4,8 +4,17 @@ import { login, getProfile, editProfile, deleteAccount } from "@/utils/accountIn
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
 import { Session, User } from "@/utils/types";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
-import { AlertDialogFooter, AlertDialogHeader } from "../ui/alert-dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Sheet } from "lucide-react";
 
 export default function ProfilePage() {
