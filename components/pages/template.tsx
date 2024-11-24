@@ -198,7 +198,7 @@ export default function TemplatePage() {
                                 {
                                     isEditing ? (
                                         <div className='flex items-center gap-3'>
-                                            <Label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                                            <Label htmlFor="title" className="block text-sm font-medium text-gray-500">
                                                 Title
                                             </Label>
                                             <Input
@@ -254,7 +254,7 @@ export default function TemplatePage() {
                                                         </DialogDescription>
                                                     </DialogHeader>
                                                     <div className="flex flex-col gap-3">
-                                                        <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-700">
+                                                        <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-500">
                                                             Title
                                                         </Label>
                                                         <Input
@@ -264,7 +264,7 @@ export default function TemplatePage() {
                                                             onChange={(e) => setForkTitle(e.target.value)}
                                                             className="p-2 border border-gray-300 rounded"
                                                         />
-                                                        <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-700">
+                                                        <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-500">
                                                             Explanation
                                                         </Label>
                                                         <Textarea
@@ -273,7 +273,7 @@ export default function TemplatePage() {
                                                             onChange={(e) => setForkExplanation(e.target.value)}
                                                             className="p-2 border border-gray-300 rounded"
                                                         />
-                                                        <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-700">
+                                                        <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-500">
                                                             Tags (comma-separated)
                                                         </Label>
                                                         <Input
@@ -314,7 +314,7 @@ export default function TemplatePage() {
                             {
                                 isEditing ? (
                                     <>
-                                        <Label htmlFor="explanation" className="block text-sm font-medium text-gray-700">
+                                        <Label htmlFor="explanation" className="block text-sm font-medium text-gray-500">
                                             Explanation
                                         </Label>
                                         <Textarea
@@ -331,7 +331,7 @@ export default function TemplatePage() {
                             {
                                 isEditing ? (
                                     <>
-                                        <Label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                                        <Label htmlFor="tags" className="block text-sm font-medium text-gray-500">
                                             Tags (comma-separated)
                                         </Label>
                                         <Input
@@ -344,7 +344,14 @@ export default function TemplatePage() {
                                     </>
                                 ) : (
                                     <div className='flex items-center gap-3'>
-                                        <div className="text-sm text-gray-500">Tags: {Array.isArray(template?.tags) ? (template.tags.join(", ").length > 20 ? template.tags.join(", ").substring(0, 20) + "..." : template.tags.join(", ")) : ""}</div>
+                                        {template && template.tags.length > 0 && (
+                                            <div className="text-sm text-gray-500">
+                                                Tags: {template.tags.join(", ").length > 20 ? template.tags.join(", ").substring(0, 20) + "..." : template.tags.join(", ")}
+                                            </div>
+                                        )}
+                                        {template && template.tags.length === 0 && (
+                                            <div className="italic text-sm text-muted">No tags provided</div>
+                                        )}
                                         <Separator orientation="vertical" />
                                         <div className="text-sm text-gray-500">Author: {template?.author?.username}</div>
                                         {template?.forkedSourceId && (

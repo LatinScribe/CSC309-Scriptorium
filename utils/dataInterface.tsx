@@ -66,7 +66,11 @@ export async function fetchTemplates(filters: Filters, page: number, pageSize: n
             throw new Error(responseData.error || "Unspecified error occured");
         }
         responseData.templates = responseData.templates.map((template: any) => {
-            template.tags = template.tags.split(",");
+            if (template.tags === '') {
+                template.tags = [];
+            } else {
+                template.tags = template.tags.split(",");
+            }
             return template;
         });
         return {
@@ -86,7 +90,11 @@ export async function fetchTemplate(id: number): Promise<Template> {
         if (response.status !== 200) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
-        responseData.tags = responseData.tags.split(",");
+        if (responseData.tags === '') {
+            responseData.tags = [];
+        } else {
+            responseData.tags = responseData.tags.split(",");
+        }
         return await responseData;
     } catch (error) {
         console.error("An error occurred while fetching template:", error);

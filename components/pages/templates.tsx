@@ -213,7 +213,7 @@ export default function TemplatesPage() {
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className="flex flex-col gap-3">
-                                            <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-700">
+                                            <Label htmlFor="fork-title" className="block text-sm font-medium text-gray-500">
                                                 Title
                                             </Label>
                                             <Input
@@ -223,7 +223,7 @@ export default function TemplatesPage() {
                                                 onChange={(e) => setTemplateTitle(e.target.value)}
                                                 className="p-2 border border-gray-300 rounded"
                                             />
-                                            <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-700">
+                                            <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-500">
                                                 Explanation
                                             </Label>
                                             <Textarea
@@ -232,7 +232,7 @@ export default function TemplatesPage() {
                                                 onChange={(e) => setTemplateExplanation(e.target.value)}
                                                 className="p-2 border border-gray-300 rounded"
                                             />
-                                            <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-700">
+                                            <Label htmlFor="fork-tags" className="block text-sm font-medium text-gray-500">
                                                 Tags (comma-separated)
                                             </Label>
                                             <Input
@@ -242,7 +242,7 @@ export default function TemplatesPage() {
                                                 onChange={(e) => setTemplateTags(e.target.value.split(","))}
                                                 className="p-2 border border-gray-300 rounded"
                                             />
-                                            <Label htmlFor="fork-language" className="block text-sm font-medium text-gray-700">
+                                            <Label htmlFor="fork-language" className="block text-sm font-medium text-gray-500">
                                                 Language
                                             </Label>
                                             <Popover open={comboOpen} onOpenChange={setComboOpen}>
@@ -311,9 +311,11 @@ export default function TemplatesPage() {
                             <div className="text-sm">{template.explanation && template.explanation.length > 100 ? `${template.explanation.substring(0, 100)}...` : template.explanation}</div>
                             <div className="flex h-5 items-center space-x-4 text-sm">
                                 <div>
-                                    {template.tags.join(", ").length > 10
-                                        ? `${template.tags.join(", ").substring(0, 20)}...`
-                                        : template.tags.join(", ")}
+                                    {template.tags.length > 0
+                                        ? template.tags.join(", ").length > 20
+                                            ? `${template.tags.join(", ").substring(0, 20)}...`
+                                            : template.tags.join(", ")
+                                        : <div className='italic text-muted'>No tags provided</div>}
                                 </div>
                                 <Separator orientation="vertical" />
                                 <div>
