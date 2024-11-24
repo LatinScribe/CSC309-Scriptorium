@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
+import ReportDialog from "../pages/reportDialog";
 
 const BlogPostPage = () => {
     const router = useRouter();
@@ -30,6 +31,7 @@ const BlogPostPage = () => {
     // const [loading, setLoading] = useState(true);
 
     const [replyText, setReplyText] = useState("");
+    const [repliesText, setRepliesText] = useState<{ [key: number]: string }>({});  // maintain reply text for each comment separately
     const [activeReplies, setActiveReplies] = useState<Record<number, boolean>>({});
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [templateExplanation, setTemplateExplanation] = useState("");
@@ -37,7 +39,14 @@ const BlogPostPage = () => {
     const [blogVote, setBlogVote] = useState<"upvoted" | "downvoted" | null>(null);
     const [commentVotes, setCommentVotes] = useState<Record<number, "upvoted" | "downvoted" | null>>({});
 
+    const [isPostDialogOpen, setIsPostDialogOpen] = useState(false); // Controls Post Report Dialog
+    // const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+    // mapping to store the state for each comment; key is commentID
+    const [activeDialogs, setActiveDialogs] = useState<{ [commentId: number]: boolean }>({}); 
 
+    const [selectedReportId, setSelectedReportId] = useState(null); // Store which post/comment is selected for reporting
+    const [selectedReportType, setSelectedReportType] = useState("blog"); // Type of report: "post" or "comment"
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     
 
     
@@ -191,24 +200,26 @@ const BlogPostPage = () => {
         }
     };
 
-    const handleReport = async (contentId: number, explanation: string, isBlog: boolean) => {
+    const handleReport = async (contentId: number, explanation: string, reportType: string) => {
         if (!session || !session.accessToken) {
             toast.error("Please sign in");
             return;
         }
-
+        if (!explanation) {
+          toast.error("Please provide an explanation.");
+          return;
+        }
+          
         try {
           let response = null;
-          if (isBlog) {
+          if (reportType==="blog") {
             response = await reportBlog(contentId, explanation, session);
             
-          } else {
+          } else if (reportType === "comment"){
             response = await reportComment(contentId, explanation, session);
           }
-
-          if (response) {
-              toast.success("Content reported successfully.");
-          }
+          
+          
         } catch (error) {
             toast.error("Failed to report content.");
         }
@@ -220,11 +231,23 @@ const BlogPostPage = () => {
           [commentId]: !prev[commentId],
       }));
     };
+  
+    const openReportDialog = (type, id) => {
+      setSelectedReportType(type); // Set report type to either "post" or "comment"
+      setSelectedReportId(id); // Set the ID of the post or comment to be reported
+      if (type === "blog") {
+        setIsPostDialogOpen(true); // Open the Post Report Dialog
+      } else if (type === "comment") {
+        setActiveDialogs((prev) => ({ ...prev, [id]: true }));
+      }
+    };
 
-    const openDialog = () => {
-      setTemplateExplanation("");
-      setShowCreateDialog(true);
-    }
+    const handleReplyChange = (commentId: number, text: string) => {
+      setRepliesText((prev) => ({
+        ...prev,
+        [commentId]: text,
+      }));
+    };
 
 
     if (!blogPost) return <div>Blog post not found.</div>;
@@ -241,8 +264,16 @@ const BlogPostPage = () => {
                 <ThickArrowUpIcon/> {comment.upvoteCount}</Button>
               <Button onClick={() => handleVote("downvote", comment.id, false)} variant="outline" size="sm">
                 <ThickArrowDownIcon/> {comment.downvoteCount}</Button>
-              <Button onClick={() => handleReport(comment.id, false)} variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
+                <Button onClick={() => openReportDialog("comment", comment.id)} 
+                  variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
                 <ExclamationTriangleIcon/> report </Button>
+                {activeDialogs[comment.id] && (
+                  <ReportDialog
+                    reportType={"comment"} 
+                    reportId={comment.id} // ID of the post or comment
+                    handleReport={handleReport} // The function to handle the report submission
+                  />
+                )}
               
             </div>
           </div>
@@ -250,16 +281,16 @@ const BlogPostPage = () => {
 
           {/* Reply input */}
           <div className="flex items-center gap-2 mt-4">
-            <Input  
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
+            <Input
+              value={repliesText[comment.id] || ""}
+              onChange={(e) => handleReplyChange(comment.id, e.target.value)}
               placeholder="Write a reply..."
               className="flex-grow"
             />
-            <Button 
-              onClick={()=> {
-                handleReplySubmit(comment.id, replyText);
-                setReplyText("");
+            <Button
+              onClick={() => {
+                handleReplySubmit(comment.id, repliesText[comment.id]);
+                setRepliesText((prev) => ({ ...prev, [comment.id]: "" })); // Clear reply text after submitting
               }}
               className="ml-2"
             >
@@ -268,7 +299,7 @@ const BlogPostPage = () => {
           </div>
           
           {/* Show/hide replies */}
-          {comment.replies.length > 0 && (
+          {comment.replies && comment.replies.length > 0 && (
             <div className="mt-4">
               <button
                   onClick={() => toggleReplies(comment.id)}
@@ -303,38 +334,18 @@ const BlogPostPage = () => {
                         size="sm"
                         className={blogVote === "downvoted" ? "text-red-500" : ""} >
                         <ThickArrowDownIcon/> {blogPost.downvoteCount}</Button>
-                      <Button onClick={openDialog} variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
+                      <Button 
+                        onClick={() => setIsPostDialogOpen(true)} 
+                        variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
                         <ExclamationTriangleIcon/> report </Button>
-                        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                                    <DialogContent className="bg-background">
-                                        <DialogHeader>
-                                            <DialogTitle>Report Post</DialogTitle>
-                                            <DialogDescription>
-                                                Please enter an explanation below
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="flex flex-col gap-3">
-                                            <Label htmlFor="fork-explanation" className="block text-sm font-medium text-gray-700">
-                                                Explanation
-                                            </Label>
-                                            <Textarea
-                                                id="fork-explanation"
-                                                value={templateExplanation}
-                                                onChange={(e) => setTemplateExplanation(e.target.value)}
-                                                className="p-2 border border-gray-300 rounded"
-                                            />
-                                            
-                                        </div>
-                                        <DialogFooter>
-                                            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                                                Cancel
-                                            </Button>
-                                            <Button onClick={() =>handleReport(blogPost.id, templateExplanation, true)}>
-                                                Submit
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
+                      {isPostDialogOpen && (
+                        <ReportDialog
+                          reportType={"blog"} // "blog" or "comment"
+                          reportId={blogPost.id} // ID of the post or comment
+                          handleReport={handleReport} // The function to handle the report submission
+                          
+                        />
+                      )}
                                 
                     </div>
                 </div>
