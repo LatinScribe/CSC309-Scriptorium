@@ -94,7 +94,19 @@ export default async function handler(req, res) {
     }
 
     else if (req.method === "PATCH") { // handle comment rating updates
-        const { userId, action } = req.body;  // `action` should be either 'upvote' or 'downvote'
+        let username = null;
+        username = payload?.username; // Extract username
+        let userId = null;
+        // query the database to get the user id
+        const user = await prisma.user.findUnique({
+            where: { username },
+            // select: { id: true },
+        });
+        if (user) {
+            userId = user.id;
+        }
+        
+        const { action } = req.body;  // `action` should be either 'upvote' or 'downvote'
 
         try {
             if (!commentId || !action || !userId) {

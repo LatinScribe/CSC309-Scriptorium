@@ -147,11 +147,12 @@ export default function BlogsPage() {
     const handleEditBlog = (blogId: number) => {
         const loadBlogForEditing = async () => {
             const blog = await fetchBlogPost(blogId);  // Fetch the blog data
+
             setNewBlog({
                 title: blog.title,
                 description: blog.description,
-                tags: Array.isArray(blog.tags) ? blog.tags : [], // Ensure it's an array
-                codeTemplates: blog.templates || [],
+                tags: Array.isArray(blog.tags) ? blog.tags : [], 
+                codeTemplates: blog.codeTemplates || [],
             });
             setIsEditing(true);
             setCurrentBlog(blog); 
@@ -201,7 +202,7 @@ export default function BlogsPage() {
 
         // Map selected templates to the format required by the API
         const formattedTemplates = newBlog.codeTemplates.map((template: Template) => ({ id: template.id }));
-
+        console.log(newBlog);
         updateBlog(
             currentBlog.id,
             newBlog.title,
@@ -237,6 +238,8 @@ export default function BlogsPage() {
         if (!newBlog.codeTemplates.some((t: Template) => t.id === template.id)) {
             setNewBlog({ ...newBlog, codeTemplates: [...newBlog.codeTemplates, template] });
         }
+        setSearchTerm('');  // clear to hide dropdown
+
     };
 
     // Handle removing a template
@@ -271,11 +274,11 @@ export default function BlogsPage() {
 
     return (
         <div className="p-6 bg-background min-h-screen m-10">
-            <h1 className="text-2xl font-bold mb-6">Your Blog Posts</h1>
 
             {/* Create New Blog */}
             {!isEditing && !isCreating && (
                 <div className="mb-6">
+                    <h1 className="text-2xl font-bold mb-6">Your Blog Posts</h1>
                     <Button
                         onClick={() => setIsCreating(true)}
                     >
@@ -325,7 +328,7 @@ export default function BlogsPage() {
                                     {newBlog.tags.map((tag) => (
                                         <div
                                             key={tag}
-                                            className="flex items-center space-x-2 bg-gray-200 text-gray-700 px-3 py-1 rounded-full"
+                                            className="flex items-center space-x-2 bg-gray-200 text-gray-700 px-3 py-1 rounded-full "
                                         >
                                             <span>{tag}</span>
                                             <button
@@ -458,7 +461,54 @@ export default function BlogsPage() {
                                     ))}
                                 </div>
                             </div>
-                            {/* Tags and Templates components remain the same as in the create blog section */}
+
+                            <div>
+                                <h2 className="font-semibold mb-4">Edit Templates</h2>
+                                <Input
+                                    type="text"
+                                    placeholder="Search Templates"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:ring-primary"
+                                />
+                                {searchTerm && filteredTemplates.length > 0 && (
+                                    <div className="mt-2 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
+                                        {filteredTemplates
+                                            .filter((template) => !newBlog.codeTemplates.some((t) => t.id === template.id)) // Filter out already selected templates
+                                            .map((template: Template) => (
+                                            <div
+                                                key={template.id}
+                                                onClick={() => handleAddTemplate(template)} // Add template to selected list
+                                                className="p-3 cursor-pointer hover:bg-gray-100"
+                                            >
+                                                <span>{template.title}</span>
+                                                <span className="text-sm text-gray-500">by {template.author?.username}</span>
+                                            </div>
+                                            ))}
+                                    </div>
+                                )}
+
+                                {/* Display Selected Templates */}
+                                {newBlog.codeTemplates.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {newBlog.codeTemplates.map((template: Template) => (
+                                            <div
+                                                key={template.id}
+                                                className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full flex items-center"
+                                            >
+                                                {template.title}
+                                                <button
+                                                    onClick={() => handleRemoveTemplate(template.id)}
+                                                    className="ml-2 text-red-500 hover:text-red-700"
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            
                         </div>
                         {/* Action buttons */}
                         <div className="flex justify-left space-x-4">
@@ -486,7 +536,7 @@ export default function BlogsPage() {
                                         </p>
                                         {/* Display tags */}
                                         <div className="flex flex-wrap gap-2">
-                                            {blog.tags.map((tag, index) => (
+                                            {blog.tags && blog.tags.map((tag, index) => (
                                                 <span
                                                 key={index}
                                                 className="px-3 py-1 text-sm text-white bg-gray-300 rounded-full mt-4"

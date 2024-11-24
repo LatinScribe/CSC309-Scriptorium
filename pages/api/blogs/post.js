@@ -14,14 +14,14 @@ export default async function handler(req, res) {
         try {
           // Fetch the blog post by ID from the database
           const blogPost = await prisma.blogPost.findUnique({
-            where: {
-              id: Number(id), 
-            },
+            where: { id: Number(id) },
             include: {
               author: true, // Include the author's details (if needed)
               codeTemplates: true, // Include related code templates (if needed)
             },
           });
+          
+    
     
           if (!blogPost) {
             return res.status(404).json({ error: "Blog post not found" });
@@ -92,7 +92,7 @@ export default async function handler(req, res) {
                 return res.status(404).json({ error: "Blog post not found" });
             }
 
-            const { title, description, tags } = req.body;
+            const { title, description, tags, codeTemplates } = req.body;
 
             try {
                 const updatedPost = await prisma.blogPost.update({
@@ -102,7 +102,16 @@ export default async function handler(req, res) {
                         title,
                         description,
                         tags,
+                        ...(codeTemplates && {
+                            codeTemplates: {
+                                set: codeTemplates.map(template => ({ id: template.id })), // Replacing existing templates with the new ones
+                            },
+                        }),
                     },
+                    include: {
+                        codeTemplates: true, // This will include the related codeTemplates in the result
+                    },
+
                 });
 
                 const tagsArray = updatedPost.tags ? updatedPost.tags.split(',').map(tag => tag.trim()) : [];
@@ -111,7 +120,7 @@ export default async function handler(req, res) {
                     tags: tagsArray, // Override the tags field to return as an array
                 });
             } catch (error) {
-                res.status(500).json({ error: 'Could not update blog post' });
+                res.status(500).json({ error: 'Could not update blog post' , details: error.message});
             }
         } else if (method === 'DELETE') {
             // mark blog post as deleted
