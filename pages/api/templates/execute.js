@@ -14,11 +14,11 @@ const fileExtension = {
 };
 
 const dockerImages = {
-    python: "custom-python:3.11",
-    javascript: "custom-node:16",
-    java: "custom-java:11",
-    c: "custom-c:11",
-    cpp: "custom-cpp:11",
+    python: "python:3.11",
+    javascript: "node:16",
+    java: "openjdk:11",
+    c: "gcc:11",
+    cpp: "gcc:11",
 };
 
 function getDockerCommand(language, directory, fileName) {
@@ -106,10 +106,13 @@ export default async function handler(req, res) {
     }
 
     // execute the code
-    // i'm on a mac, so
-    const directory = path.resolve("./");
-    const fileName = `${uuidv4()}.${fileExtension[language]}`;
+    const identifier = uuidv4();
+    const directory = path.join("/tmp", identifier);
+    const fileName = `main.${fileExtension[language]}`;
     const filePath = path.join(directory, fileName);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
     try {
         fs.writeFileSync(filePath, code);
         console.log('file created')
@@ -135,11 +138,11 @@ export default async function handler(req, res) {
 
         child.on("close", (code) => {
             try {
-                console.log("Deleting file " + filePath);
-                fs.unlinkSync(filePath);
-                console.log("File deleted");
+                console.log("Deleting directory " + directory);
+                fs.rmdirSync(directory, { recursive: true });
+                console.log("Directory deleted");
             } catch (error) {
-                console.error("Error deleting the file:", error);
+                console.error("Error deleting the directory:", error);
             }
             return res.status(200).json({
                 output: stdout,
