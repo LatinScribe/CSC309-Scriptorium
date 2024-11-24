@@ -21,6 +21,9 @@ const dockerImages = {
     cpp: "gcc:11",
 };
 
+const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
+const MEMORY_LIMIT = '512m';
+
 function getDockerCommand(language, directory, fileName) {
     const image = dockerImages[language];
     let command;
@@ -56,7 +59,7 @@ function getDockerCommand(language, directory, fileName) {
             throw new Error("Unsupported language");
     }
 
-    return `docker run --rm -i -v ${directory}:/code ${image} sh -c "${command}"`;
+    return `docker run --rm -i -v ${directory}:/code --memory=${MEMORY_LIMIT} ${image} sh -c "${command}"`;
 }
 
 // function getCommand(language, filePath) {
@@ -128,6 +131,11 @@ export default async function handler(req, res) {
         let stdout = "";
         let stderr = "";
 
+        const timeout = setTimeout(() => {
+            child.kill();
+            stderr += "\nExecution timed out. Templates may only run for 60 seconds, including compilation time. To access more resources, please purchase a Scriptorium Plus subscription, now only for $999,999,999.99!";
+        }, TIME_LIMIT);
+
         child.stdout.on("data", (data) => {
             stdout += data.toString();
         });
@@ -137,6 +145,7 @@ export default async function handler(req, res) {
         });
 
         child.on("close", (code) => {
+            clearTimeout(timeout);
             try {
                 console.log("Deleting directory " + directory);
                 fs.rmdirSync(directory, { recursive: true });
