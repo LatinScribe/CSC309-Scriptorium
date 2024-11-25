@@ -20,6 +20,7 @@ import ProfilePage from "@/components/pages/profile";
 import WorkInProgress from "@/components/pages/work-in-progress";
 import AdminAccount from "@/components/pages/admin-account";
 import AdminProfile from "@/components/pages/admin-profile";
+import MyTemplatesPage from "@/components/pages/mytemplates";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,7 +40,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-      setIsClient(true);
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
@@ -47,35 +48,40 @@ export default function Home() {
   }, [router.asPath]);
 
   if (!isClient) {
-      return null;
+    return null;
   }
 
 
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
       case "/":
-      return <WelcomePage />;
+        return <WelcomePage />;
       case "/login":
-      return <LoginPage />;
+        return <LoginPage />;
       case "/register":
-      return <RegisterPage />;
+        return <RegisterPage />;
       case "/profile":
-      return <ProfilePage />;
+        return <ProfilePage />;
       case "/blogs":
-      return <BlogsPage />;
+        return <BlogsPage />;
       case "/templates":
-      return <TemplatesPage />;
+        return <TemplatesPage />;
       case "/playground":
-      return <PlaygroundPage />;
+        return <PlaygroundPage />;
       case "/work-in-progress":
-      return <WorkInProgress />;
+        return <WorkInProgress />;
       case "/admin-account":
-      return <AdminAccount />;
+        return <AdminAccount />;
       case "/admin-profile":
-      return <AdminProfile />;
+        return <AdminProfile />;
+      case "/my-templates":
+        return <MyTemplatesPage />;
       default:
       if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;
+      }
+      if (router.asPath.startsWith("/my-templates?")) {
+        return <MyTemplatesPage />;
       }
       if (router.asPath.startsWith("/admin-profile?")) {
         return <AdminProfile />;
@@ -89,13 +95,13 @@ export default function Home() {
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} font-sans bg-background text-foreground`}>
-        <main className="min-h-screen flex flex-col">
-          <NavBar />
-          <div className="flex-grow">
-            {renderPage()}
-          </div>
-          <Footer />
-        </main>
+      <main className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow">
+          {renderPage()}
+        </div>
+        <Footer />
+      </main>
     </div>
   );
 }

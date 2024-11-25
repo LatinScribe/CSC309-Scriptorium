@@ -47,6 +47,9 @@ export default function NavBar() {
                     <Link href="/templates" className="hover:text-gray-300">
                         Templates
                     </Link>
+                    <Link href="/playground" className="hover:text-gray-300">
+                        Playground
+                    </Link>
                     <Link href="/blogs" className="hover:text-gray-300">
                         Blogs
                     </Link>
@@ -71,6 +74,11 @@ export default function NavBar() {
                                 <li>
                                     <Link href="/templates" className="hover:text-gray-300">
                                         Templates
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/playground" className="hover:text-gray-300">
+                                        Playground
                                     </Link>
                                 </li>
                                 <li>

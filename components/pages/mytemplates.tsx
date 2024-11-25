@@ -106,8 +106,11 @@ const languages = [
 ]
 
 
-export default function TemplatesPage() {
+export default function MyTemplatesPage() {
     const { session } = useContext(SessionContext);
+    if (!session) {
+        return <div>You must be logged in to view this page.</div>;
+    }
     const [filters, setFilters] = useState<Filters>({});
 
     const [templates, setTemplates] = useState<Template[]>([]);
@@ -130,6 +133,7 @@ export default function TemplatesPage() {
             title: title as string || "",
             content: content as string || "",
             tags: tags ? (Array.isArray(tags) ? tags : [tags]) : [],
+            author: session.user.username,
         };
 
         setFilters(initialFilters);
@@ -151,6 +155,7 @@ export default function TemplatesPage() {
     }, [router.query]);
 
     const handleFiltersChange = (newFilters: Filters) => {
+        newFilters.author = session.user.username;
         setFilters(newFilters);
     };
 
@@ -161,7 +166,7 @@ export default function TemplatesPage() {
         if (filters.tags && filters.tags.length > 0) query.tags = filters.tags.join(",");
 
         router.push({
-            pathname: "/templates",
+            pathname: "/my-templates",
             query,
         });
     };
@@ -203,11 +208,10 @@ export default function TemplatesPage() {
         setTemplateLanguage("");
         setShowCreateDialog(true);
     }
-
     return (
         <div className="flex justify-center">
             <div className="flex flex-col justify-center container pt-10 px-5 gap-5">
-                <div className="text-2xl">Dive into the Scriptorium</div>
+                <div className="text-2xl">{session.user.username}'s Templates</div>
                 <div className="flex justify-between flex-wrap">
                     <div className="flex gap-3 pb-3 flex-wrap">
                         <Input
@@ -220,12 +224,6 @@ export default function TemplatesPage() {
                         <Button onClick={handleSearch}>Search</Button>
                     </div>
                     <div className='flex gap-3'>
-                        <Link href='/playground'>
-                            <Button>
-                                <PlayIcon />
-                                Playground
-                            </Button>
-                        </Link>
                         {session && (
                             <>
                                 <Button onClick={openDialog}>
@@ -374,7 +372,7 @@ export default function TemplatesPage() {
                                         query.page = (currentPage - 1).toString();
 
                                         router.push({
-                                            pathname: "/templates",
+                                            pathname: "/my-templates",
                                             query,
                                         });
                                     }
@@ -393,7 +391,7 @@ export default function TemplatesPage() {
                                         query.page = (index + 1).toString();
 
                                         router.push({
-                                            pathname: "/templates",
+                                            pathname: "/my-templates",
                                             query,
                                         });
                                     }}
@@ -413,7 +411,7 @@ export default function TemplatesPage() {
                                         query.page = (currentPage + 1).toString();
 
                                         router.push({
-                                            pathname: "/templates",
+                                            pathname: "/my-templates",
                                             query,
                                         });
                                     }
