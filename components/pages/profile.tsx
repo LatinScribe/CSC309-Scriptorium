@@ -4,6 +4,7 @@ import { login, getProfile, editProfile, deleteAccount } from "@/utils/accountIn
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
 import { Session, User } from "@/utils/types";
+import { API_URL } from "@/utils/dataInterface";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -122,151 +123,173 @@ export default function ProfilePage() {
         }
     }
 
+    // from https://gist.github.com/amirhp-com/ffaa19639912f587e67aaabe26b5c728
+    // you can try: https://henrytchen.com/images/Profile3_compressed.jpg
+    let isValid = function(urlTocheck="", defaultValue=false){
+        var image = new Image();
+        image.src = urlTocheck;
+        if (image.width == 0) {
+           return defaultValue;
+        } else {
+           return true;
+        }
+     }
+
     return (
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
+            {(avatar && isValid(avatar)) ? (
+            <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
+                <img src={avatar} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover" />
+            </div>
+            ) : (
+            <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
+                <img src={API_URL+"/no-avatar.png"} alt="No Avatar" className="w-24 h-24 rounded-full object-cover" />
+            </div>
+            )}
+
             <h1 className="text-3xl font-semibold p-4">Profile</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg p-4">
-                <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
+            <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
+            <input
+                type="text"
+                placeholder="New Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Choose new Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Confirm new Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type="text"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <input
+                type="text"
+                placeholder="Avatar (URL)"
+                value={avatar}
+                onChange={(e) => setAvatar(e.target.value)}
+                className="p-2 border border-gray-300 rounded"
+                autoComplete="off"
+            />
+            <div className="relative" data-tooltip-target="tooltip-default">
                 <input
-                    type="text"
-                    placeholder="New Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
+                type="text"
+                placeholder="Email (current)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="p-2 border border-gray-300 rounded w-full cursor-not-allowed"
+                autoComplete="off"
+                disabled
                 />
-                <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Choose new Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Confirm new Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <input
-                    type="text"
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <input
-                    type="text"
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <input
-                    type="text"
-                    placeholder="Phone Number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <input
-                    type="text"
-                    placeholder="Avatar (URL)"
-                    value={avatar}
-                    onChange={(e) => setAvatar(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
-                    autoComplete="off"
-                />
-                <div className="relative" data-tooltip-target="tooltip-default">
-                    <input
-                        type="text"
-                        placeholder="Email (current)"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="p-2 border border-gray-300 rounded w-full cursor-not-allowed"
-                        autoComplete="off"
-                        disabled
-                    />
-                    <div id="tooltip-default" role="tooltip" className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                        Tooltip content
-                        <div className="tooltip-arrow" data-popper-arrow></div>
-                    </div>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    </div>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 tooltip">
-                    </div>
+                <div id="tooltip-default" role="tooltip" className="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+                Tooltip content
+                <div className="tooltip-arrow" data-popper-arrow></div>
                 </div>
-                <div className="col-span-1 md:col-span-2 flex items-center">
-                    <input
-                        type="checkbox"
-                        checked={showPassword}
-                        onChange={() => setShowPassword(!showPassword)}
-                        className="mr-2"
-                    />
-                    <label>Show Password</label>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                 </div>
-                <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 tooltip">
+                </div>
+            </div>
+            <div className="col-span-1 md:col-span-2 flex items-center">
+                <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+                className="mr-2"
+                />
+                <label>Show Password</label>
+            </div>
+            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
 
-                    <Button onClick={handelProfileChange} className="col-span-1">
-                        Edit profile
+                <Button onClick={handelProfileChange} className="col-span-1">
+                Edit profile
+                </Button>
+
+                <AlertDialog >
+                <AlertDialogTrigger asChild>
+                    <Button>
+                    Delete Account
                     </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-background">
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>
+                        Confirm Delete
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {session?.user?.username}, are you sure you want to Delete your account?
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={handelDeleteAccount} className="bg-destructive">
+                        Delete Account
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+                </AlertDialog>
 
-                    <AlertDialog >
-                        <AlertDialogTrigger asChild>
-                            <Button>
-                                Delete Account
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-background">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Confirm Delete
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {session?.user?.username}, are you sure you want to Delete your account?
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>
-                                    Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction onClick={handelDeleteAccount} className="bg-destructive">
-                                    Delete Account
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    
+            </div>
+            {error && (
+                <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4">
+                {error}
                 </div>
-                {error && (
-                    <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4">
-                        {error}
-                    </div>
-                )}
-                {message && (
-                    <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4">
-                        {message}
-                    </div>
-                )}
+            )}
+            {message && (
+                <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4">
+                {message}
+                </div>
+            )}
 
-                {createdAt && (
-                    <div className="col-span-1 md:col-span-2 text text-center mt-4">
-                        {
-                            "Account created at: " + String(createdAt)}
-                    </div>
-                )}
+            {createdAt && (
+                <div className="col-span-1 md:col-span-2 text text-center mt-4">
+                {
+                    "Account created at: " + String(createdAt)}
+                </div>
+            )}
 
-                {updatedAt && (
-                    <div className="col-span-1 md:col-span-2 text text-center mt-4">
-                        {"Account updated at: " + String(updatedAt)}
-                    </div>
-                )}
+            {updatedAt && (
+                <div className="col-span-1 md:col-span-2 text text-center mt-4">
+                {"Account updated at: " + String(updatedAt)}
+                </div>
+            )}
             </div>
         </div>
     );
