@@ -81,8 +81,8 @@ export default function ProfilePage() {
                         router.push("/login");
                     }
 
-                    setUpdatedAt(updated_profile.updatedAt ? new Date(updated_profile.updatedAt).toUTCString() : "Unknown");
-                    setCreatedAt(updated_profile.createdAt ? new Date(updated_profile.createdAt).toUTCString() : "Unknown");
+                    setUpdatedAt(updated_profile.updatedAt ? new Date(updated_profile.updatedAt).toLocaleString() : "Unknown");
+                    setCreatedAt(updated_profile.createdAt ? new Date(updated_profile.createdAt).toLocaleString() : "Unknown");
                 })
                 .catch((error) => {
                     console.error("Registration failed:", error);
