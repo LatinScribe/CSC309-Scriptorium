@@ -407,7 +407,7 @@ export default function TemplatePage() {
                                 </Button>
                             )}
                         </div>
-                        <ScrollArea className="rounded-lg border max-h-[50%] md:max-h-none md:flex-grow">
+                        <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
                             <Editor
                                 value={template?.content || ""}
                                 onValueChange={(code) => setTemplate({ ...template, content: code } as Template)}

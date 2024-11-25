@@ -15,7 +15,16 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import 'prismjs/components/prism-cpp';
-import { Pencil1Icon } from "@radix-ui/react-icons";
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markup-templating';
+import 'prismjs/components/prism-perl';
+import 'prismjs/components/prism-swift';
+import 'prismjs/components/prism-brainfuck';
+import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner"
@@ -36,6 +45,7 @@ import {
 } from "@/components/ui/popover"
 import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
+import { executeCode } from "@/utils/dataInterface";
 
 const codeLanguages = [
     {
@@ -57,6 +67,34 @@ const codeLanguages = [
     {
         "value": "cpp",
         "label": "C++"
+    },
+    {
+        "value": "rust",
+        "label": "Rust"
+    },
+    {
+        "value": "go",
+        "label": "Go"
+    },
+    {
+        "value": "ruby",
+        "label": "Ruby"
+    },
+    {
+        "value": "php",
+        "label": "PHP"
+    },
+    {
+        "value": "perl",
+        "label": "Perl"
+    },
+    {
+        "value": "swift",
+        "label": "Swift"
+    },
+    {
+        "value": "brainfuck",
+        "label": "Brainfuck"
     }
 ]
 
@@ -66,6 +104,25 @@ export default function PlaygroundPage() {
     const [error, setError] = useState<string | null>(null);
     const [templateLanguage, setTemplateLanguage] = useState("javascript");
     const [comboOpen, setComboOpen] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
+    const [inputs, setInputs] = useState<string[]>([]);
+    const [stdout, setStdout] = useState("");
+    const [stderr, setStderr] = useState("");
+
+    const handleRun = async () => {
+        toast.info("Running code...");
+        setIsRunning(true);
+        try {
+            const { output, error } = await executeCode(templateLanguage, code, inputs);
+            setStdout(output);
+            setStderr(error);
+            toast.success("Code executed successfully");
+        } catch (error) {
+            console.error("Failed to execute code:", error);
+            toast.error("Failed to execute code: " + (error as Error).message);
+        }
+        setIsRunning(false);
+    }
 
     return (
         <>
@@ -84,7 +141,7 @@ export default function PlaygroundPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
-                    <div className='flex flex-col gap-3 p-4 h-screen'>
+                    <div className='flex flex-col gap-3 p-4 h-fit'>
                         <div className="flex gap-3 items-center justify-between">
                             <div className="text-2xl">Playground</div>
                             <>
@@ -136,12 +193,18 @@ export default function PlaygroundPage() {
                         </div>
                         <Separator />
                         <div className="flex justify-center">
-                            <Button className='p-5 text-1xl'>
-                                <PlayIcon />
-                                Run
-                            </Button>
+                        {isRunning ? (
+                                <Button disabled>
+                                    Running...
+                                </Button>
+                            ) : (
+                                <Button onClick={handleRun}>
+                                    <PlayIcon />
+                                    Run
+                                </Button>
+                            )}
                         </div>
-                        <ScrollArea className="rounded-lg border max-h-[50%] md:max-h-none md:flex-grow">
+                        <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
                             <Editor
                                 value={code}
                                 onValueChange={setCode}
@@ -155,8 +218,52 @@ export default function PlaygroundPage() {
                             />
                         </ScrollArea>
                     </div>
-                    <div>
-
+                    <div className="flex flex-col gap-3 p-4">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex justify-between items-center">
+                                <div className="text-lg font-medium">Inputs (Stdin)</div>
+                                <Button onClick={() => setInputs([...inputs, ""])}>Add Input</Button>
+                            </div>
+                              {inputs.map((input, index) => (
+                                <div key={index} className="flex items-center gap-3">
+                                    <Input
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => {
+                                            const newInputs = [...inputs];
+                                            newInputs[index] = e.target.value;
+                                            setInputs(newInputs);
+                                        }}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        variant="destructive"
+                                        onClick={() => {
+                                            const newInputs = inputs.filter((_, i) => i !== index);
+                                            setInputs(newInputs);
+                                        }}
+                                    >
+                                        <TrashIcon />
+                                    </Button>
+                                </div>
+                              ))}  
+                              {inputs.length === 0 && (
+                                <div className="text-sm text-gray-500">No inputs added.</div>
+                              )}
+                            
+                        </div>
+                        <div className="text-lg font-medium">Output (Stdout)</div>
+                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                            {stdout.split('\n').map((line, index) => (
+                                <div key={index}>{line}</div>
+                            ))}
+                        </ScrollArea>
+                        <div className="text-lg font-medium">Error (Stderr)</div>
+                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                            {stderr.split('\n').map((line, index) => (
+                                <div key={index}>{line}</div>
+                            ))}
+                        </ScrollArea>
                     </div>
                 </div>
             )}
