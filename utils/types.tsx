@@ -4,9 +4,24 @@ export interface Session {
     user: User;
 }
 
+export interface Filters {
+    title?: string;
+    content?: string;
+    tags?: string[];
+    ids?: string[];
+    author?: string;
+}
+
+export interface PaginationInfo {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalSize: number;
+}
+
 export interface User {
     id: number;
-    name: string;
+    username: string;
     email: string;
     firstName?: string;
     lastName?: string;
@@ -23,10 +38,11 @@ export interface Template {
     explanation?: string;
     tags: string[];
     forkedSourceId?: number;
-    author: User;
+    author?: User;
+    authorId?: number;
     content: string;
     language: string;
-    modifiedAt: Date;
+    modifiedAt: string;
 }
 
 export interface BlogPost {

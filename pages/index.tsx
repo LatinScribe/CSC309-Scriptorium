@@ -8,9 +8,14 @@ import WelcomePage from "@/components/pages/welcome";
 import LoginPage from "@/components/pages/login";
 import BlogsPage from "@/components/pages/blogs";
 import TemplatesPage from "@/components/pages/templates";
+import TemplatePage from "@/components/pages/template";
+import PlaygroundPage from "@/components/pages/playground";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
+import { ThemeProvider } from "next-themes";
+import Custom404 from "@/components/pages/404";
+import MyTemplatesPage from "@/components/pages/mytemplates";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +35,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-      setIsClient(true);
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
@@ -38,32 +43,47 @@ export default function Home() {
   }, [router.asPath]);
 
   if (!isClient) {
-      return null;
+    return null;
   }
 
 
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
+      case "/":
+        return <WelcomePage />;
       case "/login":
         return <LoginPage />;
       case "/blogs":
         return <BlogsPage />;
       case "/templates":
         return <TemplatesPage />;
+      case "/playground":
+        return <PlaygroundPage />;
+      case "/my-templates":
+        return <MyTemplatesPage />;
       default:
-        if (!session) {
-          // not logged in
-          return <WelcomePage />;
+        if (router.asPath.startsWith("/templates?")) {
+          return <TemplatesPage />;
         }
-        return <WelcomePage />;
+        if (router.asPath.startsWith("/my-templates?")) {
+          return <MyTemplatesPage />;
+        }
+        if (router.asPath.startsWith("/templates/")) {
+          return <TemplatePage />;
+        }
+        return <Custom404 />;
     }
   };
 
   return (
-    <>
-      <NavBar />
-      {renderPage()}
-      <Footer />
-    </>
+    <div className={`${geistSans.variable} ${geistMono.variable} font-sans bg-background text-foreground`}>
+      <main className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow">
+          {renderPage()}
+        </div>
+        <Footer />
+      </main>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import prisma from "@/utils/db";
 import { verifyToken } from "@/utils/auth";
 
-const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "c++", "c"];
+const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "cpp", "c", "rust", "go", "ruby", "php", "perl", "swift", "brainfuck"];
 
 export default async function handler(req, res) {
     // GET: return template metadata list based on filters (title, tags, content, author)
@@ -62,16 +62,18 @@ export default async function handler(req, res) {
         let templates = await prisma.codeTemplate.findMany({
             where: where,
             select: {
-            id: true,
-            title: true,
-            tags: true,
-            explanation: true,
-            author: {
-                select: {
-                    username: true,
+                id: true,
+                title: true,
+                tags: true,
+                explanation: true,
+                author: {
+                    select: {
+                        username: true,
+                    },
                 },
-            },
-            deleted: true,
+                deleted: true,
+                modifiedAt: true,
+                language: true,
             },
         });
         // filter out all deleted templates
@@ -82,10 +84,18 @@ export default async function handler(req, res) {
                 return template.tags && tags.split(',').every(tag => template.tags.split(',').includes(tag));
             });
         }
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
+        const start = (parseInt(page) - 1) * parseInt(pageSize);
+        const end = start + parseInt(pageSize);
         const paginatedTemplates = templates.slice(start, end);
-        return res.status(200).json(paginatedTemplates);
+        return res.status(200).json({
+            templates: paginatedTemplates,
+            pagination: {
+                totalSize: templates.length,
+                totalPages: Math.ceil(templates.length / pageSize),
+                page: parseInt(page),
+                pageSize: parseInt(pageSize),
+            }
+        })
     }
 
     // We now check if the user is authenticated
@@ -118,32 +128,32 @@ export default async function handler(req, res) {
         const { title, explanation, tags, forkedSourceId, language } = req.body;
         if (!title) {
             return res.status(400).json({
-            error: "Please provide a title",
+                error: "Please provide a title",
             });
         }
         if (tags && !Array.isArray(tags)) {
             return res.status(400).json({
-            error: "Tags should be an array of strings",
+                error: "Tags should be an array of strings",
             });
         }
         if (forkedSourceId && typeof forkedSourceId !== "number") {
             return res.status(400).json({
-            error: "Forked source id should be a number",
+                error: "Forked source id should be a number",
             });
         }
         if (!forkedSourceId && !language) {
             return res.status(400).json({
-            error: "Please provide a language",
+                error: "Please provide a language",
             });
         }
         if (language && typeof language !== "string") {
             return res.status(400).json({
-            error: "Language should be a string",
+                error: "Language should be a string",
             });
         }
         if (language && !SUPPORTED_LANGUAGES.includes(language)) {
             return res.status(400).json({
-            error: "Invalid language",
+                error: "Invalid language",
             });
         }
 
@@ -156,9 +166,9 @@ export default async function handler(req, res) {
 
         if (forkedSourceId) {
             const source = await prisma.codeTemplate.findUnique({
-            where: {
-                id: forkedSourceId,
-            },
+                where: {
+                    id: forkedSourceId,
+                },
             });
             if (!source) {
                 return res.status(404).json({
@@ -171,18 +181,18 @@ export default async function handler(req, res) {
         // the token only contains the username, so we need to query the user to get the id
         const template = await prisma.codeTemplate.create({
             data: {
-            title,
-            explanation,
-            tags: tagsString,
-            content,
-            author: {
-                connect: {
-                id: user.id,
+                title,
+                explanation,
+                tags: tagsString,
+                content,
+                author: {
+                    connect: {
+                        id: user.id,
+                    },
                 },
-            },
-            forkedSourceId,
-            language: templateLanguage,
-            deleted: false,
+                forkedSourceId,
+                language: templateLanguage,
+                deleted: false,
             },
         });
         return res.status(201).json(template);
@@ -203,23 +213,23 @@ export default async function handler(req, res) {
         }
         if (title && typeof title !== "string") {
             return res.status(400).json({
-            error: "Title should be a string",
+                error: "Title should be a string",
             });
         }
         if (explanation && typeof explanation !== "string") {
             return res.status(400).json({
-            error: "Explanation should be a string",
+                error: "Explanation should be a string",
             });
         }
         if (content && typeof content !== "string") {
             return res.status(400).json({
-            error: "Content should be a string",
+                error: "Content should be a string",
             });
         }
         if (tags && !Array.isArray(tags)) {
             console.log(tags);
             return res.status(400).json({
-            error: "Tags should be an array of strings",
+                error: "Tags should be an array of strings",
             });
         }
         if (tags) {
@@ -250,6 +260,7 @@ export default async function handler(req, res) {
                 explanation,
                 tags: tagsString,
                 content,
+                modifiedAt: new Date(),
             },
         });
         return res.status(200).json(updatedTemplate);
@@ -261,12 +272,12 @@ export default async function handler(req, res) {
         if (!id && id !== 0) {
             console.log(req.body.id);
             return res.status(400).json({
-            error: "Please provide a template id",
+                error: "Please provide a template id",
             });
         }
         if (isNaN(parseInt(id))) {
             return res.status(400).json({
-            error: "Template id should be a number",
+                error: "Template id should be a number",
             });
         }
         // check if the template exists

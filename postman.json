@@ -3302,7 +3302,7 @@
 								"execute"
 							]
 						},
-						"description": "Executes code, passing in provided input to the program and returning the program output.\n\n**Body**\n\n- code (string) _(required)_: the code to execute.\n    \n- language (string) _(required)_: the language which the code is written in. Accepts any of \\[\"python\", \"javascript\", \"c\", \"c++\", \"java\"\\].\n    \n- input (array of strings) _(required)_: the inputs to be passed, individually, into stdin of the process. Should be an empty array if no input is to be passed in."
+						"description": "Executes code, passing in provided input to the program and returning the program output.\n\n**Body**\n\n- code (string) _(required)_: the code to execute.\n    \n- language (string) _(required)_: the language which the code is written in. Accepts any of \\[\"python\", \"javascript\", \"c\", \"cpp\", \"java\"\\].\n    \n- input (array of strings) _(required)_: the inputs to be passed, individually, into stdin of the process. Should be an empty array if no input is to be passed in."
 					},
 					"response": [
 						{
@@ -3383,7 +3383,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"error\": \"Invalid language, supported languages are: python, javascript, java, c, c++\"\n}"
+							"body": "{\n    \"error\": \"Invalid language, supported languages are: python, javascript, java, c, cpp\"\n}"
 						}
 					]
 				},
