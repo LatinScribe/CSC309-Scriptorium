@@ -526,7 +526,7 @@ export default function BlogsPage() {
                     {(Array.isArray(blogs) && blogs.length === 0) ? (
                         <p className="text-gray-600">No blog posts available. Please create one!</p>
                     ) : (
-                        blogs.map((blog: BlogPost) => (
+                        blogs && blogs.map((blog: BlogPost) => (
                             <div key={blog.id} className="bg-background p-6 shadow rounded">
                                 <div className="flex justify-between items-center">
                                     <div>

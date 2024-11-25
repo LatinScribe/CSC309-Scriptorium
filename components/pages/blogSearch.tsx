@@ -51,22 +51,22 @@ export default function BlogsSearchPage() {
         if (!router.isReady) return;
         const { page } = router.query;
         if (page) {
-            setCurrentPage(parseInt(page as string));   // update currentPage from query
+            setCurrentPage(parseInt(page as string));   
         } else {
             setCurrentPage(1);      // default to page 1
         }
     }, [router.query]);
 
     const handleSearch = async () => {
-        try {
-            // Fetch the blogs based on the search query and sort option
-            const response = await fetchBlogs(searchQuery, sortOption);
-            setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
-            setPageCount(response.totalPages);  // page count is updated based on totalPages
-        } catch (error) {
-            console.error("Search failed:", error);
-            toast.error("Failed to fetch blogs.");
-        }
+        // try {
+        //     // Fetch the blogs based on the search query and sort option
+        //     const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize);
+        //     setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
+        //     setPageCount(response.totalPages);  // page count is updated based on totalPages
+        // } catch (error) {
+        //     console.error("Search failed:", error);
+        //     toast.error("Failed to fetch blogs.");
+        // }
 
         const query: { [key: string]: string } = {};
         if (searchQuery) query.query = searchQuery;
@@ -78,6 +78,9 @@ export default function BlogsSearchPage() {
             query: { search },
         });
     };
+
+    
+
 
     // on blogSearch page 
     // const handleClick = (id: string) => {
@@ -112,13 +115,14 @@ export default function BlogsSearchPage() {
                             className="border p-2"
                         >
                             <option value="createdAt">Newest</option>
-                            <option value="mostUpvoted">Most Upvoted</option>
+                            <option value="mostValuable">Most Upvoted</option>
                             <option value="mostControversial">Most Downvoted</option>
                         </select>
                     </div>
                 </div>
                 <div className="flex flex-col gap-5">
-                    {blogs?.length > 0 ? (
+                    <div>Explore blogs from the Scriptorium community.</div>
+                    {/* {blogs?.length > 0 ? (
                         blogs.map((blog) => (
                             <div key={blog.id} className="blog-post-card" onClick={() => handleClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border border-gray-300 rounded-lg">
@@ -129,11 +133,11 @@ export default function BlogsSearchPage() {
                             </div>
                         ))
                     ) : (
-                        <div>No blogs found.</div>
-                    )}
+                        <div>Explore blogs from the Scriptorium community.</div>
+                    )} */}
                 </div>
                 <div className="flex justify-center">
-                    {/* Pagination could be added here */}
+                    
                 </div>
             </div>
         </div>

@@ -30,21 +30,17 @@ const BlogPostPage = () => {
     const [newComment, setNewComment] = useState("");
     // const [loading, setLoading] = useState(true);
 
-    const [replyText, setReplyText] = useState("");
     const [repliesText, setRepliesText] = useState<{ [key: number]: string }>({});  // maintain reply text for each comment separately
     const [activeReplies, setActiveReplies] = useState<Record<number, boolean>>({});
-    const [showCreateDialog, setShowCreateDialog] = useState(false);
-    const [templateExplanation, setTemplateExplanation] = useState("");
 
     const [blogVote, setBlogVote] = useState<"upvoted" | "downvoted" | null>(null);
     const [commentVotes, setCommentVotes] = useState<Record<number, "upvoted" | "downvoted" | null>>({});
 
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false); // Controls Post Report Dialog
-    // const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
     // mapping to store the state for each comment; key is commentID
     const [activeDialogs, setActiveDialogs] = useState<{ [commentId: number]: boolean }>({}); 
 
-    const [selectedReportId, setSelectedReportId] = useState(null); // Store which post/comment is selected for reporting
+    const [selectedReportId, setSelectedReportId] = useState<number | null>(null); // Store which post/comment is selected for reporting
     const [selectedReportType, setSelectedReportType] = useState("blog"); // Type of report: "post" or "comment"
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     
@@ -56,16 +52,17 @@ const BlogPostPage = () => {
 
 
     useEffect(() => {
-      // Wait for the router to be ready (to make sure the query is populated)
-      console.log("router.query.id:", id);  // Debug the query parameter
+      // Wait for the router to be ready to make sure the query is populated
         if (!postId) {
-            console.log("No valid postId available");  // Ensure postId is available
+            console.log("No valid postId available");  
             return;
         }
       const fetchData = async () => {
         try {
             const responseBlog = await fetchBlogPost(postId);
             setBlogPost(responseBlog);
+
+            if (!blogPost) return <div>Blog post not found.</div>;
 
             const commentsResponse = await fetchComments(postId);
             const nestedComments = nestComments(commentsResponse.comments);
@@ -191,7 +188,6 @@ const BlogPostPage = () => {
                       ? "upvoted"
                       : "downvoted",
                 }));
-              // toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} successful!`);
               }
             }
 
@@ -232,9 +228,9 @@ const BlogPostPage = () => {
       }));
     };
   
-    const openReportDialog = (type, id) => {
+    const openReportDialog = (type: string, id: number) => {
       setSelectedReportType(type); // Set report type to either "post" or "comment"
-      setSelectedReportId(id); // Set the ID of the post or comment to be reported
+      setSelectedReportId(id); 
       if (type === "blog") {
         setIsPostDialogOpen(true); // Open the Post Report Dialog
       } else if (type === "comment") {
@@ -249,8 +245,9 @@ const BlogPostPage = () => {
       }));
     };
 
+    
 
-    if (!blogPost) return <div>Blog post not found.</div>;
+    
 
 
     const renderComments = (commentsList: any[]) =>
@@ -341,8 +338,8 @@ const BlogPostPage = () => {
                       {isPostDialogOpen && (
                         <ReportDialog
                           reportType={"blog"} // "blog" or "comment"
-                          reportId={blogPost.id} // ID of the post or comment
-                          handleReport={handleReport} // The function to handle the report submission
+                          reportId={blogPost.id} 
+                          handleReport={handleReport} // function to handel submitting report
                           
                         />
                       )}
@@ -386,22 +383,21 @@ const nestComments = (comments: Comment[]) => {
     commentMap.set(comment.id, comment);
   });
 
-  const roots = [];
+  const roots: Comment[] = [];
 
   comments.forEach((comment) => {
     if (comment.parentCommentId) {
-      // Attach as a reply to its parent
+      // attach as a reply to its parent
       const parent = commentMap.get(comment.parentCommentId);
       if (parent) {
         parent.replies.push(comment);
       }
-    } else {
-      // Top-level comment
+    } else { // top level comment
       roots.push(comment);
     }
   });
 
-  return roots; // Return only top-level comments
+  return roots; // only returns top level comments
 };
 
 export default BlogPostPage;

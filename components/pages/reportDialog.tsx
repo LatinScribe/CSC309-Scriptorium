@@ -13,10 +13,13 @@ import { Label } from "../ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
   
+interface ReportDialogProps {
+  reportType: 'blog' | 'comment';  
+  reportId: number;
+  handleReport: (contentId: number, explanation: string, reportType: string) => Promise<void>;  
+}
 
-
-// Reusable ReportDialog component for both blog posts and comments
-const ReportDialog = ({ reportType, reportId, handleReport }) => {
+const  ReportDialog: React.FC<ReportDialogProps> = ({ reportType, reportId, handleReport }) => {
   const [showReportDialog, setShowReportDialog] = useState(true); // Report dialog visibility
   const [showSuccessDialog, setShowSuccessDialog] = useState(false); // Success dialog visibility
   const [explanation, setExplanation] = useState(""); // Explanation text
@@ -39,7 +42,7 @@ const ReportDialog = ({ reportType, reportId, handleReport }) => {
       <Dialog open={showReportDialog} onOpenChange={(open) => setShowReportDialog(open)}>
         <DialogContent className="bg-background">
           <DialogHeader>
-            <DialogTitle>Report {reportType === "post" ? "Post" : "Comment"}</DialogTitle>
+            <DialogTitle>Report {reportType === "blog" ? "Blog" : "Comment"}</DialogTitle>
             <DialogDescription>Please enter an explanation below</DialogDescription>
           </DialogHeader>
 
@@ -69,7 +72,7 @@ const ReportDialog = ({ reportType, reportId, handleReport }) => {
         <DialogContent className="bg-background">
           <DialogHeader>
             <DialogTitle>Thank You</DialogTitle>
-            <DialogDescription>Thanks, we have received your report. Our team will review it shortly.</DialogDescription>
+            <DialogDescription>We have received your report. Our team will review it shortly.</DialogDescription>
           </DialogHeader>
 
           <DialogFooter>

@@ -86,7 +86,7 @@ export default function BlogListPage() {
     const fetchAndSetBlogs = async (queryToSearch: string = searchQuery) => {
         try {
             // Fetch the blogs based on the search query and sort option
-            const response = await fetchBlogs(searchQuery, sortOption);
+            const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
             setPageCount(response.totalPages);  // page count is updated based on totalPages
         } catch (error) {
@@ -128,14 +128,18 @@ export default function BlogListPage() {
         updateUrl({ sort: newSort, page: 1 });
     };
 
-    const handleClick = (id: number) => {
-        // Navigate to the individual blog post page using the id
-        
+    const handlePostClick = (id: number) => {
+        // navigate to blog post page
         router.push({
             pathname: "/post",
             query: { id },
         });
     };
+
+    const handlePaginationClick = (page: number) => {
+        setCurrentPage(page);
+    };
+  
 
     return (
         <div className="flex justify-center">
@@ -169,7 +173,7 @@ export default function BlogListPage() {
                 <div className="flex flex-col gap-5">
                     {blogs?.length > 0 ? (
                         blogs.map((blog) => (
-                            <div key={blog.id} className="blog-post-card" onClick={() => handleClick(blog.id)}>
+                            <div key={blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border border-gray-300 rounded-lg">
                                     <h2 className="text-xl font-bold">{blog.title}</h2>
                                     <p className="text-sm text-gray-600">{blog.description}</p>
@@ -181,8 +185,61 @@ export default function BlogListPage() {
                         <div>No blogs found for "{searchQuery}".</div>
                     )}
                 </div>
-                <div className="flex justify-center">
-                    {/* Pagination could be added here */}
+                <div className="flex justify-center mt-5">
+                    <Pagination>
+                        <PaginationContent className="flex flex-row justify-center gap-2">
+                        <PaginationItem>
+                            <PaginationPrevious
+                                className={`${
+                                    currentPage <= 1 ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
+                                // disabled={currentPage <= 1}
+                                onClick={() => {
+                                    if (currentPage > 1) {
+                                        const newPage = currentPage - 1;
+                                        setCurrentPage(newPage); // Update the current page state
+                                        fetchAndSetBlogs();     // Fetch and set blogs for the updated page
+                                    }
+                                }}
+                            >
+                                Previous
+                            </PaginationPrevious>
+                        </PaginationItem>
+
+                            {Array.from({ length: pageCount }, (_, index) => (
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        isActive={currentPage === index + 1}
+                                        onClick={() => {
+                                            // Update the current page and fetch blogs for that page
+                                            setCurrentPage(index + 1); // Update the state for the current page
+                                            fetchAndSetBlogs(); // Call the function to fetch blogs with the updated currentPage
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    className={`${
+                                        currentPage >= pageCount ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
+                                    // disabled={currentPage >= pageCount}
+                                    onClick={() => {
+                                        if (currentPage < pageCount) {
+                                            const newPage = currentPage + 1;
+                                            setCurrentPage(newPage); // update the current page state
+                                            fetchAndSetBlogs();
+                                        }
+                                    }}
+                                >
+                                    Next
+                                </PaginationNext>
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
                 </div>
             </div>
         </div>
