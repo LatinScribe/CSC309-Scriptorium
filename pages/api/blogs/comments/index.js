@@ -7,8 +7,8 @@ import { verifyTokenLocal } from "@/utils/auth";
 import { attemptRefreshAccess } from "@/utils/auth";
 
 export default async function handler(req, res) {
-    const { blogPostId } = req.query; 
-    
+    const { blogPostId } = req.query;
+
     if (req.method === 'GET') {
         try {
             // get userId if user is logged in 
@@ -16,30 +16,115 @@ export default async function handler(req, res) {
             let payload = null;
             let username = null;
 
-            if (authorization) {
-                try {
-                    payload = verifyToken(authorization);
-                    username = payload?.username; // Extract username
-                } catch (err) {
-                    console.log("Initial token verification failed:", err);
+            // if (authorization) {
+            //     try {
+            //         payload = verifyToken(authorization);
+            //         username = payload?.username; // Extract username
+            //     } catch (err) {
+            //         console.log("Initial token verification failed:", err);
 
-                    // attempt to refresh the token
+            //         // attempt to refresh the token
+            //         if (x_refreshToken) {
+            //             console.log("Attempting to refresh access token...");
+            //             try {
+            //                 const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+            //                 if (newAccessToken) {   // verify new access token 
+            //                     payload = verifyTokenLocal(newAccessToken);
+            //                     username = payload?.username;  // Extract username from the refreshed token
+            //                 } else {
+            //                     console.log("Refresh token failed");
+            //                 }
+            //             } catch (refreshError) {
+            //                 console.log("Refresh token verification failed:", refreshError);
+            //             }
+            //         } 
+            //     }
+            // }
+
+            // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
+            // ======== TOKEN HANDLING STARTS HERE ==========
+            var payload = null
+            try {
+                // attempt to verify the provided access token!!
+                payload = verifyToken(req.headers.authorization);
+            } catch (err) {
+                // this happens if we can't succesfully verify the access token!!
+                try {
+                    // attempt to refresh access token using refresh token
+                    console.log(err)
+                    let new_accessToken
                     if (x_refreshToken) {
-                        console.log("Attempting to refresh access token...");
-                        try {
-                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-                            if (newAccessToken) {   // verify new access token 
-                                payload = verifyTokenLocal(newAccessToken);
-                                username = payload?.username;  // Extract username from the refreshed token
-                            } else {
-                                console.log("Refresh token failed");
-                            }
-                        } catch (refreshError) {
-                            console.log("Refresh token verification failed:", refreshError);
-                        }
-                    } 
+                        new_accessToken = attemptRefreshAccess(x_refreshToken);
+                    } else {
+                        // no Refresh token, so we have Token Error
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                    if (!new_accessToken) {
+                        // new access token not generated!
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                    // set the payload to be correct using new access token
+                    payload = verifyTokenLocal(new_accessToken)
+
+                    if (!payload) {
+                        // new access token not generated!
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                } catch (err) {
+                    // refresh token went wrong somewhere, push token error
+                    console.log(err)
+                    return res.status(401).json({
+                        error: "Token Error",
+                    });
                 }
             }
+            if (!payload) {
+                // access token verification failed
+                try {
+                    // attempt to refresh access token with refresh token
+                    let new_accessToken
+                    if (x_refreshToken) {
+                        new_accessToken = attemptRefreshAccess(x_refreshToken);
+                    } else {
+                        // no Refresh token, so we have Token Error
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                    if (!new_accessToken) {
+                        // new access token not generated!
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                    // set the payload to be correct using new access token
+                    payload = verifyTokenLocal(new_accessToken)
+
+                    if (!payload) {
+                        // new access token not generated!
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
+                } catch (err) {
+                    console.log(err)
+                    return res.status(401).json({
+                        error: "Token Error",
+                    });
+                }
+            }
+
+            // if we get here, assume that payload is correct!
+            // ========== TOKEN HANDLING ENDS HERE ==========
+
+            username = payload?.username;
+
             let userId = null;
             if (username) {
                 // query the database to get the user id
@@ -52,33 +137,33 @@ export default async function handler(req, res) {
                 }
             }
 
-            
-            const { sortOption } = req.query;
-            const pageNum = parseInt(req.query.page) || 1; 
-            const pageSize = parseInt(req.query.pageSize) || 10; 
 
-            let orderBy = []; 
+            const { sortOption } = req.query;
+            const pageNum = parseInt(req.query.page) || 1;
+            const pageSize = parseInt(req.query.pageSize) || 10;
+
+            let orderBy = [];
             if (sortOption === 'mostValuable') {
                 orderBy = [
-                  { upvoteCount: 'desc' },
-                  { downvoteCount: 'asc' },
-                  { createdAt: 'desc' }
-                ]; 
+                    { upvoteCount: 'desc' },
+                    { downvoteCount: 'asc' },
+                    { createdAt: 'desc' }
+                ];
             } else if (sortOption === 'mostControversial') {
                 orderBy = [
-                  { downvoteCount: 'desc' },
-                  { createdAt: 'desc' }
+                    { downvoteCount: 'desc' },
+                    { createdAt: 'desc' }
                 ];
             } else {
                 orderBy = [
-                  { createdAt: 'desc' } // default sort by creation time
+                    { createdAt: 'desc' } // default sort by creation time
                 ];
             }
 
 
             let whereCondition = {
                 blogPostId: parseInt(blogPostId), // get the comments associated with the blog post
-                deleted: false 
+                deleted: false
             };
 
             // manage visibility of hidden content
@@ -86,10 +171,12 @@ export default async function handler(req, res) {
                 whereCondition = {
                     AND: [
                         whereCondition, // (combine with previous where conditition)
-                        { OR: [
+                        {
+                            OR: [
                                 { hidden: false },
                                 { authorId: userId }, // let authors see their hidden content
-                            ], },
+                            ],
+                        },
                     ],
                 };
             } else {
@@ -103,7 +190,7 @@ export default async function handler(req, res) {
 
             // fetch comments (with pagination)
             const comments = await prisma.comment.findMany({
-                where: whereCondition, 
+                where: whereCondition,
                 orderBy: orderBy, // apply sorting order
                 skip: (pageNum - 1) * pageSize,
                 take: pageSize,
@@ -114,8 +201,8 @@ export default async function handler(req, res) {
             // userId matches the authorId of the post 
             // (this field is specific to the requestor and indicates the comments that should show as flagged
             // to the author)
-            const mappedComments = comments.map((post) => ({    
-                ...post,        
+            const mappedComments = comments.map((post) => ({
+                ...post,
                 isReported: post.hidden && post.authorId === userId,
             }));
 
@@ -125,17 +212,17 @@ export default async function handler(req, res) {
                 where: whereCondition,
             });
             const totalPages = Math.ceil(totalPosts / pageSize);
-            
+
             const response = {
                 comments: mappedComments,
                 totalPages,
                 totalPosts,
             };
 
-            res.status(200).json(response); 
+            res.status(200).json(response);
         } catch (error) {
-          // res.status(500).json({ error: "Could not fetch comment", details: error.message });
-          res.status(500).json({ error: "Could not fetch comment" });
+            // res.status(500).json({ error: "Could not fetch comment", details: error.message });
+            res.status(500).json({ error: "Could not fetch comment" });
         }
     } else if (req.method === 'POST') { // handle comment creation
         // user access
@@ -215,12 +302,12 @@ export default async function handler(req, res) {
 
             // Create a new comment (or a reply if parentCommentId is provided)
             const newComment = await prisma.comment.create({
-            data: {
-                blogPostId: parseInt(blogPostId),
-                authorId: userId, 
-                content,
-                parentCommentId: parentCommentId ? parseInt(parentCommentId) : null, // If provided, marks this as a reply
-            },
+                data: {
+                    blogPostId: parseInt(blogPostId),
+                    authorId: userId,
+                    content,
+                    parentCommentId: parentCommentId ? parseInt(parentCommentId) : null, // If provided, marks this as a reply
+                },
             });
 
             res.status(200).json(newComment);
@@ -228,7 +315,7 @@ export default async function handler(req, res) {
             res.status(500).json({ error: "Could not create comment" });
         }
     } else {
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${method} Not Allowed`);
+        res.setHeader('Allow', ['GET', 'POST']);
+        res.status(405).end(`Method ${method} Not Allowed`);
     }
-  }
+}
