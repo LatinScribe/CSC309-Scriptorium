@@ -11,6 +11,13 @@ const fileExtension = {
     "java": "java",
     "c": "c",
     "cpp": "cpp",
+    "rust": "rs",
+    "go": "go",
+    "ruby": "rb",
+    "php": "php",
+    "perl": "pl",
+    "swift": "swift",
+    "brainfuck": "bf",
 };
 
 const dockerImages = {
@@ -19,6 +26,13 @@ const dockerImages = {
     java: "openjdk:11",
     c: "gcc:11",
     cpp: "gcc:11",
+    rust: "rust:latest",
+    go: "golang:latest",
+    ruby: "ruby:latest",
+    php: "php:latest",
+    perl: "perl:latest",
+    swift: "swift:latest",
+    brainfuck: "sergiomtzlosa/brainfuck",
 };
 
 const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
@@ -54,6 +68,27 @@ function getDockerCommand(language, directory, fileName) {
             break;
         case "cpp":
             command = `g++ /code/${fileName} -o /code/${fileName.replace(/\.cpp$/, "")} && /code/${fileName.replace(/\.cpp$/, "")} && rm /code/${fileName.replace(/\.cpp$/, "")}`;
+            break;
+        case "rust":
+            command = `rustc /code/${fileName} -o /code/${fileName.replace(/\.rs$/, "")} && /code/${fileName.replace(/\.rs$/, "")}`;
+            break;
+        case "go":
+            command = `go run /code/${fileName}`;
+            break;
+        case "ruby":
+            command = `ruby /code/${fileName}`;
+            break;
+        case "php":
+            command = `php /code/${fileName}`;
+            break;
+        case "perl":
+            command = `perl /code/${fileName}`;
+            break;
+        case "swift":
+            command = `swift /code/${fileName}`;
+            break;
+        case "brainfuck":
+            command = `brainfuck /code/${fileName}`;
             break;
         default:
             throw new Error("Unsupported language");

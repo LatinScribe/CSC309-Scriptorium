@@ -74,6 +74,34 @@ const languages = [
     {
         "value": "cpp",
         "label": "C++"
+    },
+    {
+        "value": "rust",
+        "label": "Rust"
+    },
+    {
+        "value": "go",
+        "label": "Go"
+    },
+    {
+        "value": "ruby",
+        "label": "Ruby"
+    },
+    {
+        "value": "php",
+        "label": "PHP"
+    },
+    {
+        "value": "perl",
+        "label": "Perl"
+    },
+    {
+        "value": "swift",
+        "label": "Swift"
+    },
+    {
+        "value": "brainfuck",
+        "label": "Brainf--k"
     }
 ]
 
