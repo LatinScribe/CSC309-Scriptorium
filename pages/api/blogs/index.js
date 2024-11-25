@@ -24,65 +24,73 @@ export default async function handler(req, res) {
                     // attempt to refresh the token
                     if (x_refreshToken) {
                         console.log("Attempting to refresh access token...");
-                        
-//                         const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-//                         if (newAccessToken) {   // verify new access token 
-//                             payload = verifyTokenLocal(newAccessToken);
-//                             username = payload?.username;  // Extract username from the refreshed token
-//                         } else {
-//                             console.log("Refresh token failed");
-//                         }
-//                     } 
-//                 }
 
-                
-//                 if (username) {
-//                     // query the database to get the user id
-//                     const user = await prisma.user.findUnique({
-//                         where: { username },
-//                         // select: { id: true },
-//                     });
-//                     if (user) {
-//                         userId = user.id;
-//                     }
-                        try {
-                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-                            if (newAccessToken) {   // verify new access token 
-                                payload = verifyTokenLocal(newAccessToken);
-                                username = payload?.username;  // Extract username from the refreshed token
-                            } else {
-                                console.log("Refresh token failed");
-                            }
-                        } catch (refreshError) {
-                            console.log("Refresh token verification failed:", refreshError);
+            // ============== DIFFFERENCE ===============
+                        
+                        const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                        if (newAccessToken) {   // verify new access token 
+                            payload = verifyTokenLocal(newAccessToken);
+                            username = payload?.username;  // Extract username from the refreshed token
+                        } else {
+                            console.log("Refresh token failed");
                         }
                     } 
                 }
-            }
-            // try {
-            //     payload = verifyToken(req.headers.authorization);
-            // } catch (err) {
-            //     console.log(err);
-            //     return res.status(401).json({
-            //         error: "Unauthorized",
-            //     });
-            // }
-            // if (!payload) {
-            //     return res.status(401).json({
-            //         error: "Unauthorized",
-            //     });
-            // }
-            let userId = null;
-            if (username) {
-                // query the database to get the user id
-                const user = await prisma.user.findUnique({
-                    where: { username },
-                    // select: { id: true },
-                });
-                if (user) {
-                    userId = user.id;
+
+                
+                if (username) {
+                    // query the database to get the user id
+                    const user = await prisma.user.findUnique({
+                        where: { username },
+                        // select: { id: true },
+                    });
+                    if (user) {
+                        userId = user.id;
+                    }
                 }
             }
+
+            // ============== DIFFFERENCE =============== (use control k + control u to uncomment)
+            //             try {
+            //                 const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+            //                 if (newAccessToken) {   // verify new access token 
+            //                     payload = verifyTokenLocal(newAccessToken);
+            //                     username = payload?.username;  // Extract username from the refreshed token
+            //                 } else {
+            //                     console.log("Refresh token failed");
+            //                 }
+            //             } catch (refreshError) {
+            //                 console.log("Refresh token verification failed:", refreshError);
+            //             }
+            //         } 
+            //     }
+            // }
+            // // try {
+            // //     payload = verifyToken(req.headers.authorization);
+            // // } catch (err) {
+            // //     console.log(err);
+            // //     return res.status(401).json({
+            // //         error: "Unauthorized",
+            // //     });
+            // // }
+            // // if (!payload) {
+            // //     return res.status(401).json({
+            // //         error: "Unauthorized",
+            // //     });
+            // // }
+            // let userId = null;
+            // if (username) {
+            //     // query the database to get the user id
+            //     const user = await prisma.user.findUnique({
+            //         where: { username },
+            //         // select: { id: true },
+            //     });
+            //     if (user) {
+            //         userId = user.id;
+            //     }
+            // }
+
+            // ============== DIFFFERENCE ===============
 
             
             // const userId = payload?.id || null; // if authenticated, extract userid
