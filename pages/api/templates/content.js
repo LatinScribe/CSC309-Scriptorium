@@ -23,6 +23,12 @@ export default async function handler(req, res) {
                 author: {
                     select: {
                         username: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        avatar: true,
+                        role: true,
+                        createdAt: true,
                     }
                 },
                 modifiedAt: true,

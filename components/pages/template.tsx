@@ -56,6 +56,12 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+  } from "@/components/ui/hover-card"
+import UserCard from "../usercard";
 
 export default function TemplatePage() {
     const router = useRouter();
@@ -219,7 +225,10 @@ export default function TemplatePage() {
                                             />
                                         </div>
                                     ) : (
-                                        <div className="text-2xl">{template?.title}</div>
+                                        <div className="text-2xl truncate">
+                                            {template?.title}
+                                            <span className="text-gray-500"> @{template?.id}</span>
+                                        </div>
                                     )
                                 }
                                 <div className='flex gap-3'>
@@ -334,7 +343,9 @@ export default function TemplatePage() {
                                         />
                                     </>
                                 ) : (
-                                    <div className="text-sm text-gray-500">{template?.explanation}</div>
+                                    <ScrollArea className='max-h-20'>
+                                        <div className="text-sm text-gray-500">{template?.explanation}</div>
+                                    </ScrollArea>
                                 )
                             }
                             {
@@ -362,7 +373,11 @@ export default function TemplatePage() {
                                             <div className="italic text-sm text-muted">No tags provided</div>
                                         )}
                                         <Separator orientation="vertical" />
-                                        <div className="text-sm text-gray-500">Author: {template?.author?.username}</div>
+                                        <div className="text-sm text-gray-500">
+                                            {template?.author && (
+                                                <UserCard user={template.author} />
+                                            )}
+                                        </div>
                                         {template?.forkedSourceId && (
                                             <Separator orientation="vertical" />)}
                                         {template?.forkedSourceId && (
