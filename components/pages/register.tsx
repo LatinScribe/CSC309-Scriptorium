@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import { register } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export default function RegisterPage() {
     const { session, setSession } = useContext(SessionContext);
@@ -39,7 +40,7 @@ export default function RegisterPage() {
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
             <h1 className="text-3xl font-semibold p-4">Register</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg p-4">
-                <input
+                <Input
                     type="text"
                     placeholder="Username *"
                     value={username}
@@ -48,7 +49,7 @@ export default function RegisterPage() {
                     required
                 />
                 <div className="relative">
-                    <input
+                    <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="Password *"
                         value={password}
@@ -65,7 +66,7 @@ export default function RegisterPage() {
                     </button>
                 </div>
                 <div className="relative">
-                    <input
+                    <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="Confirm Password *"
                         value={confirmPassword}
@@ -81,7 +82,7 @@ export default function RegisterPage() {
                         {showPassword ? "Hide" : "Show"}
                     </button>
                 </div>
-                <input
+                <Input
                     type="email"
                     placeholder="Email *"
                     value={email}
@@ -89,28 +90,28 @@ export default function RegisterPage() {
                     className="p-2 border border-gray-300 rounded"
                     required
                 />
-                <input
+                <Input
                     type="text"
                     placeholder="First Name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="p-2 border border-gray-300 rounded"
                 />
-                <input
+                <Input
                     type="text"
                     placeholder="Last Name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="p-2 border border-gray-300 rounded"
                 />
-                <input
+                <Input
                     type="text"
                     placeholder="Phone Number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className="p-2 border border-gray-300 rounded"
                 />
-                <input
+                <Input
                     type="text"
                     placeholder="Avatar (URL)"
                     value={avatar}

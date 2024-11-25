@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import { login } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export default function LoginPage() {
     const { session, setSession } = useContext(SessionContext);
@@ -29,22 +30,22 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen text-textcolor">
-            <h1 className="text-3xl font-semibold p-4">Login</h1>
-            <div className="flex flex-col items-center justify-center space-y-4">
-                <input
+        <div className="flex flex-col items-center justify-center h-screen">
+            <h1 className="text-3xl font-semibold p-4">Welcome Back!</h1>
+            <div className="flex flex-col items-center justify-center gap-3">
+                <Input
                     type="text"
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
+                    className="p-2 border border-gray-300 rounded sm:w-64"
                 />
-                <input
+                <Input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="p-2 border border-gray-300 rounded"
+                    className="p-2 border border-gray-300 rounded sm:w-64"
                 />
                 <Button onClick={handleLogin}>
                     Login

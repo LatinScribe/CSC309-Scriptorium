@@ -100,7 +100,7 @@ export default function Home() {
       if (router.asPath.startsWith("/post?")) {
         return <BlogPostPage />;
       }
-      if (router.asPath.startsWith("/blogs?search=")) {
+      if (router.asPath.startsWith("/blogs?")) {
         return <BlogListPage />;
       }
       return <Custom404 />;
