@@ -136,7 +136,7 @@ export default function NavBar() {
                                                 <li>
                                                     <Link href="/moderation" className="flex items-center space-x-2 text-primary">
                                                         <FaceIcon />
-                                                        <span>(Admins) Moderation</span>
+                                                        <span>(Admin) Moderation</span>
                                                     </Link>
                                                 </li>
                                         
