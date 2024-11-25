@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import { login, getProfileADMIN, searchUsers } from "@/utils/accountInterface";
 import { useRouter } from "next/router";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export default function AdminAccount() {
     const { session, setSession } = useContext(SessionContext);
@@ -49,7 +50,7 @@ export default function AdminAccount() {
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
             <h1 className="text-3xl font-semibold p-4">Select a User</h1>
             <div className="flex flex-col items-center justify-center space-y-4">
-                <input
+                <Input
                     type="text"
                     placeholder="Username"
                     value={username}

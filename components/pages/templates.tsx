@@ -53,6 +53,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import Link from "next/link";
+import UserCard from "../usercard";
 
 const languages = [
     {
@@ -335,8 +336,8 @@ export default function TemplatesPage() {
                 <div className='flex flex-col gap-5'>
                     {templates.map((template) => (
                         <a key={template.id} className="flex flex-col gap-2 p-4 border rounded-lg" href={`/templates/${template.id}`}>
-                            <div className="text-xl">{template.title}</div>
-                            <div className="text-sm">{template.explanation && template.explanation.length > 100 ? `${template.explanation.substring(0, 100)}...` : template.explanation}</div>
+                            <div className="text-xl truncate">{template.title}</div>
+                            <div className="text-sm truncate">{template.explanation}</div>
                             <div className="flex h-5 items-center space-x-4 text-sm">
                                 <div>
                                     {template.tags.length > 0
@@ -347,7 +348,7 @@ export default function TemplatesPage() {
                                 </div>
                                 <Separator orientation="vertical" />
                                 <div>
-                                    {template.author?.username}
+                                    {template.author && <UserCard user={template.author} />}
                                 </div>
                                 <Separator orientation="vertical" className="hidden sm:block" />
                                 <div className="hidden sm:block">
