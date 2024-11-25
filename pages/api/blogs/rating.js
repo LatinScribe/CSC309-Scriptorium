@@ -51,10 +51,22 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: "Forbidden" });
     }
 
+    let username = null;
+    username = payload?.username; // Extract username
+    let userId = null;
+    // query the database to get the user id
+    const user = await prisma.user.findUnique({
+        where: { username },
+        // select: { id: true },
+    });
+    if (user) {
+        userId = user.id;
+    }
+
     try {
         // Expecting the body to contain action and userId 
         // action should be either 'upvote' or 'downvote'
-        const { action, userId } = req.body;
+        const { action } = req.body;
         const { id } = req.query;
         
 
@@ -126,7 +138,7 @@ export default async function handler(req, res) {
                     where: { blogPostId: parseInt(id), userId },
                 });
                 if (prevUpvote) { // remove previous upvote if necessary
-                    await prisma.blogPostUpvote.delete({ where: { id: existingUpvote.id } });
+                    await prisma.blogPostUpvote.delete({ where: { id: prevUpvote.id } });
                     await prisma.blogPost.update({
                         where: { id: parseInt(id) },
                         data: { upvoteCount: { decrement: 1 } },
@@ -153,6 +165,6 @@ export default async function handler(req, res) {
 
         return res.status(200).json(updatedPost);
     } catch (error) { 
-        res.status(500).json({ error: 'Could not rate blog post' });
+        res.status(500).json({ error: 'Could not rate blog post', details:error.message });
     }
 }

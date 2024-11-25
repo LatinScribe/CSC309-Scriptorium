@@ -8,21 +8,43 @@ import { attemptRefreshAccess } from "@/utils/auth";
 export default async function handler(req, res) {
     if (req.method === 'GET') { // retrieve blog posts
         try {
+            console.log("sending response");
             // get userId if user is logged in 
             const { authorization, x_refreshToken } = req.headers;
             let payload = null;
             let username = null;
+            let userId = null;
 
             if (authorization) {
-                try {
-                    payload = verifyToken(authorization);
-                    username = payload?.username; // Extract username
-                } catch (err) {
+                payload = verifyToken(authorization);
+                username = payload?.username; // Extract username
+                if (!payload) {
                     console.log("Initial token verification failed:", err);
 
                     // attempt to refresh the token
                     if (x_refreshToken) {
                         console.log("Attempting to refresh access token...");
+                        
+//                         const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+//                         if (newAccessToken) {   // verify new access token 
+//                             payload = verifyTokenLocal(newAccessToken);
+//                             username = payload?.username;  // Extract username from the refreshed token
+//                         } else {
+//                             console.log("Refresh token failed");
+//                         }
+//                     } 
+//                 }
+
+                
+//                 if (username) {
+//                     // query the database to get the user id
+//                     const user = await prisma.user.findUnique({
+//                         where: { username },
+//                         // select: { id: true },
+//                     });
+//                     if (user) {
+//                         userId = user.id;
+//                     }
                         try {
                             const newAccessToken = attemptRefreshAccess(x_refreshToken);  
                             if (newAccessToken) {   // verify new access token 
@@ -67,6 +89,7 @@ export default async function handler(req, res) {
             const pageNum = parseInt(req.query.page) || 1; // default to 1 
             const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
             const searchQuery = req.query.query || '';
+            const author = req.query.author;
 
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
@@ -130,10 +153,29 @@ export default async function handler(req, res) {
             }
 
 
+            if (author) {
+                whereCondition.AND = whereCondition.AND || [whereCondition]; 
+                whereCondition.AND.push({
+                    author: {
+                        is: {
+                            username: {
+                                equals: author,
+                            },
+                        },
+                    },
+                });
+            }
+
+
             const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
                 where: whereCondition,
                 include: { // relations
-                    codeTemplates: true         // fetch each blog post and all the related code templates stored in codeTemplatse field
+                    codeTemplates: true,         // fetch each blog post and all the related code templates stored in codeTemplatse field
+                    author: {
+                        select: {
+                            username: true,
+                        },
+                    },
                 },
                 skip: (pageNum - 1) * pageSize,           // pagination offset
                 take: pageSize,                
@@ -147,6 +189,9 @@ export default async function handler(req, res) {
             // to the autho)
             let mappedBlogPosts = blogPosts.map((post) => ({    
                 ...post,       
+
+                tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
+
                 isReported: post.hidden && post.authorId === userId,
             }));
 
@@ -158,20 +203,30 @@ export default async function handler(req, res) {
             const totalPages = Math.ceil(totalPosts / pageSize);
 
             if (mappedBlogPosts.length === 0) {
+
+                console.log("no results");
+
                 return res.status(404).json({ message: "No blog posts found matching your criteria." });
             }
 
             const response = {
                 blogPosts: mappedBlogPosts,
                 totalPages,
-                totalPosts,
+                // totalPosts,
             };
             
+            console.log("sending response");
+//                 totalPosts,
+//             };
+            
+
             res.status(200).json(response);
         } catch (error) {
-            res.status(500).json({ error: 'Could not fetch blog posts'});
+            res.status(500).json({ error: 'Could not fetch blog posts', details: error.message});
         }
     } else if (req.method === 'POST') {     // create new blog post 
+
+        console.log("creating blog post...");
 
         // user access
         const { x_refreshToken } = req.headers;
@@ -215,26 +270,48 @@ export default async function handler(req, res) {
             return res.status(403).json({ error: "Forbidden" });
         }
 
+        let username = null;
+        username = payload?.username; // Extract username
+        let userId = null;
+        // query the database to get the user id
+        const user = await prisma.user.findUnique({
+            where: { username },
+            // select: { id: true },
+        });
+        if (user) {
+            userId = user.id;
+        }
 
-        const { title, description, tags, authorId, codeTemplates } = req.body;
+        console.log("authentication successful");
 
-
+        const { title, description, tags, codeTemplates } = req.body;
         try {
             const newBlogPost = await prisma.blogPost.create({
+                
                 data: {
                     title,
                     description,
                     tags,
-                    authorId,
+                    author: {
+                        connect: {
+                            id: userId,  
+                        },
+                    },
+                    
                     codeTemplates: {
-                        connect: codeTemplates ? codeTemplates.map(template => ({ id: template.id })) : [],
-                    } 
+                        connect: codeTemplates.map(template => ({ id: template.id })), // Connecting to existing CodeTemplates by ID
+                      },
+                },
+                include: {
+                    codeTemplates: true, // This will include the related codeTemplates in the result
                 },
             });
+            console.log(newBlogPost.codeTemplates);
+            console.log("blog post created");
             res.status(200).json(newBlogPost);
         } catch (error) {
             // res.status(500).json({ error: 'Could not create blog post', details: error.message });
-            res.status(500).json({ error: 'Could not create blog post' });
+            res.status(500).json({ error: 'Could not create blog post', details: error.message });
         }
     } else {
         res.setHeader('Allow', ['GET', 'POST']);
