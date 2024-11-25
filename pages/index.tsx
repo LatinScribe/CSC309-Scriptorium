@@ -10,11 +10,16 @@ import BlogsPage from "@/components/pages/blogs";
 import TemplatesPage from "@/components/pages/templates";
 import TemplatePage from "@/components/pages/template";
 import PlaygroundPage from "@/components/pages/playground";
+import RegisterPage from "@/components/pages/register";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "next-themes";
 import Custom404 from "@/components/pages/404";
+import ProfilePage from "@/components/pages/profile";
+import WorkInProgress from "@/components/pages/work-in-progress";
+import AdminAccount from "@/components/pages/admin-account";
+import AdminProfile from "@/components/pages/admin-profile";
 import MyTemplatesPage from "@/components/pages/mytemplates";
 
 const geistSans = localFont({
@@ -53,25 +58,38 @@ export default function Home() {
         return <WelcomePage />;
       case "/login":
         return <LoginPage />;
+      case "/register":
+        return <RegisterPage />;
+      case "/profile":
+        return <ProfilePage />;
       case "/blogs":
         return <BlogsPage />;
       case "/templates":
         return <TemplatesPage />;
       case "/playground":
         return <PlaygroundPage />;
+      case "/work-in-progress":
+        return <WorkInProgress />;
+      case "/admin-account":
+        return <AdminAccount />;
+      case "/admin-profile":
+        return <AdminProfile />;
       case "/my-templates":
         return <MyTemplatesPage />;
       default:
-        if (router.asPath.startsWith("/templates?")) {
-          return <TemplatesPage />;
-        }
-        if (router.asPath.startsWith("/my-templates?")) {
-          return <MyTemplatesPage />;
-        }
-        if (router.asPath.startsWith("/templates/")) {
-          return <TemplatePage />;
-        }
-        return <Custom404 />;
+      if (router.asPath.startsWith("/templates?")) {
+        return <TemplatesPage />;
+      }
+      if (router.asPath.startsWith("/my-templates?")) {
+        return <MyTemplatesPage />;
+      }
+      if (router.asPath.startsWith("/admin-profile?")) {
+        return <AdminProfile />;
+      }
+      if (router.asPath.startsWith("/templates/")) {
+        return <TemplatePage />;
+      }
+      return <Custom404 />;
     }
   };
 
