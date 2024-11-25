@@ -49,6 +49,7 @@ export default function AdminProfile() {
     const [updatedAt, setUpdatedAt] = useState<string | null>(null);
     const [createdAt, setCreatedAt] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [userRole, setUserRole] = useState("USER");
 
     useEffect(() => {
         if (session) {
@@ -64,8 +65,9 @@ export default function AdminProfile() {
                         setAvatar(profile.avatar || "");
                         setEmail(profile.email);
                         setOldEmail(profile.email);
-                        setUpdatedAt(profile.updatedAt ? new Date(profile.updatedAt).toUTCString() : "Unknown");
-                        setCreatedAt(profile.createdAt ? new Date(profile.createdAt).toUTCString() : "Unknown");
+                        setUpdatedAt(profile.updatedAt ? new Date(profile.updatedAt).toLocaleString() : "Unknown");
+                        setCreatedAt(profile.createdAt ? new Date(profile.createdAt).toLocaleString() : "Unknown");
+                        setUserRole(profile.role);
                     })
                     .catch((error) => {
                         console.error("Failed to fetch profile:", error);
@@ -93,7 +95,7 @@ export default function AdminProfile() {
                 email_in = email
             }
 
-            editProfileADMIN(oldusername, session.accessToken, session.refreshToken, username, email_in, session.user.role, avatar, phoneNumber, firstName, lastName, password_in)
+            editProfileADMIN(oldusername, session.accessToken, session.refreshToken, username, email_in, userRole, avatar, phoneNumber, firstName, lastName, password_in)
                 .then((updated_profile) => {
                     setError(null);
                     setSuccessMessage("Profile updated successfully!");
@@ -112,6 +114,7 @@ export default function AdminProfile() {
                     setEmail(updated_profile.email);
                     setOldEmail(updated_profile.email);
                     setOldUsername(updated_profile.username);
+                    setUserRole(updated_profile.role);
 
                 })
                 .catch((error) => {
@@ -257,6 +260,19 @@ export default function AdminProfile() {
                 />
                 <label>Show Password</label>
             </div>
+            <div className="col-span-1 md:col-span-2 flex items-center">
+                <label className="mr-2">Role:</label>
+                <select
+                    value={userRole}
+                    onChange={(e) => {
+                        setUserRole(e.target.value);
+                    }}
+                    className="p-2 border border-gray-300 rounded"
+                >
+                    <option value="USER">User</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
             <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
 
                 <Button onClick={handelProfileChange} className="col-span-1">
@@ -291,30 +307,26 @@ export default function AdminProfile() {
 
             </div>
             {error && (
-                <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4">
-                {error}
-
-                <Button onClick={handelAccountReturn} className="col-span-1">
-                Go back to account selection
-                </Button>
+                <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4 p-4">
+                    {error}
+                    <Button onClick={handelAccountReturn} className="col-span-1 mt-2">
+                        Go back to account selection
+                    </Button>
                 </div>
             )}
             {message && (
-                <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4">
-                {message}
+                <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4 p-4">
+                    {message}
                 </div>
             )}
-
             {createdAt && (
-                <div className="col-span-1 md:col-span-2 text text-center mt-4">
-                {
-                    "Account created at: " + String(createdAt)}
+                <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
+                    {"Account created at: " + String(createdAt)}
                 </div>
             )}
-
             {updatedAt && (
-                <div className="col-span-1 md:col-span-2 text text-center mt-4">
-                {"Account updated at: " + String(updatedAt)}
+                <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
+                    {"Account updated at: " + String(updatedAt)}
                 </div>
             )}
             </div>
