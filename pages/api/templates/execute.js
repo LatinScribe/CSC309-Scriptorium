@@ -21,18 +21,18 @@ const fileExtension = {
 };
 
 const dockerImages = {
-    python: "python:3.11",
-    javascript: "node:16",
-    java: "openjdk:11",
-    c: "gcc:11",
-    cpp: "gcc:11",
-    rust: "rust:latest",
-    go: "golang:latest",
-    ruby: "ruby:latest",
-    php: "php:latest",
-    perl: "perl:latest",
-    swift: "swift:latest",
-    brainfuck: "sergiomtzlosa/brainfuck",
+    python: "python:3.13-alpine",
+    javascript: "node:23-alpine",
+    java: "openjdk:24",
+    c: "gcc:14",
+    cpp: "gcc:14",
+    rust: "rust:1.82-alpine",
+    go: "golang:1.23-alpine",
+    ruby: "ruby:3.3-alpine",
+    php: "php:8.2-alpine",
+    perl: "perl:5.40-slim",
+    swift: "swift:6.0",
+    brainfuck: "sergiomtzlosa/brainfuck"
 };
 
 const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
