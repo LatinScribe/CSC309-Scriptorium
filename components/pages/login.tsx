@@ -24,6 +24,10 @@ export default function LoginPage() {
             });
     }
 
+    function handleForgotPassword() {
+        router.push("/work-in-progress");
+    }
+
     return (
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
             <h1 className="text-3xl font-semibold p-4">Login</h1>
@@ -48,6 +52,12 @@ export default function LoginPage() {
                 {errorMessage && (
                     <p className="text-red-500 mt-4">{errorMessage}</p>
                 )}
+                <button
+                    onClick={handleForgotPassword}
+                    className="text-blue-500 mt-4"
+                >
+                    Forgot Password?
+                </button>
             </div>
         </div>
     );

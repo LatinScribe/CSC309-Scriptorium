@@ -17,6 +17,7 @@ import Footer from "@/components/footer";
 import { ThemeProvider } from "next-themes";
 import Custom404 from "@/components/pages/404";
 import ProfilePage from "@/components/pages/profile";
+import WorkInProgress from "@/components/pages/work-in-progress";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -64,6 +65,8 @@ export default function Home() {
       return <TemplatesPage />;
       case "/playground":
       return <PlaygroundPage />;
+      case "/work-in-progress":
+      return <WorkInProgress />;
       default:
       if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;
