@@ -439,7 +439,6 @@ export default async function handler(req, res) {
                 });
             }
         }
-    }
 
     // if we get here, assume that payload is correct!
     // ========== TOKEN HANDLING ENDS HERE ==========
