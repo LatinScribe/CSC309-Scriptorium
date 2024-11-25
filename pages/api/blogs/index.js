@@ -25,26 +25,62 @@ export default async function handler(req, res) {
                     if (x_refreshToken) {
                         console.log("Attempting to refresh access token...");
                         
-                        const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-                        if (newAccessToken) {   // verify new access token 
-                            payload = verifyTokenLocal(newAccessToken);
-                            username = payload?.username;  // Extract username from the refreshed token
-                        } else {
-                            console.log("Refresh token failed");
+//                         const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+//                         if (newAccessToken) {   // verify new access token 
+//                             payload = verifyTokenLocal(newAccessToken);
+//                             username = payload?.username;  // Extract username from the refreshed token
+//                         } else {
+//                             console.log("Refresh token failed");
+//                         }
+//                     } 
+//                 }
+
+                
+//                 if (username) {
+//                     // query the database to get the user id
+//                     const user = await prisma.user.findUnique({
+//                         where: { username },
+//                         // select: { id: true },
+//                     });
+//                     if (user) {
+//                         userId = user.id;
+//                     }
+                        try {
+                            const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                            if (newAccessToken) {   // verify new access token 
+                                payload = verifyTokenLocal(newAccessToken);
+                                username = payload?.username;  // Extract username from the refreshed token
+                            } else {
+                                console.log("Refresh token failed");
+                            }
+                        } catch (refreshError) {
+                            console.log("Refresh token verification failed:", refreshError);
                         }
                     } 
                 }
-
-                
-                if (username) {
-                    // query the database to get the user id
-                    const user = await prisma.user.findUnique({
-                        where: { username },
-                        // select: { id: true },
-                    });
-                    if (user) {
-                        userId = user.id;
-                    }
+            }
+            // try {
+            //     payload = verifyToken(req.headers.authorization);
+            // } catch (err) {
+            //     console.log(err);
+            //     return res.status(401).json({
+            //         error: "Unauthorized",
+            //     });
+            // }
+            // if (!payload) {
+            //     return res.status(401).json({
+            //         error: "Unauthorized",
+            //     });
+            // }
+            let userId = null;
+            if (username) {
+                // query the database to get the user id
+                const user = await prisma.user.findUnique({
+                    where: { username },
+                    // select: { id: true },
+                });
+                if (user) {
+                    userId = user.id;
                 }
             }
 
@@ -116,6 +152,7 @@ export default async function handler(req, res) {
                 };
             }
 
+
             if (author) {
                 whereCondition.AND = whereCondition.AND || [whereCondition]; 
                 whereCondition.AND.push({
@@ -128,6 +165,7 @@ export default async function handler(req, res) {
                     },
                 });
             }
+
 
             const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
                 where: whereCondition,
@@ -151,7 +189,9 @@ export default async function handler(req, res) {
             // to the autho)
             let mappedBlogPosts = blogPosts.map((post) => ({    
                 ...post,       
+
                 tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
+
                 isReported: post.hidden && post.authorId === userId,
             }));
 
@@ -163,7 +203,9 @@ export default async function handler(req, res) {
             const totalPages = Math.ceil(totalPosts / pageSize);
 
             if (mappedBlogPosts.length === 0) {
+
                 console.log("no results");
+
                 return res.status(404).json({ message: "No blog posts found matching your criteria." });
             }
 
@@ -174,12 +216,18 @@ export default async function handler(req, res) {
             };
             
             console.log("sending response");
+//                 totalPosts,
+//             };
+            
+
             res.status(200).json(response);
         } catch (error) {
             res.status(500).json({ error: 'Could not fetch blog posts', details: error.message});
         }
     } else if (req.method === 'POST') {     // create new blog post 
+
         console.log("creating blog post...");
+
         // user access
         const { x_refreshToken } = req.headers;
         let payload;

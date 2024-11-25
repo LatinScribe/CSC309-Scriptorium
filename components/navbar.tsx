@@ -47,6 +47,9 @@ export default function NavBar() {
                     <Link href="/templates" className="hover:text-gray-300">
                         Templates
                     </Link>
+                    <Link href="/playground" className="hover:text-gray-300">
+                        Playground
+                    </Link>
                     <Link href="/blogs" className="hover:text-gray-300">
                         Blogs
                     </Link>
@@ -71,6 +74,11 @@ export default function NavBar() {
                                 <li>
                                     <Link href="/templates" className="hover:text-gray-300">
                                         Templates
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/playground" className="hover:text-gray-300">
+                                        Playground
                                     </Link>
                                 </li>
                                 <li>
@@ -126,18 +134,27 @@ export default function NavBar() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/edit-profile" className="flex items-center space-x-2">
+                                            <Link href="/profile" className="flex items-center space-x-2">
                                                 <PersonIcon />
-                                                <span>Edit Profile</span>
+                                                <span>Manage Profile</span>
                                             </Link>
                                         </li>
                                         {session?.user?.role === "ADMIN" && (
-                                            <li>
-                                                <Link href="/moderation" className="flex items-center space-x-2 text-primary">
-                                                    <FaceIcon />
-                                                    <span>(Admins) Moderation</span>
-                                                </Link>
-                                            </li>
+                                            <>
+                                                <li>
+                                                    <Link href="/moderation" className="flex items-center space-x-2 text-primary">
+                                                        <FaceIcon />
+                                                        <span>(Admin) Moderation</span>
+                                                    </Link>
+                                                </li>
+                                        
+                                                <li>
+                                                    <Link href="/admin-account" className="flex items-center space-x-2 text-primary">
+                                                        <FaceIcon />
+                                                        <span>(Admin) User Management</span>
+                                                    </Link>
+                                                </li>
+                                            </>
                                         )}
                                         <li>
                                             <AlertDialog>
@@ -171,9 +188,14 @@ export default function NavBar() {
                             </Sheet>
                         </li>
                     ) : (
-                        <li>
+                        <li className="flex flex-col sm:flex-row sm:space-x-2">
+                            <Link href="/register">
+                                <Button className="w-full sm:w-auto">
+                                    Signup
+                                </Button>
+                            </Link>
                             <Link href="/login">
-                                <Button>
+                                <Button className="w-full sm:w-auto">
                                     Login
                                 </Button>
                             </Link>

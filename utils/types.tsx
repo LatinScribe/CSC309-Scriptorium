@@ -20,7 +20,7 @@ export interface PaginationInfo {
 }
 
 export interface User {
-    id: number;
+    id?: number;
     username: string;
     email: string;
     firstName?: string;
@@ -28,8 +28,8 @@ export interface User {
     role: string;
     avatar?: string;
     phoneNumber?: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface Template {

@@ -301,7 +301,7 @@ export default async function handler(req, res) {
                         username: newUsername,
                     },
                 })
-                if (userExists) {
+                if (userExists && newUsername !== username) {
                     return res.status(400).json({
                         error: "USER ALREADY EXISTS",
                     });

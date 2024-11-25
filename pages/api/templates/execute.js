@@ -11,15 +11,32 @@ const fileExtension = {
     "java": "java",
     "c": "c",
     "cpp": "cpp",
+    "rust": "rs",
+    "go": "go",
+    "ruby": "rb",
+    "php": "php",
+    "perl": "pl",
+    "swift": "swift",
+    "brainfuck": "bf",
 };
 
 const dockerImages = {
-    python: "custom-python:3.11",
-    javascript: "custom-node:16",
-    java: "custom-java:11",
-    c: "custom-c:11",
-    cpp: "custom-cpp:11",
+    python: "python:3.13-alpine",
+    javascript: "node:23-alpine",
+    java: "openjdk:24",
+    c: "gcc:14",
+    cpp: "gcc:14",
+    rust: "rust:1.82-alpine",
+    go: "golang:1.23-alpine",
+    ruby: "ruby:3.3-alpine",
+    php: "php:8.2-alpine",
+    perl: "perl:5.40-slim",
+    swift: "swift:6.0",
+    brainfuck: "sergiomtzlosa/brainfuck"
 };
+
+const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
+const MEMORY_LIMIT = '512m';
 
 function getDockerCommand(language, directory, fileName) {
     const image = dockerImages[language];
@@ -52,11 +69,32 @@ function getDockerCommand(language, directory, fileName) {
         case "cpp":
             command = `g++ /code/${fileName} -o /code/${fileName.replace(/\.cpp$/, "")} && /code/${fileName.replace(/\.cpp$/, "")} && rm /code/${fileName.replace(/\.cpp$/, "")}`;
             break;
+        case "rust":
+            command = `rustc /code/${fileName} -o /code/${fileName.replace(/\.rs$/, "")} && /code/${fileName.replace(/\.rs$/, "")}`;
+            break;
+        case "go":
+            command = `go run /code/${fileName}`;
+            break;
+        case "ruby":
+            command = `ruby /code/${fileName}`;
+            break;
+        case "php":
+            command = `php /code/${fileName}`;
+            break;
+        case "perl":
+            command = `perl /code/${fileName}`;
+            break;
+        case "swift":
+            command = `swift /code/${fileName}`;
+            break;
+        case "brainfuck":
+            command = `brainfuck /code/${fileName}`;
+            break;
         default:
             throw new Error("Unsupported language");
     }
 
-    return `docker run --rm -i -v ${directory}:/code ${image} sh -c "${command}"`;
+    return `docker run --rm -i -v ${directory}:/code --memory=${MEMORY_LIMIT} ${image} sh -c "${command}"`;
 }
 
 // function getCommand(language, filePath) {
@@ -106,10 +144,13 @@ export default async function handler(req, res) {
     }
 
     // execute the code
-    // i'm on a mac, so
-    const directory = path.resolve("./");
-    const fileName = `${uuidv4()}.${fileExtension[language]}`;
+    const identifier = uuidv4();
+    const directory = path.join("/tmp", identifier);
+    const fileName = `main.${fileExtension[language]}`;
     const filePath = path.join(directory, fileName);
+    if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true });
+    }
     try {
         fs.writeFileSync(filePath, code);
         console.log('file created')
@@ -125,6 +166,11 @@ export default async function handler(req, res) {
         let stdout = "";
         let stderr = "";
 
+        const timeout = setTimeout(() => {
+            child.kill();
+            stderr += "\nExecution timed out. Templates may only run for 60 seconds, including compilation time. To access more resources, please purchase a Scriptorium Plus subscription, now only for $999,999,999.99!";
+        }, TIME_LIMIT);
+
         child.stdout.on("data", (data) => {
             stdout += data.toString();
         });
@@ -134,12 +180,13 @@ export default async function handler(req, res) {
         });
 
         child.on("close", (code) => {
+            clearTimeout(timeout);
             try {
-                console.log("Deleting file " + filePath);
-                fs.unlinkSync(filePath);
-                console.log("File deleted");
+                console.log("Deleting directory " + directory);
+                fs.rmdirSync(directory, { recursive: true });
+                console.log("Directory deleted");
             } catch (error) {
-                console.error("Error deleting the file:", error);
+                console.error("Error deleting the directory:", error);
             }
             return res.status(200).json({
                 output: stdout,
