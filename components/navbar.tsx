@@ -132,12 +132,21 @@ export default function NavBar() {
                                             </Link>
                                         </li>
                                         {session?.user?.role === "ADMIN" && (
-                                            <li>
-                                                <Link href="/moderation" className="flex items-center space-x-2 text-primary">
-                                                    <FaceIcon />
-                                                    <span>(Admins) Moderation</span>
-                                                </Link>
-                                            </li>
+                                            <>
+                                                <li>
+                                                    <Link href="/moderation" className="flex items-center space-x-2 text-primary">
+                                                        <FaceIcon />
+                                                        <span>(Admins) Moderation</span>
+                                                    </Link>
+                                                </li>
+                                        
+                                                <li>
+                                                    <Link href="/admin-account" className="flex items-center space-x-2 text-primary">
+                                                        <FaceIcon />
+                                                        <span>(Admin) User Management</span>
+                                                    </Link>
+                                                </li>
+                                            </>
                                         )}
                                         <li>
                                             <AlertDialog>
