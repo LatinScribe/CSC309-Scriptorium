@@ -306,9 +306,11 @@ export default async function handler(req, res) {
                         },
                     },
                     
-                    codeTemplates: {
-                        connect: codeTemplates.map(template => ({ id: template.id })), // Connecting to existing CodeTemplates by ID
-                      },
+                    ...(codeTemplates && codeTemplates.length > 0 && {
+                        codeTemplates: {
+                            connect: codeTemplates.map(template => ({ id: template.id })), // Connect existing CodeTemplates by ID
+                        },
+                    }),
                 },
                 include: {
                     codeTemplates: true, // This will include the related codeTemplates in the result
