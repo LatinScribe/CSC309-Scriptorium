@@ -172,6 +172,9 @@ export default function AdminProfile() {
 
     return (
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
+            <div className="bg-yellow-600 text-black w-full text-center p-2">
+                This is admin sorcery, I sure hope you know what you are doing!
+            </div>
             {(avatar && isValid(avatar)) ? (
             <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
                 <img src={avatar} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover" />
