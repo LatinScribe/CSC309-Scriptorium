@@ -28,6 +28,11 @@ export async function fetchTemplates(filters: Filters, page: number, pageSize: n
         const response = await fetch(`${API_URL}/api/templates/?${queryParams.toString()}`);
         const responseData = await response.json();
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         responseData.templates = responseData.templates.map((template: any) => {
@@ -53,6 +58,11 @@ export async function fetchTemplate(id: number): Promise<Template> {
         const response = await fetch(`${API_URL}/api/templates/content?id=${id}`);
         const responseData = await response.json();
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         if (responseData.tags === '') {
@@ -80,6 +90,11 @@ export async function updateTemplate(template: Template, session: Session): Prom
         });
         const responseData = await response.json();
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         responseData.tags = responseData.tags.split(",");
@@ -105,6 +120,11 @@ export async function createTemplate(title: string, session: Session, tags?: str
         });
         const responseData = await response.json();
         if (response.status !== 201) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         responseData.tags = responseData.tags.split(",");
@@ -128,6 +148,11 @@ export async function deleteTemplate(id: number, session: Session): Promise<void
         });
         const responseData = await response.json();
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
     } catch (error) {
@@ -147,6 +172,11 @@ export async function executeCode(language: string, code: string, input: string[
         });
         const responseData = await response.json();
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData;

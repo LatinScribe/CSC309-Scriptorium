@@ -81,6 +81,11 @@ export async function getProfile(accessToken: string, refreshToken: string): Pro
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData['user'];
@@ -104,6 +109,11 @@ export async function getProfileADMIN(accessToken: string, refreshToken: string,
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData['user'];
@@ -131,6 +141,11 @@ export async function editProfile(accessToken: string, refreshToken: string, ava
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 201) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData['updated_user'];
@@ -155,6 +170,11 @@ export async function editProfileADMIN(username: string, accessToken: string, re
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 201) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData['updated_user'];
@@ -177,6 +197,11 @@ export async function deleteAccount(accessToken: string, refreshToken: string): 
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return true;
@@ -201,6 +226,11 @@ export async function deleteAccountADMIN(username: string, accessToken: string, 
         const responseData = await response.json();
         console.log(responseData);
         if (response.status !== 200) {
+            // CHECKING FOR TOKEN ERROR STARTS HERE
+            if (response.status === 401 && responseData.error === "Token Error") {
+                throw new Error("Token Error");
+            }
+            // CHECKING FOR TOKEN ERROR ENDS HERE
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return true;

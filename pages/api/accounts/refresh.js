@@ -25,12 +25,12 @@ export default function handler(req, res) {
   } catch (err) {
     console.log(err)
     return res.status(401).json({
-      error: "Unauthorized",
+      error: "Token Error",
     });
   }
   if (!payload) {
     return res.status(401).json({
-      error: "Unauthorized",
+      error: "Token Error",
     });
   }
 
