@@ -140,7 +140,7 @@ export async function editProfile(accessToken: string, refreshToken: string, ava
     }
 }
 
-export async function editProfileADMIN(username: string, accessToken: string, refreshToken: string, email?:string, role?:string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string, password?: string): Promise<User> {
+export async function editProfileADMIN(username: string, accessToken: string, refreshToken: string, newUsername?:string,email?:string, role?:string, avatar?: string, phoneNumber?: string, firstName?: string, lastName?: string, password?: string): Promise<User> {
     try {
         const response = await fetch(`${API_URL}/api/admin/admin_users`, {
             method: "PUT",
@@ -149,12 +149,12 @@ export async function editProfileADMIN(username: string, accessToken: string, re
                 "x_refreshToken": refreshToken,
                 Authorization: `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({username, password, firstName, lastName, avatar, phoneNumber, email, role}),
+            body: JSON.stringify({username, password, firstName, lastName, avatar, phoneNumber, email, role, newUsername}),
         });
         // currently using backend for input checking!
         const responseData = await response.json();
         console.log(responseData);
-        if (response.status !== 200) {
+        if (response.status !== 201) {
             throw new Error(responseData.error || "Unspecified error occured");
         }
         return responseData['updated_user'];
@@ -209,3 +209,25 @@ export async function deleteAccountADMIN(username: string, accessToken: string, 
         throw error;
     }
 }
+
+export async function searchUsers(username: string): Promise<User[] | boolean> {
+    try {
+        const response = await fetch(`${API_URL}/api/accounts/users?username=${username}`, {
+            method: "GET",
+        });
+        // currently using backend for input checking!
+        const responseData = await response.json();
+        console.log(responseData);
+        if (response.status !== 200) {
+            throw new Error(responseData.error || "Unspecified error occured");
+        }
+        if (responseData.message === "No users could be found!") {
+            return false;
+        }
+        return responseData;
+    } catch (error) {
+        console.error("An error occurred during user register:", error);
+        throw error;
+    }
+}
+

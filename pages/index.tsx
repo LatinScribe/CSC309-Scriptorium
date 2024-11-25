@@ -18,6 +18,8 @@ import { ThemeProvider } from "next-themes";
 import Custom404 from "@/components/pages/404";
 import ProfilePage from "@/components/pages/profile";
 import WorkInProgress from "@/components/pages/work-in-progress";
+import AdminAccount from "@/components/pages/admin-account";
+import AdminProfile from "@/components/pages/admin-profile";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -67,9 +69,16 @@ export default function Home() {
       return <PlaygroundPage />;
       case "/work-in-progress":
       return <WorkInProgress />;
+      case "/admin-account":
+      return <AdminAccount />;
+      case "/admin-profile":
+      return <AdminProfile />;
       default:
       if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;
+      }
+      if (router.asPath.startsWith("/admin-profile?")) {
+        return <AdminProfile />;
       }
       if (router.asPath.startsWith("/templates/")) {
         return <TemplatePage />;

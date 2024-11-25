@@ -11,7 +11,17 @@ import { verifyUsername } from "@/utils/verification";
 export default async function handler(req, res) {
     if (req.method === "GET") {
         // FILTER and RETRIEVE USER(s) based on username
-        const { username, firstName_bool, lastName_bool, email_bool, avatar_bool, phoneNumber_bool, createdAt_bool, role_bool, page, pageSize } = req.body;
+        //const { username, firstName_bool, lastName_bool, email_bool, avatar_bool, phoneNumber_bool, createdAt_bool, role_bool, page, pageSize } = req.body;
+        const username = req.query.username;
+        const firstName_bool = req.query.firstName_bool === 'true';
+        const lastName_bool = req.query.lastName_bool === 'true';
+        const email_bool = req.query.email_bool === 'true';
+        const avatar_bool = req.query.avatar_bool === 'true';
+        const phoneNumber_bool = req.query.phoneNumber_bool === 'true';
+        const createdAt_bool = req.query.createdAt_bool === 'true';
+        const role_bool = req.query.role_bool === 'true';
+        const page = req.query.page;
+        const pageSize = req.query.pageSize;
 
         if (page && isNaN(parseInt(page))) {
             return res.status(400).json({
