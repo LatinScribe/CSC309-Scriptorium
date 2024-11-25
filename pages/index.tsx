@@ -6,7 +6,11 @@ import React, { useEffect, useContext } from "react";
 import { fetchTemplates } from "@/utils/dataInterface";
 import WelcomePage from "@/components/pages/welcome";
 import LoginPage from "@/components/pages/login";
-import BlogsPage from "@/components/pages/blogs";
+import BlogsSearchPage from "@/components/pages/blogSearch";
+import MyBlogsPage from "@/components/pages/myblogs";
+import BlogPostPage from "@/components/pages/singlePost";
+import BlogListPage from "@/components/pages/blogList";
+
 import TemplatesPage from "@/components/pages/templates";
 import TemplatePage from "@/components/pages/template";
 import PlaygroundPage from "@/components/pages/playground";
@@ -53,7 +57,9 @@ export default function Home() {
       case "/login":
       return <LoginPage />;
       case "/blogs":
-      return <BlogsPage />;
+      return <BlogsSearchPage />;
+      case "/my-blogs": 
+      return <MyBlogsPage />;
       case "/templates":
       return <TemplatesPage />;
       case "/playground":
@@ -64,6 +70,12 @@ export default function Home() {
       }
       if (router.asPath.startsWith("/templates/")) {
         return <TemplatePage />;
+      }
+      if (router.asPath.startsWith("/post?")) {
+        return <BlogPostPage />;
+      }
+      if (router.asPath.startsWith("/blogs?search=")) {
+        return <BlogListPage />;
       }
       return <Custom404 />;
     }
