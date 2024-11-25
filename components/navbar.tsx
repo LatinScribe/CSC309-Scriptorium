@@ -34,8 +34,17 @@ export default function NavBar() {
     useEffect(() => {
         console.log('aaaa')
         console.log(session);
+    }, []);
+
+    let isValid = function (urlTocheck = "", defaultValue = false) {
+        var image = new Image();
+        image.src = urlTocheck;
+        if (image.width == 0) {
+            return defaultValue;
+        } else {
+            return true;
+        }
     }
-    , []);
 
     return (
         <div>
@@ -108,8 +117,14 @@ export default function NavBar() {
                         <li>
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button>
-                                        <PersonIcon />
+                                    <Button className="flex items-center space-x-1">
+                                        {(session?.user?.avatar && isValid(session.user.avatar)) ? (
+                                            <div className="flex justify-center items-center">
+                                                <img src={session.user.avatar} alt="Profile Avatar" className="w-7 h-7 rounded-full object-cover" />
+                                            </div>
+                                        ) : (
+                                            <PersonIcon />
+                                        )}
                                         <div className='hidden sm:block'>{session?.user?.username}</div>
                                     </Button>
                                 </SheetTrigger>
@@ -123,8 +138,8 @@ export default function NavBar() {
                                     <ul className="space-y-4">
                                         <li>
                                             <Link href="/my-templates" className="flex items-center space-x-2">
-                                               <CodeIcon />
-                                               <span>My Templates</span>
+                                                <CodeIcon />
+                                                <span>My Templates</span>
                                             </Link>
                                         </li>
                                         <li>
@@ -147,7 +162,7 @@ export default function NavBar() {
                                                         <span>(Admin) Moderation</span>
                                                     </Link>
                                                 </li>
-                                        
+
                                                 <li>
                                                     <Link href="/admin-account" className="flex items-center space-x-2 text-primary">
                                                         <FaceIcon />

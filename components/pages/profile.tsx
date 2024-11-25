@@ -17,6 +17,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Sheet } from "lucide-react";
+import { Input } from "../ui/input";
 
 export default function ProfilePage() {
     const { session, setSession, logout } = useContext(SessionContext);
@@ -149,8 +150,8 @@ export default function ProfilePage() {
 
             <h1 className="text-3xl font-semibold p-4">Profile</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg p-4">
-            <input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
-            <input
+            <Input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
+            <Input
                 type="text"
                 placeholder="New Username"
                 value={username}
@@ -158,7 +159,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="Choose new Password"
                 value={password}
@@ -166,7 +167,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirm new Password"
                 value={confirmPassword}
@@ -174,7 +175,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type="text"
                 placeholder="First Name"
                 value={firstName}
@@ -182,7 +183,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type="text"
                 placeholder="Last Name"
                 value={lastName}
@@ -190,7 +191,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type="text"
                 placeholder="Phone Number"
                 value={phoneNumber}
@@ -198,7 +199,7 @@ export default function ProfilePage() {
                 className="p-2 border border-gray-300 rounded"
                 autoComplete="off"
             />
-            <input
+            <Input
                 type="text"
                 placeholder="Avatar (URL)"
                 value={avatar}
@@ -207,7 +208,7 @@ export default function ProfilePage() {
                 autoComplete="off"
             />
             <div className="relative" data-tooltip-target="tooltip-default">
-                <input
+                <Input
                 type="text"
                 placeholder="Email (current)"
                 value={email}
@@ -225,14 +226,14 @@ export default function ProfilePage() {
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 tooltip">
                 </div>
             </div>
-            <div className="col-span-1 md:col-span-2 flex items-center">
+            <div className="col-span-1 flex items-center" onClick={() => setShowPassword(!showPassword)}>
                 <input
                 type="checkbox"
                 checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-                className="mr-2"
+                // onChange={() => setShowPassword(!showPassword)}
+                className="mr-2 cursor-pointer"
                 />
-                <label>Show Password</label>
+                <label className="cursor-pointer">Show Password</label>
             </div>
             <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
 

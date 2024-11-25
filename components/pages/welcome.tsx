@@ -23,6 +23,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { TypeAnimation } from 'react-type-animation';
 
 export default function WelcomePage() {
     const { session } = useContext(SessionContext);
@@ -51,8 +52,21 @@ export default function WelcomePage() {
     return (
         <div className="flex flex-col items-center justify-center pt-20 gap-10">
             <div className="flex flex-col items-center gap-3">
-                <div className="text-2xl md:text-4xl">Code. Collaborate. Create.</div>
-                <div className="text-1xl md:text-2xl">It all happens on Scriptorium.</div>
+                <TypeAnimation 
+                    sequence={[
+                        'Code.',
+                        1000,
+                        'Code. Collaborate.',
+                        1000,
+                        'Code. Collaborate. Create.',
+                        1000,
+                        '',
+                    ]}
+                    speed={50}
+                    className="text-2xl md:text-4xl" 
+                    repeat={Infinity}
+                />
+                <div className="text-1xl md:text-2xl text-gray-400">It all happens on Scriptorium.</div>
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
                 <Input
