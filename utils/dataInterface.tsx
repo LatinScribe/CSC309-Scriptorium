@@ -60,6 +60,9 @@ export async function fetchTemplates(filters: Filters, page: number, pageSize: n
         if (filters.ids) {
             queryParams.append("ids", filters.ids.join(","));
         }
+        if (filters.author) {
+            queryParams.append("author", filters.author);
+        }
         const response = await fetch(`${API_URL}/api/templates/?${queryParams.toString()}`);
         const responseData = await response.json();
         if (response.status !== 200) {

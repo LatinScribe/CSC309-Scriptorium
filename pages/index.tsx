@@ -15,6 +15,7 @@ import { useState } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "next-themes";
 import Custom404 from "@/components/pages/404";
+import MyTemplatesPage from "@/components/pages/mytemplates";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,7 +35,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-      setIsClient(true);
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
@@ -42,42 +43,47 @@ export default function Home() {
   }, [router.asPath]);
 
   if (!isClient) {
-      return null;
+    return null;
   }
 
 
   const renderPage = () => {
     switch (router.asPath) { // Use asPath instead of pathname
       case "/":
-      return <WelcomePage />;
+        return <WelcomePage />;
       case "/login":
-      return <LoginPage />;
+        return <LoginPage />;
       case "/blogs":
-      return <BlogsPage />;
+        return <BlogsPage />;
       case "/templates":
-      return <TemplatesPage />;
-      case "/playground":
-      return <PlaygroundPage />;
-      default:
-      if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;
-      }
-      if (router.asPath.startsWith("/templates/")) {
-        return <TemplatePage />;
-      }
-      return <Custom404 />;
+      case "/playground":
+        return <PlaygroundPage />;
+      case "/my-templates":
+        return <MyTemplatesPage />;
+      default:
+        if (router.asPath.startsWith("/templates?")) {
+          return <TemplatesPage />;
+        }
+        if (router.asPath.startsWith("/my-templates?")) {
+          return <MyTemplatesPage />;
+        }
+        if (router.asPath.startsWith("/templates/")) {
+          return <TemplatePage />;
+        }
+        return <Custom404 />;
     }
   };
 
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} font-sans bg-background text-foreground`}>
-        <main className="min-h-screen flex flex-col">
-          <NavBar />
-          <div className="flex-grow">
-            {renderPage()}
-          </div>
-          <Footer />
-        </main>
+      <main className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow">
+          {renderPage()}
+        </div>
+        <Footer />
+      </main>
     </div>
   );
 }
