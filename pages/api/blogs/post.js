@@ -191,7 +191,7 @@ export default async function handler(req, res) {
                         }),
                     },
                     include: {
-                        codeTemplates: true, // This will include the related codeTemplates in the result
+                        codeTemplates: true, 
                     },
 
                 });

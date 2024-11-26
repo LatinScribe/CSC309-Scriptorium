@@ -469,11 +469,7 @@ export default async function handler(req, res) {
                 title,
                 description,
                 tags,
-                author: {
-                    connect: {
-                        id: userId,
-                    },
-                },
+                author: { connect: { id: userId  } },
 
                 ...(codeTemplates && codeTemplates.length > 0 && {
                     codeTemplates: {
@@ -485,7 +481,7 @@ export default async function handler(req, res) {
                 codeTemplates: true, 
             },
         });
-        console.log(newBlogPost.codeTemplates);
+
         const tagsArray = newBlogPost.tags ? newBlogPost.tags.split(',').map(tag => tag.trim()) : [];
         console.log("blog post created");
         res.status(200).json({

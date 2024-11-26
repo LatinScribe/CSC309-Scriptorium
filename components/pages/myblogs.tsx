@@ -63,10 +63,11 @@ export default function BlogsPage() {
     const router = useRouter();
 
     useEffect(() => {
+
         if (!session || !session?.accessToken || !session?.refreshToken) {
-            router.replace("/login"); // Redirect to login if no valid session
+            router.replace("/login"); 
         }
-    }, []); // Empty dependency array ensures it only runs on mount
+    }, []); 
 
     if (!session || !session?.accessToken || !session?.refreshToken) {
         return null; // Don't render the page while redirecting
@@ -112,6 +113,7 @@ export default function BlogsPage() {
             setFilteredTemplates([]);
         }
     }, [searchTerm]);
+
 
     // Handle creating a blog post
     const handleCreateBlog = () => {
@@ -241,7 +243,10 @@ export default function BlogsPage() {
     // Handle adding a template
     const handleAddTemplate = (template: Template) => {
         if (!newBlog.codeTemplates.some((t: Template) => t.id === template.id)) {
-            setNewBlog({ ...newBlog, codeTemplates: [...newBlog.codeTemplates, template] });
+            setNewBlog(prev => ({
+                ...prev,
+                codeTemplates: [...prev.codeTemplates, template],
+            }));
         }
         setSearchTerm('');  // clear to hide dropdown
 

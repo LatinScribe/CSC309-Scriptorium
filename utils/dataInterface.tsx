@@ -239,7 +239,7 @@ export async function fetchBlogPost(id: number, session: Session ) {
 export async function createBlog(title: string, 
     description: string, 
     tags: string, 
-    templates: { id: number; }[], 
+    codeTemplates: { id: number; }[], 
     session: Session) {
     const response = await fetch(`${API_URL}/api/blogs`, {
         method: "POST",
@@ -248,7 +248,7 @@ export async function createBlog(title: string,
             "Authorization": `Bearer ${session.accessToken}`,
             x_refreshToken: session.refreshToken,
         },
-        body: JSON.stringify({ title, description, tags, templates }),
+        body: JSON.stringify({ title, description, tags, codeTemplates }),
     });
     return await response.json();
 }
