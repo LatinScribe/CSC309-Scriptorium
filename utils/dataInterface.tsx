@@ -283,13 +283,13 @@ export async function updateBlog(
 }
 
 
-export async function fetchComments(blogId: number) {
+export async function fetchComments(blogId: number, session: Session) {
     const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            // "Authorization": `Bearer ${token}`,
-            // x_refreshToken: refreshToken,
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
         },
 
     });

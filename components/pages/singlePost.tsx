@@ -63,7 +63,7 @@ const BlogPostPage = () => {
             const responseBlog = await fetchBlogPost(postId, session);
             setBlogPost(responseBlog);
 
-            const commentsResponse = await fetchComments(postId);
+            const commentsResponse = await fetchComments(postId, session);
             const nestedComments = nestComments(commentsResponse.comments);
             setComments(nestedComments);
             // setComments(commentsResponse.comments);
@@ -107,7 +107,7 @@ const BlogPostPage = () => {
     const handleReplySubmit = async (parentCommentId: number, reply: string) => {
       if (!reply) return; // Don't allow empty replies
       if (!reply.trim()) {
-          toast.error("Reply cannot be empty.");
+          toast.error("Comment cannot be empty.");
           return;
       }
       try {
@@ -132,6 +132,11 @@ const BlogPostPage = () => {
                 : comment
             )
           );
+
+          setActiveReplies((prev) => ({
+            ...prev,
+            [parentCommentId]: true,  
+          }));
           
       
           toast.success("Reply posted!");
@@ -335,7 +340,9 @@ const BlogPostPage = () => {
                 {activeReplies[comment.id] ? "Hide Replies" : "Show Replies"}
               </button>
               {activeReplies[comment.id] && comment?.replies?.length > 0 && (
-                <div className="mt-4 pl-4 border-l">{renderComments(comment.replies)}</div>
+                <div className="mt-4 pl-4 border-l">
+                  {renderComments(comment.replies)}
+                </div>
               )}
             </div>
           )}
