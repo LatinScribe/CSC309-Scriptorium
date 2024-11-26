@@ -473,26 +473,25 @@ export default async function handler(req, res) {
                     connect: {
                         id: userId,
                     },
-                    
-                    ...(codeTemplates && codeTemplates.length > 0 && {
-                        codeTemplates: {
-                            connect: codeTemplates.map(template => ({ id: template.id })), // Connect existing CodeTemplates by ID
-                        },
-                    }),
-
                 },
 
-                codeTemplates: {
-                    connect: codeTemplates.map(template => ({ id: template.id })), // Connecting to existing CodeTemplates by ID
-                },
+                ...(codeTemplates && codeTemplates.length > 0 && {
+                    codeTemplates: {
+                        connect: codeTemplates.map(template => ({ id: template.id })),
+                    },
+                }),
             },
             include: {
-                codeTemplates: true, // This will include the related codeTemplates in the result
+                codeTemplates: true, 
             },
         });
         console.log(newBlogPost.codeTemplates);
+        const tagsArray = newBlogPost.tags ? newBlogPost.tags.split(',').map(tag => tag.trim()) : [];
         console.log("blog post created");
-        res.status(200).json(newBlogPost);
+        res.status(200).json({
+            ...newBlogPost,
+            tags: tagsArray,  
+        });
     } catch (error) {
         // res.status(500).json({ error: 'Could not create blog post', details: error.message });
         res.status(500).json({ error: 'Could not create blog post', details: error.message });

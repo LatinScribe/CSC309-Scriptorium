@@ -44,8 +44,8 @@ export default function BlogsPage() {
     const [newBlog, setNewBlog] = useState<{
         title: string;
         description: string;
-        tags: string[];    // Ensure tags is an array of strings
-        codeTemplates: Template[];  // Ensure codeTemplates is an array of Template objects
+        tags: string[];    
+        codeTemplates: Template[]; 
       }>({
         title: "",
         description: "",
@@ -137,7 +137,7 @@ export default function BlogsPage() {
             newBlog.title,
             newBlog.description,
             newBlog.tags.join(","),
-            formattedTemplates,  // Pass the selected templates in the correct format
+            formattedTemplates,  
             session
         )
             .then((newPost: BlogPost) => {
@@ -541,7 +541,7 @@ export default function BlogsPage() {
                                         </p>
                                         {/* Display tags */}
                                         <div className="flex flex-wrap gap-2">
-                                            {blog.tags && blog.tags.map((tag, index) => (
+                                            {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
                                                 className="px-3 py-1 text-sm text-white bg-gray-300 rounded-full mt-4"
