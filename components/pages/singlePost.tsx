@@ -59,7 +59,8 @@ const BlogPostPage = () => {
         }
       const fetchData = async () => {
         try {
-            const responseBlog = await fetchBlogPost(postId);
+
+            const responseBlog = await fetchBlogPost(postId, session);
             setBlogPost(responseBlog);
 
             const commentsResponse = await fetchComments(postId);

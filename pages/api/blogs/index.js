@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         let username = null;
         let userId = null;
 
-        if (!authorization) {
+        if (authorization) {
             // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
             // ======== TOKEN HANDLING STARTS HERE ==========
             var payload = null

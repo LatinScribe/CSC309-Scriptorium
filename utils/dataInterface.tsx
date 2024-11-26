@@ -223,13 +223,13 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
     return await response.json();
 }
 
-export async function fetchBlogPost(id: number) {
+export async function fetchBlogPost(id: number, session: Session ) {
     const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            // "Authorization": `Bearer ${session.accessToken}`,
-            // x_refreshToken: session.refreshToken,
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
         },
 
     });
