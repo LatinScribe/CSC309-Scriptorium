@@ -125,8 +125,9 @@ export default async function handler(req, res) {
             // if we get here, assume that payload is correct!
             // ========== TOKEN HANDLING ENDS HERE ==========
             let username = null;
-            username = payload?.username;
-
+            if (payload) {
+                username = payload.username;
+            }
             let userId = null;
             if (username) {
                 // query the database to get the user id

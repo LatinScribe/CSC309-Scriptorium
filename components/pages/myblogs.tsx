@@ -115,7 +115,10 @@ export default function BlogsPage() {
     }, [searchTerm]);
 
 
-    // Handle creating a blog post
+    const resetFields = () => {
+        setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });
+    };
+
     const handleCreateBlog = () => {
         if (!session || !session.accessToken) {
             toast.error("You must be logged in to create a blog");
@@ -145,7 +148,7 @@ export default function BlogsPage() {
             .then((newPost: BlogPost) => {
                 setBlogs([newPost, ...blogs]);
                 setIsCreating(false);
-                setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });  // Reset selected templates
+                resetFields();
             })
             .catch(console.error);
     };
@@ -282,6 +285,12 @@ export default function BlogsPage() {
 
     };
 
+    const handleCancel = () => {
+        resetFields(); 
+        setIsCreating(false); 
+        setIsEditing(false); 
+    };
+
     return (
         <div className="p-6 bg-background min-h-screen m-10">
 
@@ -404,7 +413,7 @@ export default function BlogsPage() {
                             {/* action buttons */}
                             <div className="flex justify-left space-x-4">
                                 <Button
-                                    onClick={() => setIsCreating(false)}  variant="outline">
+                                    onClick={handleCancel}  variant="outline">
                                 Cancel </Button>
                                 <Button onClick={handleCreateBlog}>
                                     Publish
@@ -522,7 +531,7 @@ export default function BlogsPage() {
                         </div>
                         {/* Action buttons */}
                         <div className="flex justify-left space-x-4">
-                            <Button onClick={() => setIsEditing(false)} variant="outline">Cancel</Button>
+                            <Button onClick={handleCancel} variant="outline">Cancel</Button>
                             <Button onClick={handleUpdateBlog} >Update Post</Button>
                         </div>
                     </div>
@@ -549,7 +558,9 @@ export default function BlogsPage() {
                                             {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
-                                                className="px-3 py-1 text-sm text-white bg-gray-300 rounded-full mt-4"
+                                                className="px-2 py-1 text-sm rounded-md mt-4
+                                                    bg-gray-200 text-gray-800 
+                                                    dark:bg-gray-800 dark:text-gray-100"
                                                 >
                                                 {tag}
                                                 </span>

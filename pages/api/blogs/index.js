@@ -301,7 +301,7 @@ export default async function handler(req, res) {
 
                 console.log("no results");
 
-                return res.status(404).json({ message: "No blog posts found matching your criteria." });
+                return res.status(200).json({ message: "No blog posts found matching your criteria." });
             }
 
             const response = {

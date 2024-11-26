@@ -210,14 +210,18 @@ export async function fetchUserBlogs(session: Session, author: string) {
 }
 
 export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
-    pageSize: number = 5) {
+    pageSize: number = 5, session: Session) {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    if (session) {
+        headers["Authorization"] = `Bearer ${session.accessToken}`;
+        headers["x_refreshToken"] = session.refreshToken;
+    }
+
     const response = await fetch(`${API_URL}/api/blogs?query=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            // "Authorization": `Bearer ${token}`,
-            // x_refreshToken: refreshToken,
-        },
+        headers,
 
     });
     return await response.json();
@@ -228,8 +232,8 @@ export async function fetchBlogPost(id: number, session: Session ) {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.accessToken}`,
-            x_refreshToken: session.refreshToken,
+            "Authorization": `Bearer ${session?.accessToken}`,
+            x_refreshToken: session?.refreshToken,
         },
 
     });
@@ -283,14 +287,19 @@ export async function updateBlog(
 }
 
 
-export async function fetchComments(blogId: number, session: Session) {
-    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}`, {
+export async function fetchComments(blogId: number, sortOption: string, session: Session) {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+
+    if (session) {
+        headers["Authorization"] = `Bearer ${session.accessToken}`;
+        headers["x_refreshToken"] = session.refreshToken;
+    }
+
+    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}&sortOption=${sortOption}`, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.accessToken}`,
-            x_refreshToken: session.refreshToken,
-        },
+        headers,
 
     });
     return await response.json();
@@ -302,8 +311,8 @@ export async function fetchCommentbyId(id: number, includeReplies: boolean, sess
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.accessToken}`,
-            x_refreshToken: session.refreshToken,
+            "Authorization": `Bearer ${session?.accessToken}`,
+            x_refreshToken: session?.refreshToken,
         },
     });
     return await response.json();

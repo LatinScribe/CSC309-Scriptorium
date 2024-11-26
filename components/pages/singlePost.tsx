@@ -42,8 +42,9 @@ const BlogPostPage = () => {
 
     const [selectedReportId, setSelectedReportId] = useState<number | null>(null); // Store which post/comment is selected for reporting
     const [selectedReportType, setSelectedReportType] = useState("blog"); // Type of report: "post" or "comment"
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    // const [isDialogOpen, setIsDialogOpen] = useState(false);
     
+    const [sortOption, setSortOption] = useState<"newest" | "upvotes" | "downvotes">("newest");
 
     
     const { id } = router.query;
@@ -63,7 +64,7 @@ const BlogPostPage = () => {
             const responseBlog = await fetchBlogPost(postId, session);
             setBlogPost(responseBlog);
 
-            const commentsResponse = await fetchComments(postId, session);
+            const commentsResponse = await fetchComments(postId, sortOption, session);
             const nestedComments = nestComments(commentsResponse.comments);
             setComments(nestedComments);
             // setComments(commentsResponse.comments);
@@ -78,7 +79,21 @@ const BlogPostPage = () => {
         
     }, [router.isReady, router.query.id]);
 
-    
+    useEffect(() => {
+      const getComments = async () => {
+        const commentsResponse = await fetchComments(postId, sortOption, session);
+        if (Array.isArray(commentsResponse.comments)) {
+          const nestedComments = nestComments(commentsResponse.comments);
+          setComments(nestedComments);
+        } else {
+          console.error("Expected an array of comments, but got:", commentsResponse.comments);
+          setComments([]); // Handle the case where comments are not as expected
+        }
+      };
+  
+      getComments();
+    }, [sortOption]);  
+  
 
     const handleCommentSubmit = async () => {
       if (!session || !session.accessToken) {
@@ -150,7 +165,7 @@ const BlogPostPage = () => {
     };
 
 
-      const handleVote = async (type: "upvote" | "downvote", contentId: number, isBlog: boolean) => {
+      const handleVote = async (type: "upvote" | "downvote", contentId: number, isBlog: boolean, parentCommentId?: number) => {
         if (!session || !session.accessToken) {
             toast.error("Please sign in");
             return;
@@ -182,13 +197,20 @@ const BlogPostPage = () => {
               if (response) {
                 setComments((prev) =>
                   prev.map((comment) =>
-                      comment.id === contentId
-                          ? {
-                              ...comment,
-                              upvoteCount: response.upvoteCount,
-                              downvoteCount: response.downvoteCount,
-                          }
-                          : comment
+                    comment.id === parentCommentId
+                      ? {
+                          ...comment,
+                          replies: comment.replies.map((reply) =>
+                            reply.id === contentId
+                              ? {
+                                  ...reply,
+                                  upvoteCount: response.upvoteCount,
+                                  downvoteCount: response.downvoteCount,
+                                }
+                              : reply
+                          ),
+                        }
+                      : comment
                   )
                 );
                 setCommentVotes((prevVotes) => ({
@@ -205,7 +227,7 @@ const BlogPostPage = () => {
             }
 
         } catch (error) {
-            toast.error(`Failed to ${type} content.`);
+            toast.error(`Failed to post content.`);
         }
     };
 
@@ -258,6 +280,10 @@ const BlogPostPage = () => {
       }));
     };
 
+    const handleSortChange = (e) => {
+      setSortOption(e.target.value);
+    };
+
     
 
     
@@ -282,7 +308,8 @@ const BlogPostPage = () => {
                 onClick={() => handleVote("upvote", comment.id, false)} 
                 variant="outline" 
                 size="sm" 
-                className={commentVotes[comment.id] === "upvoted" ? "text-green-500" : ""}
+                className="px-1 py-1 flex items-center"
+                // className={commentVotes[comment.id] === "upvoted" ? "text-green-500" : ""}
               >
                 <ThickArrowUpIcon /> {comment.upvoteCount}
               </Button>
@@ -290,6 +317,7 @@ const BlogPostPage = () => {
                 onClick={() => handleVote("downvote", comment.id, false)} 
                 variant="outline" 
                 size="sm"
+                className="px-1 py-1 flex items-center"
               >
                 <ThickArrowDownIcon /> {comment.downvoteCount}
               </Button>
@@ -359,13 +387,15 @@ const BlogPostPage = () => {
                     <div className="mt-4">{blogPost.description}</div>
                     <div className="mt-4 flex items-center gap-2">
                       <Button onClick={() => handleVote("upvote", blogPost.id, true)} variant="outline" size="sm"
-                        className={blogVote === "upvoted" ? "text-green-500" : ""} >
+                        // className={blogVote === "upvoted" ? "text-green-500" : ""} 
+                        >
                         <ThickArrowUpIcon/> {blogPost.upvoteCount}</Button>
                       <Button 
                         onClick={() => handleVote("downvote", blogPost.id, true)} 
                         variant="outline" 
                         size="sm"
-                        className={blogVote === "downvoted" ? "text-red-500" : ""} >
+                        // className={blogVote === "downvoted" ? "text-red-500" : ""} 
+                        >
                         <ThickArrowDownIcon/> {blogPost.downvoteCount}</Button>
                       <Button 
                         onClick={() => setIsPostDialogOpen(true)} 
@@ -383,7 +413,23 @@ const BlogPostPage = () => {
                     </div>
                 </div>
             )}
-
+            {/* Dropdown for Sorting Comments */}
+            <div className="mb-4 flex justify-end items-center space-x-2">
+              <label htmlFor="sortComments" className="text-sm font-medium text-gray-700">
+                Sort comments:
+              </label>
+              <select
+                id="sortComments"
+                value={sortOption}
+                onChange={handleSortChange}
+                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+              >
+                <option value="newest">Newest</option>
+                <option value="mostValuable">Most Upvotes</option>
+                <option value="mostControversial">Most Downvotes</option>
+              </select>
+            </div>
+            {/* Comments List */}
             <div className="p-4 rounded">
                 <h2 className="text-lg font-bold mb-4">Comments</h2>
                 <div className="mb-4 flex">
@@ -413,7 +459,7 @@ const BlogPostPage = () => {
 const nestComments = (comments: Comment[]) => {
   const commentMap = new Map();
 
-  // Initialize map with comments
+
   comments.forEach((comment: Comment) => {
     comment.replies = []; 
     commentMap.set(comment.id, comment);

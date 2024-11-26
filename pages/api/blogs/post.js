@@ -28,7 +28,7 @@ export default async function handler(req, res) {
             }
 
             if (blogPost?.tags) {
-                blogPost.tags = blogPost.tags.split(","); // Convert to array
+                blogPost.tags = blogPost.tags.split(","); // convert to array
             }
 
             res.status(200).json(blogPost);
