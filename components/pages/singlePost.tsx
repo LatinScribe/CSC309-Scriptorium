@@ -94,7 +94,8 @@ const BlogPostPage = () => {
           if (!response) {
             toast.error("An error occurred. Pleas sign in again");
           }
-          setComments((prev) => [...prev, response]);
+          // setComments((prev) => [...prev, response]);
+          setComments((prev) => [...prev, { ...response, author: session.user }]);
           setNewComment("");
           toast.success("Comment posted!");
       } catch (error) {
@@ -123,11 +124,14 @@ const BlogPostPage = () => {
               comment.id === parentCommentId
                 ? {
                     ...comment,
-                    replies: [...(comment.replies || []), replyResponse] // Append the new reply to the replies array
+                    replies: [
+                      ...(comment.replies || []),
+                      { ...replyResponse, author: session.user }
+                    ]
                   }
                 : comment
             )
-          );  
+          );
           
       
           toast.success("Reply posted!");
@@ -404,7 +408,7 @@ const nestComments = (comments: Comment[]) => {
 
   // Initialize map with comments
   comments.forEach((comment: Comment) => {
-    comment.replies = []; // Ensure a replies field exists
+    comment.replies = []; 
     commentMap.set(comment.id, comment);
   });
 
