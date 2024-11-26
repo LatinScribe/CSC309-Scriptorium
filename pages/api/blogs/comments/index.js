@@ -13,118 +13,121 @@ export default async function handler(req, res) {
         try {
             // get userId if user is logged in 
             const { authorization, x_refreshToken } = req.headers;
-            let payload = null;
-            let username = null;
+            if (authorization) {
 
-            // if (authorization) {
-            //     try {
-            //         payload = verifyToken(authorization);
-            //         username = payload?.username; // Extract username
-            //     } catch (err) {
-            //         console.log("Initial token verification failed:", err);
+                
 
-            //         // attempt to refresh the token
-            //         if (x_refreshToken) {
-            //             console.log("Attempting to refresh access token...");
-            //             try {
-            //                 const newAccessToken = attemptRefreshAccess(x_refreshToken);  
-            //                 if (newAccessToken) {   // verify new access token 
-            //                     payload = verifyTokenLocal(newAccessToken);
-            //                     username = payload?.username;  // Extract username from the refreshed token
-            //                 } else {
-            //                     console.log("Refresh token failed");
-            //                 }
-            //             } catch (refreshError) {
-            //                 console.log("Refresh token verification failed:", refreshError);
-            //             }
-            //         } 
-            //     }
-            // }
+                // if (authorization) {
+                //     try {
+                //         payload = verifyToken(authorization);
+                //         username = payload?.username; // Extract username
+                //     } catch (err) {
+                //         console.log("Initial token verification failed:", err);
 
-            // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
-            // ======== TOKEN HANDLING STARTS HERE ==========
-            var payload = null
-            try {
-                // attempt to verify the provided access token!!
-                payload = verifyToken(req.headers.authorization);
-            } catch (err) {
-                // this happens if we can't succesfully verify the access token!!
+                //         // attempt to refresh the token
+                //         if (x_refreshToken) {
+                //             console.log("Attempting to refresh access token...");
+                //             try {
+                //                 const newAccessToken = attemptRefreshAccess(x_refreshToken);  
+                //                 if (newAccessToken) {   // verify new access token 
+                //                     payload = verifyTokenLocal(newAccessToken);
+                //                     username = payload?.username;  // Extract username from the refreshed token
+                //                 } else {
+                //                     console.log("Refresh token failed");
+                //                 }
+                //             } catch (refreshError) {
+                //                 console.log("Refresh token verification failed:", refreshError);
+                //             }
+                //         } 
+                //     }
+                // }
+
+                // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
+                // ======== TOKEN HANDLING STARTS HERE ==========
+                var payload = null
                 try {
-                    // attempt to refresh access token using refresh token
-                    console.log(err)
-                    let new_accessToken
-                    if (x_refreshToken) {
-                        new_accessToken = attemptRefreshAccess(x_refreshToken);
-                    } else {
-                        // no Refresh token, so we have Token Error
-                        return res.status(401).json({
-                            error: "Token Error",
-                        });
-                    }
-                    if (!new_accessToken) {
-                        // new access token not generated!
-                        return res.status(401).json({
-                            error: "Token Error",
-                        });
-                    }
-                    // set the payload to be correct using new access token
-                    payload = verifyTokenLocal(new_accessToken)
-
-                    if (!payload) {
-                        // new access token not generated!
-                        return res.status(401).json({
-                            error: "Token Error",
-                        });
-                    }
+                    // attempt to verify the provided access token!!
+                    payload = verifyToken(req.headers.authorization);
                 } catch (err) {
-                    // refresh token went wrong somewhere, push token error
-                    console.log(err)
-                    return res.status(401).json({
-                        error: "Token Error",
-                    });
+                    // this happens if we can't succesfully verify the access token!!
+                    try {
+                        // attempt to refresh access token using refresh token
+                        console.log(err)
+                        let new_accessToken
+                        if (x_refreshToken) {
+                            new_accessToken = attemptRefreshAccess(x_refreshToken);
+                        } else {
+                            // no Refresh token, so we have Token Error
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                        if (!new_accessToken) {
+                            // new access token not generated!
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                        // set the payload to be correct using new access token
+                        payload = verifyTokenLocal(new_accessToken)
+
+                        if (!payload) {
+                            // new access token not generated!
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                    } catch (err) {
+                        // refresh token went wrong somewhere, push token error
+                        console.log(err)
+                        return res.status(401).json({
+                            error: "Token Error",
+                        });
+                    }
                 }
-            }
-            if (!payload) {
-                // access token verification failed
-                try {
-                    // attempt to refresh access token with refresh token
-                    let new_accessToken
-                    if (x_refreshToken) {
-                        new_accessToken = attemptRefreshAccess(x_refreshToken);
-                    } else {
-                        // no Refresh token, so we have Token Error
-                        return res.status(401).json({
-                            error: "Token Error",
-                        });
-                    }
-                    if (!new_accessToken) {
-                        // new access token not generated!
-                        return res.status(401).json({
-                            error: "Token Error",
-                        });
-                    }
-                    // set the payload to be correct using new access token
-                    payload = verifyTokenLocal(new_accessToken)
+                if (!payload) {
+                    // access token verification failed
+                    try {
+                        // attempt to refresh access token with refresh token
+                        let new_accessToken
+                        if (x_refreshToken) {
+                            new_accessToken = attemptRefreshAccess(x_refreshToken);
+                        } else {
+                            // no Refresh token, so we have Token Error
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                        if (!new_accessToken) {
+                            // new access token not generated!
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                        // set the payload to be correct using new access token
+                        payload = verifyTokenLocal(new_accessToken)
 
-                    if (!payload) {
-                        // new access token not generated!
+                        if (!payload) {
+                            // new access token not generated!
+                            return res.status(401).json({
+                                error: "Token Error",
+                            });
+                        }
+                    } catch (err) {
+                        console.log(err)
                         return res.status(401).json({
                             error: "Token Error",
                         });
                     }
-                } catch (err) {
-                    console.log(err)
-                    return res.status(401).json({
-                        error: "Token Error",
-                    });
                 }
             }
 
             // if we get here, assume that payload is correct!
             // ========== TOKEN HANDLING ENDS HERE ==========
-
-            username = payload?.username;
-
+            let username = null;
+            if (payload) {
+                username = payload.username;
+            }
             let userId = null;
             if (username) {
                 // query the database to get the user id
@@ -139,7 +142,7 @@ export default async function handler(req, res) {
 
 
             const { sortOption } = req.query;
-            const pageNum = parseInt(req.query.page) || 1;
+            const pageNum = parseInt(req.query.pageNum) || 1;
             const pageSize = parseInt(req.query.pageSize) || 10;
 
             let orderBy = [];
@@ -147,16 +150,19 @@ export default async function handler(req, res) {
                 orderBy = [
                     { upvoteCount: 'desc' },
                     { downvoteCount: 'asc' },
-                    { createdAt: 'desc' }
+                    { createdAt: 'desc' },
+                    { id: 'asc' }
                 ];
             } else if (sortOption === 'mostControversial') {
                 orderBy = [
                     { downvoteCount: 'desc' },
-                    { createdAt: 'desc' }
+                    { createdAt: 'desc' }, 
+                    { id: 'asc' }
                 ];
             } else {
                 orderBy = [
-                    { createdAt: 'desc' } // default sort by creation time
+                    { createdAt: 'desc' }, // default sort by creation time
+                    { id: 'asc' }
                 ];
             }
 
@@ -190,8 +196,15 @@ export default async function handler(req, res) {
 
             // fetch comments (with pagination)
             const comments = await prisma.comment.findMany({
-                where: whereCondition,
-                orderBy: orderBy, // apply sorting order
+                where: whereCondition, 
+                orderBy: orderBy, 
+                include: { 
+                    author: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
                 skip: (pageNum - 1) * pageSize,
                 take: pageSize,
             });

@@ -41,12 +41,17 @@ import { Pencil2Icon } from "@radix-ui/react-icons";
 export default function BlogsPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [newBlog, setNewBlog] = useState({
+    const [newBlog, setNewBlog] = useState<{
+        title: string;
+        description: string;
+        tags: string[];    
+        codeTemplates: Template[]; 
+      }>({
         title: "",
         description: "",
         tags: [],
-        codeTemplates: [],  
-    });
+        codeTemplates: [],
+      });
     const [currentBlog, setCurrentBlog] = useState<BlogPost | null>(null);
     const [tagInput, setTagInput] = useState("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -58,10 +63,11 @@ export default function BlogsPage() {
     const router = useRouter();
 
     useEffect(() => {
+
         if (!session || !session?.accessToken || !session?.refreshToken) {
-            router.replace("/login"); // Redirect to login if no valid session
+            router.replace("/login"); 
         }
-    }, []); // Empty dependency array ensures it only runs on mount
+    }, []); 
 
     if (!session || !session?.accessToken || !session?.refreshToken) {
         return null; // Don't render the page while redirecting
@@ -108,7 +114,11 @@ export default function BlogsPage() {
         }
     }, [searchTerm]);
 
-    // Handle creating a blog post
+
+    const resetFields = () => {
+        setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });
+    };
+
     const handleCreateBlog = () => {
         if (!session || !session.accessToken) {
             toast.error("You must be logged in to create a blog");
@@ -132,13 +142,13 @@ export default function BlogsPage() {
             newBlog.title,
             newBlog.description,
             newBlog.tags.join(","),
-            formattedTemplates,  // Pass the selected templates in the correct format
+            formattedTemplates,  
             session
         )
             .then((newPost: BlogPost) => {
                 setBlogs([newPost, ...blogs]);
                 setIsCreating(false);
-                setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });  // Reset selected templates
+                resetFields();
             })
             .catch(console.error);
     };
@@ -236,7 +246,10 @@ export default function BlogsPage() {
     // Handle adding a template
     const handleAddTemplate = (template: Template) => {
         if (!newBlog.codeTemplates.some((t: Template) => t.id === template.id)) {
-            setNewBlog({ ...newBlog, codeTemplates: [...newBlog.codeTemplates, template] });
+            setNewBlog(prev => ({
+                ...prev,
+                codeTemplates: [...prev.codeTemplates, template],
+            }));
         }
         setSearchTerm('');  // clear to hide dropdown
 
@@ -270,6 +283,12 @@ export default function BlogsPage() {
         };
         deletePost();
 
+    };
+
+    const handleCancel = () => {
+        resetFields(); 
+        setIsCreating(false); 
+        setIsEditing(false); 
     };
 
     return (
@@ -394,7 +413,7 @@ export default function BlogsPage() {
                             {/* action buttons */}
                             <div className="flex justify-left space-x-4">
                                 <Button
-                                    onClick={() => setIsCreating(false)}  variant="outline">
+                                    onClick={handleCancel}  variant="outline">
                                 Cancel </Button>
                                 <Button onClick={handleCreateBlog}>
                                     Publish
@@ -474,7 +493,7 @@ export default function BlogsPage() {
                                 {searchTerm && filteredTemplates.length > 0 && (
                                     <div className="mt-2 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
                                         {filteredTemplates
-                                            .filter((template) => !newBlog.codeTemplates.some((t) => t.id === template.id)) // Filter out already selected templates
+                                            .filter((template: Template) => !newBlog.codeTemplates.some((t) => t.id === template.id)) // Filter out already selected templates
                                             .map((template: Template) => (
                                             <div
                                                 key={template.id}
@@ -512,7 +531,7 @@ export default function BlogsPage() {
                         </div>
                         {/* Action buttons */}
                         <div className="flex justify-left space-x-4">
-                            <Button onClick={() => setIsEditing(false)} variant="outline">Cancel</Button>
+                            <Button onClick={handleCancel} variant="outline">Cancel</Button>
                             <Button onClick={handleUpdateBlog} >Update Post</Button>
                         </div>
                     </div>
@@ -536,10 +555,12 @@ export default function BlogsPage() {
                                         </p>
                                         {/* Display tags */}
                                         <div className="flex flex-wrap gap-2">
-                                            {blog.tags && blog.tags.map((tag, index) => (
+                                            {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
-                                                className="px-3 py-1 text-sm text-white bg-gray-300 rounded-full mt-4"
+                                                className="px-2 py-1 text-sm rounded-md mt-4
+                                                    bg-gray-200 text-gray-800 
+                                                    dark:bg-gray-800 dark:text-gray-100"
                                                 >
                                                 {tag}
                                                 </span>

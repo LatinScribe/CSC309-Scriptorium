@@ -185,3 +185,210 @@ export async function executeCode(language: string, code: string, input: string[
         throw error;
     }
 }
+
+
+
+export async function searchTemplatesByTitle(title: string) {
+    const response = await fetch(`${API_URL}/api/templates/?page=1&pageSize=10&title=${title}`, {
+        method: "GET",
+    });
+    const data = await response.json();
+    return data.templates;
+}
+
+export async function fetchUserBlogs(session: Session, author: string) {
+    const response = await fetch(`${API_URL}/api/blogs?author=${author}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+    });
+    const data = await response.json();
+    return data.blogPosts;
+}
+
+export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
+    pageSize: number = 5, session: Session | null) {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    if (session) {
+        headers["Authorization"] = `Bearer ${session.accessToken}`;
+        headers["x_refreshToken"] = session.refreshToken;
+    }
+
+    const response = await fetch(`${API_URL}/api/blogs?query=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+        method: "GET",
+        headers,
+
+    });
+    return await response.json();
+}
+
+export async function fetchBlogPost(id: number) {
+    const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            // "Authorization": `Bearer ${session?.accessToken}`,
+            // x_refreshToken: session?.refreshToken,
+        },
+
+    });
+    return await response.json();
+}
+
+export async function createBlog(title: string, 
+    description: string, 
+    tags: string, 
+    codeTemplates: { id: number; }[], 
+    session: Session) {
+    const response = await fetch(`${API_URL}/api/blogs`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ title, description, tags, codeTemplates }),
+    });
+    return await response.json();
+}
+
+export async function deleteBlog(id: number, session: Session) {
+    const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+    });
+    return await response.json();
+}
+
+export async function updateBlog(
+    id: number, 
+    title: string,
+    description: string, 
+    tags: string, 
+    codeTemplates: { id: number; }[], 
+    session: Session) {
+    const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ title, description, tags, codeTemplates }),
+    });
+    return await response.json();
+}
+
+
+export async function fetchComments(blogId: number, sortOption: string, pageNum: number, session: Session | null) {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+
+    if (session) {
+        headers["Authorization"] = `Bearer ${session.accessToken}`;
+        headers["x_refreshToken"] = session.refreshToken;
+    }
+
+    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}&sortOption=${sortOption}&pageNum=${pageNum}`, 
+    {
+        method: "GET",
+        headers,
+
+    });
+    return await response.json();
+}
+
+export async function fetchCommentbyId(id: number, includeReplies: boolean, session: Session) {
+    const response = 
+        await fetch(`${API_URL}/api/blogs/comments/post?commentId=${id}&IncludeReplies=${includeReplies}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.accessToken}`,
+            x_refreshToken: session?.refreshToken,
+        },
+    });
+    return await response.json();
+}
+
+export async function postComment(blogId: number, content: string, parentCommentId: null | number, session: Session): Promise<Comment>  {
+    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ content, parentCommentId }),
+
+    });
+    return await response.json();
+}
+
+export async function rateBlog(id: number, action: string, session: Session)  {
+    const response = await fetch(`${API_URL}/api/blogs/rating?id=${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ action }),
+
+    });
+    return await response.json();
+}
+
+export async function reportBlog(blogPostId: number, explanation: string, session: Session)  {
+    const response = await fetch(`${API_URL}/api/moderation/reports`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({
+            explanation,
+            blogPostId: Number(blogPostId), 
+        }),
+
+    });
+    return await response.json();
+}
+
+export async function rateComment(id: number, action: string, session: Session)  {
+    const response = await fetch(`${API_URL}/api/blogs/comments/post?commentId=${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ action }),
+
+    });
+    return await response.json();
+}
+
+export async function reportComment(commentId: number, explanation: string, session: Session)  {
+    const response = await fetch(`${API_URL}/api/moderation/reports`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
+        },
+        body: JSON.stringify({ commentId, explanation }),
+
+    });
+    return await response.json();
+}

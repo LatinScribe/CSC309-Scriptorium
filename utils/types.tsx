@@ -71,6 +71,7 @@ export interface Comment {
     reportsCount: number;
     hidden: boolean;
     author: User;
+    replies: Comment[];
 }
 
 export interface Report {

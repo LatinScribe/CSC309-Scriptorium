@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         let username = null;
         let userId = null;
 
-        if (!authorization) {
+        if (authorization) {
             // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
             // ======== TOKEN HANDLING STARTS HERE ==========
             var payload = null
@@ -301,7 +301,7 @@ export default async function handler(req, res) {
 
                 console.log("no results");
 
-                return res.status(404).json({ message: "No blog posts found matching your criteria." });
+                return res.status(200).json({ message: "No blog posts found matching your criteria." });
             }
 
             const response = {
@@ -469,23 +469,25 @@ export default async function handler(req, res) {
                 title,
                 description,
                 tags,
-                author: {
-                    connect: {
-                        id: userId,
-                    },
-                },
+                author: { connect: { id: userId  } },
 
-                codeTemplates: {
-                    connect: codeTemplates.map(template => ({ id: template.id })), // Connecting to existing CodeTemplates by ID
-                },
+                ...(codeTemplates && codeTemplates.length > 0 && {
+                    codeTemplates: {
+                        connect: codeTemplates.map(template => ({ id: template.id })),
+                    },
+                }),
             },
             include: {
-                codeTemplates: true, // This will include the related codeTemplates in the result
+                codeTemplates: true, 
             },
         });
-        console.log(newBlogPost.codeTemplates);
+
+        const tagsArray = newBlogPost.tags ? newBlogPost.tags.split(',').map(tag => tag.trim()) : [];
         console.log("blog post created");
-        res.status(200).json(newBlogPost);
+        res.status(200).json({
+            ...newBlogPost,
+            tags: tagsArray,  
+        });
     } catch (error) {
         // res.status(500).json({ error: 'Could not create blog post', details: error.message });
         res.status(500).json({ error: 'Could not create blog post', details: error.message });
