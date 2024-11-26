@@ -62,8 +62,6 @@ const BlogPostPage = () => {
             const responseBlog = await fetchBlogPost(postId);
             setBlogPost(responseBlog);
 
-            if (!blogPost) return <div>Blog post not found.</div>;
-
             const commentsResponse = await fetchComments(postId);
             const nestedComments = nestComments(commentsResponse.comments);
             setComments(nestedComments);
@@ -105,6 +103,7 @@ const BlogPostPage = () => {
     };
 
     const handleReplySubmit = async (parentCommentId: number, reply: string) => {
+      if (!reply) return; // Don't allow empty replies
       if (!reply.trim()) {
           toast.error("Reply cannot be empty.");
           return;
@@ -121,10 +120,14 @@ const BlogPostPage = () => {
           setComments((prev) =>
             prev.map((comment) =>
               comment.id === parentCommentId
-                ? { ...comment, replies: [...comment.replies, replyResponse] }
+                ? {
+                    ...comment,
+                    replies: [...(comment.replies || []), replyResponse] // Append the new reply to the replies array
+                  }
                 : comment
             )
-          );
+          );  
+          
       
           toast.success("Reply posted!");
         }
@@ -252,30 +255,52 @@ const BlogPostPage = () => {
 
     const renderComments = (commentsList: any[]) =>
       commentsList.map((comment) => (
-        <div key={comment.id} className="p-4 rounded-md my-2">
-          <div className="flex justify-between items-center">
-            <p className="font-semibold">{comment.content}</p>
-            <div className="flex gap-1">
-              <Button onClick={() => handleVote("upvote", comment.id, false)} variant="outline" size="sm" 
-                className={commentVotes[comment.id] === "upvoted" ? "text-green-500" : ""}>
-                <ThickArrowUpIcon/> {comment.upvoteCount}</Button>
-              <Button onClick={() => handleVote("downvote", comment.id, false)} variant="outline" size="sm">
-                <ThickArrowDownIcon/> {comment.downvoteCount}</Button>
-                <Button onClick={() => openReportDialog("comment", comment.id)} 
-                  variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
-                <ExclamationTriangleIcon/> report </Button>
-                {activeDialogs[comment.id] && (
-                  <ReportDialog
-                    reportType={"comment"} 
-                    reportId={comment.id} // ID of the post or comment
-                    handleReport={handleReport} // The function to handle the report submission
-                  />
-                )}
-              
+        <div key={comment.id} className="p-4 rounded-md my-2 bg-background-50">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              {/* Author and Time Ago */}
+              <p className="text-sm text-gray-500 font-semibold">{comment.author?.username}</p>
+              <span className="text-sm text-gray-400">•</span>
+              <p className="text-sm text-gray-400">{new Date(comment.createdAt).toLocaleString()}</p> 
+            </div>
+            
+            {/* Comment Content */}
+            <p className="text-base text-gray-800 mt-1">{comment.content}</p>
+            
+            <div className="flex gap-2 mt-2">
+              <Button 
+                onClick={() => handleVote("upvote", comment.id, false)} 
+                variant="outline" 
+                size="sm" 
+                className={commentVotes[comment.id] === "upvoted" ? "text-green-500" : ""}
+              >
+                <ThickArrowUpIcon /> {comment.upvoteCount}
+              </Button>
+              <Button 
+                onClick={() => handleVote("downvote", comment.id, false)} 
+                variant="outline" 
+                size="sm"
+              >
+                <ThickArrowDownIcon /> {comment.downvoteCount}
+              </Button>
+              <Button 
+                onClick={() => openReportDialog("comment", comment.id)} 
+                variant="outline" 
+                size="sm" 
+                className="px-2 py-1 flex items-center space-x-1 ml-4"
+              >
+                <ExclamationTriangleIcon /> report
+              </Button>
+              {activeDialogs[comment.id] && (
+                <ReportDialog
+                  reportType={"comment"}
+                  reportId={comment.id}
+                  handleReport={handleReport}
+                />
+              )}
             </div>
           </div>
-          
-
+    
           {/* Reply input */}
           <div className="flex items-center gap-2 mt-4">
             <Input
@@ -294,22 +319,21 @@ const BlogPostPage = () => {
               Reply
             </Button>
           </div>
-          
+    
           {/* Show/hide replies */}
           {comment.replies && comment.replies.length > 0 && (
             <div className="mt-4">
               <button
-                  onClick={() => toggleReplies(comment.id)}
-                  className="text-sm hover:underline"
+                onClick={() => toggleReplies(comment.id)}
+                className="text-sm text-gray-500 hover:underline"
               >
-                  {activeReplies[comment.id] ? "Hide Replies" : "Show Replies"}
+                {activeReplies[comment.id] ? "Hide Replies" : "Show Replies"}
               </button>
-            {activeReplies[comment.id] && comment?.replies?.length > 0 && (
-              <div className="mt-4 pl-4 border-l">{renderComments(comment.replies)}</div>
+              {activeReplies[comment.id] && comment?.replies?.length > 0 && (
+                <div className="mt-4 pl-4 border-l">{renderComments(comment.replies)}</div>
+              )}
+            </div>
           )}
-          </div>
-          )}
-          
         </div>
       ));
 

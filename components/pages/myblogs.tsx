@@ -41,12 +41,17 @@ import { Pencil2Icon } from "@radix-ui/react-icons";
 export default function BlogsPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [newBlog, setNewBlog] = useState({
+    const [newBlog, setNewBlog] = useState<{
+        title: string;
+        description: string;
+        tags: string[];    // Ensure tags is an array of strings
+        codeTemplates: Template[];  // Ensure codeTemplates is an array of Template objects
+      }>({
         title: "",
         description: "",
         tags: [],
-        codeTemplates: [],  
-    });
+        codeTemplates: [],
+      });
     const [currentBlog, setCurrentBlog] = useState<BlogPost | null>(null);
     const [tagInput, setTagInput] = useState("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);
@@ -474,7 +479,7 @@ export default function BlogsPage() {
                                 {searchTerm && filteredTemplates.length > 0 && (
                                     <div className="mt-2 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
                                         {filteredTemplates
-                                            .filter((template) => !newBlog.codeTemplates.some((t) => t.id === template.id)) // Filter out already selected templates
+                                            .filter((template: Template) => !newBlog.codeTemplates.some((t) => t.id === template.id)) // Filter out already selected templates
                                             .map((template: Template) => (
                                             <div
                                                 key={template.id}

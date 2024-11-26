@@ -248,7 +248,7 @@ export async function createBlog(title: string,
             "Authorization": `Bearer ${session.accessToken}`,
             x_refreshToken: session.refreshToken,
         },
-        body: JSON.stringify({ title, description, tags, templates: templates.map(template => template.id) }),
+        body: JSON.stringify({ title, description, tags, templates }),
     });
     return await response.json();
 }

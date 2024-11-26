@@ -190,8 +190,15 @@ export default async function handler(req, res) {
 
             // fetch comments (with pagination)
             const comments = await prisma.comment.findMany({
-                where: whereCondition,
-                orderBy: orderBy, // apply sorting order
+                where: whereCondition, 
+                orderBy: orderBy, 
+                include: { 
+                    author: {
+                        select: {
+                            username: true,
+                        },
+                    },
+                },
                 skip: (pageNum - 1) * pageSize,
                 take: pageSize,
             });

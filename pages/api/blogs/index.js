@@ -473,6 +473,13 @@ export default async function handler(req, res) {
                     connect: {
                         id: userId,
                     },
+                    
+                    ...(codeTemplates && codeTemplates.length > 0 && {
+                        codeTemplates: {
+                            connect: codeTemplates.map(template => ({ id: template.id })), // Connect existing CodeTemplates by ID
+                        },
+                    }),
+
                 },
 
                 codeTemplates: {
