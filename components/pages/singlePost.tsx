@@ -31,21 +31,24 @@ const BlogPostPage = () => {
     const [newComment, setNewComment] = useState("");
     // const [loading, setLoading] = useState(true);
 
+    const [sortOption, setSortOption] = useState<"newest" | "upvotes" | "downvotes">("newest");
     const [repliesText, setRepliesText] = useState<{ [key: number]: string }>({});  // maintain reply text for each comment separately
     const [activeReplies, setActiveReplies] = useState<Record<number, boolean>>({});
 
     const [blogVote, setBlogVote] = useState<"upvoted" | "downvoted" | null>(null);
     const [commentVotes, setCommentVotes] = useState<Record<number, "upvoted" | "downvoted" | null>>({});
+    // pagination 
+    const [currentPage, setCurrentPage] = useState(1); // Track the current page
+    const [loading, setLoading] = useState(false); // To show loading state
+    const [hasMore, setHasMore] = useState(true); // Track if there are more comments
+    const [totalPages, setTotalPages] = useState(0);
+    const [pageSize] = useState(20);
 
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false); // Controls Post Report Dialog
     // mapping to store the state for each comment; key is commentID
     const [activeDialogs, setActiveDialogs] = useState<{ [commentId: number]: boolean }>({}); 
-
-    const [selectedReportId, setSelectedReportId] = useState<number | null>(null); // Store which post/comment is selected for reporting
+    const [selectedReportId, setSelectedReportId] = useState<number | null>(null); // post/comment selected for reporting
     const [selectedReportType, setSelectedReportType] = useState("blog"); // Type of report: "post" or "comment"
-    // const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
-    const [sortOption, setSortOption] = useState<"newest" | "upvotes" | "downvotes">("newest");
 
     
     const { id } = router.query;
@@ -56,7 +59,7 @@ const BlogPostPage = () => {
     useEffect(() => {
       // Wait for the router to be ready to make sure the query is populated
         if (!postId) {
-            console.log("No valid postId available");  
+            console.log("Couldn't load post");  
             return;
         }
       const fetchData = async () => {
@@ -65,10 +68,12 @@ const BlogPostPage = () => {
             const responseBlog = await fetchBlogPost(postId);
             setBlogPost(responseBlog);
 
-            const commentsResponse = await fetchComments(postId, sortOption, session);
+            const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
             const nestedComments = nestComments(commentsResponse.comments);
-            setComments(nestedComments);
-            // setComments(commentsResponse.comments);
+            setComments((prevComments) => [...prevComments, ...nestedComments]);
+            // setComments(nestedComments);
+            setTotalPages(commentsResponse.totalPages);
+
         } catch (error) {
             console.error("Error fetching data:", error);
         } 
@@ -81,19 +86,53 @@ const BlogPostPage = () => {
     }, [router.isReady, router.query.id]);
 
     useEffect(() => {
+      if (!postId) {
+        console.log("Couldnt load post");  
+        return;
+      }
+      // sorting
       const getComments = async () => {
-        const commentsResponse = await fetchComments(postId, sortOption, session);
-        if (Array.isArray(commentsResponse.comments)) {
-          const nestedComments = nestComments(commentsResponse.comments);
-          setComments(nestedComments);
-        } else {
-          console.error("Expected an array of comments, but got:", commentsResponse.comments);
-          setComments([]); // Handle the case where comments are not as expected
-        }
+        try {
+          const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+          if (Array.isArray(commentsResponse.comments)) {
+            const nestedComments = nestComments(commentsResponse.comments);
+            setComments(nestedComments);
+          } else {
+            console.error("Expected an array of comments, but got:", commentsResponse.comments);
+            setComments([]); 
+          }
+        } catch(error) {
+            console.error("Error fetching data:", error);
+        } 
       };
-  
-      getComments();
-    }, [sortOption]);  
+
+      if (postId) {
+        getComments();
+      }
+
+    }, [sortOption]); 
+    
+    // const loadMoreComments = async () => {
+    //   if (!postId) {
+    //     console.log("Invalid postId");  
+    //     return;
+    //   }
+
+    //   if (currentPage < totalPages) {
+    //     const nextPage = currentPage + 1;
+    //     setCurrentPage(nextPage); 
+    //     try{
+    //       const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+    //       const newComments = newCommentsResponse.comments;
+          
+    //       setComments((prevComments) => [...prevComments, ...newComments]);
+    //     } catch (error) {
+    //       console.error("Failed to load more comments:", error);
+    //       toast.error("Failed to load more comments.");
+    //     }
+    //   }
+
+    // };
   
 
     const handleCommentSubmit = async () => {
@@ -360,6 +399,7 @@ const BlogPostPage = () => {
               {activeReplies[comment.id] && comment?.replies?.length > 0 && (
                 <div className="mt-4 pl-4 border-l">
                   {renderComments(comment.replies)}
+                  
                 </div>
               )}
             </div>
@@ -439,9 +479,24 @@ const BlogPostPage = () => {
                 <div>
                 {comments.length > 0 ? (
                   renderComments(comments)
+                  
                 ) : (     
                   <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                 )}
+                {/* Load More Button */}
+                {/* {(currentPage < totalPages) && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      onClick={loadMoreComments}
+                      variant="outline"
+                      size="sm"
+                      className="px-4 py-2 text-blue-500"
+                      disabled={loading} // Disable while loading
+                    >
+                      {loading ? "Loading..." : "Load More"}
+                    </Button>
+                  </div>
+                )} */}
                 </div>
             </div>
         </div>

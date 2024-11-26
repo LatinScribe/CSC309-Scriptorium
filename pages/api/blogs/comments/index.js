@@ -142,24 +142,27 @@ export default async function handler(req, res) {
 
 
             const { sortOption } = req.query;
-            const pageNum = parseInt(req.query.page) || 1;
-            const pageSize = parseInt(req.query.pageSize) || 30;
+            const pageNum = parseInt(req.query.pageNum) || 1;
+            const pageSize = parseInt(req.query.pageSize) || 10;
 
             let orderBy = [];
             if (sortOption === 'mostValuable') {
                 orderBy = [
                     { upvoteCount: 'desc' },
                     { downvoteCount: 'asc' },
-                    { createdAt: 'desc' }
+                    { createdAt: 'desc' },
+                    { id: 'asc' }
                 ];
             } else if (sortOption === 'mostControversial') {
                 orderBy = [
                     { downvoteCount: 'desc' },
-                    { createdAt: 'desc' }
+                    { createdAt: 'desc' }, 
+                    { id: 'asc' }
                 ];
             } else {
                 orderBy = [
-                    { createdAt: 'desc' } // default sort by creation time
+                    { createdAt: 'desc' }, // default sort by creation time
+                    { id: 'asc' }
                 ];
             }
 

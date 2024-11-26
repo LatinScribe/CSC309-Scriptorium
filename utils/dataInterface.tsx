@@ -288,7 +288,7 @@ export async function updateBlog(
 }
 
 
-export async function fetchComments(blogId: number, sortOption: string, session: Session | null) {
+export async function fetchComments(blogId: number, sortOption: string, pageNum: number, session: Session | null) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -298,7 +298,8 @@ export async function fetchComments(blogId: number, sortOption: string, session:
         headers["x_refreshToken"] = session.refreshToken;
     }
 
-    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}&sortOption=${sortOption}`, {
+    const response = await fetch(`${API_URL}/api/blogs/comments?blogPostId=${blogId}&sortOption=${sortOption}&pageNum=${pageNum}`, 
+    {
         method: "GET",
         headers,
 
