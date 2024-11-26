@@ -11,49 +11,131 @@ export default async function handler(req, res) {
     }
 
     // user access
-    const { x_refreshToken } = req.headers;
-    let payload;
+    // const { x_refreshToken } = req.headers;
+    // let payload;
 
+    // try {
+    //     payload = verifyToken(req.headers.authorization);
+    // } catch (err) {
+    //     try {
+    //         // attempt refresh
+    //         console.log("Initial token verification failed:", err);
+    //         let newAccessToken;
+    //         if (x_refreshToken) {
+    //             newAccessToken = attemptRefreshAccess(x_refreshToken);
+    //         } else {
+    //             return res.status(401).json({ message: "Unauthorized" });
+    //         }
+    //         if (!newAccessToken) {
+    //             return res.status(401).json({ message: "Unauthorized" });
+    //         }
+    //         payload = verifyTokenLocal(newAccessToken);
+    //     } catch (refreshError) {
+    //         return res.status(401).json({ message: "Unauthorized" });
+    //     }
+    // }
+
+    // if (!payload) {
+    //     try {
+    //         if (x_refreshToken) {
+    //             const newAccessToken = attemptRefreshAccess(x_refreshToken);
+    //             if (newAccessToken) {
+    //                 payload = verifyTokenLocal(newAccessToken);
+    //             }
+    //         }
+    //     } catch (finalRefreshError) {
+    //         return res.status(401).json({ message: "Unauthorized" });
+    //     }
+    // }
+
+    // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
+    // ======== TOKEN HANDLING STARTS HERE ==========
+    var payload = null
     try {
+        // attempt to verify the provided access token!!
         payload = verifyToken(req.headers.authorization);
     } catch (err) {
+        // this happens if we can't succesfully verify the access token!!
         try {
-            // attempt refresh
-            console.log("Initial token verification failed:", err);
-            let newAccessToken;
+            // attempt to refresh access token using refresh token
+            console.log(err)
+            let new_accessToken
             if (x_refreshToken) {
-                newAccessToken = attemptRefreshAccess(x_refreshToken);
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
             } else {
-                return res.status(401).json({ message: "Unauthorized" });
+                // no Refresh token, so we have Token Error
+                return res.status(401).json({
+                    error: "Token Error",
+                });
             }
-            if (!newAccessToken) {
-                return res.status(401).json({ message: "Unauthorized" });
+            if (!new_accessToken) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
             }
-            payload = verifyTokenLocal(newAccessToken);
-        } catch (refreshError) {
-            return res.status(401).json({ message: "Unauthorized" });
+            // set the payload to be correct using new access token
+            payload = verifyTokenLocal(new_accessToken)
+
+            if (!payload) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+        } catch (err) {
+            // refresh token went wrong somewhere, push token error
+            console.log(err)
+            return res.status(401).json({
+                error: "Token Error",
+            });
+        }
+    }
+    if (!payload) {
+        // access token verification failed
+        try {
+            // attempt to refresh access token with refresh token
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                // no Refresh token, so we have Token Error
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            if (!new_accessToken) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            // set the payload to be correct using new access token
+            payload = verifyTokenLocal(new_accessToken)
+
+            if (!payload) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                error: "Token Error",
+            });
         }
     }
 
-    if (!payload) {
-        try {
-            if (x_refreshToken) {
-                const newAccessToken = attemptRefreshAccess(x_refreshToken);
-                if (newAccessToken) {
-                    payload = verifyTokenLocal(newAccessToken);
-                }
-            }
-        } catch (finalRefreshError) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-    }
+    // if we get here, assume that payload is correct!
+    // ========== TOKEN HANDLING ENDS HERE ==========
 
     if (payload.role !== "USER") {
         return res.status(403).json({ error: "Forbidden" });
     }
 
 
-    const { commentId } = req.query; 
+    const { commentId } = req.query;
 
     if (req.method === "GET") { // fetch comment by id
         // Fetch comment by ID
@@ -61,7 +143,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Comment ID is required' });
         }
 
-        
+
 
         try {
             // Check if `includeReplies` is passed as a query parameter
@@ -105,7 +187,7 @@ export default async function handler(req, res) {
         if (user) {
             userId = user.id;
         }
-        
+
         const { action } = req.body;  // `action` should be either 'upvote' or 'downvote'
 
         try {
@@ -117,13 +199,13 @@ export default async function handler(req, res) {
             const comment = await prisma.comment.findUnique({
                 where: { id: parseInt(commentId) },
             });
-        
+
             if (!comment || comment.deleted || comment.hidden) {
                 return res.status(404).json({ error: 'Comment not found' });
             }
 
             let updatedComment;
-            
+
             if (action === 'upvote') {
                 // Check if user previously upvoted the comment
                 let prevUpvote = await prisma.commentUpvote.findFirst({
@@ -202,7 +284,7 @@ export default async function handler(req, res) {
             res.status(200).json(updatedComment);
         } catch (error) {
             // return res.status(500).json({ error: 'Could not update comment ratings', details: error.message});
-            return res.status(500).json({ error: 'Could not update comment ratings'});
+            return res.status(500).json({ error: 'Could not update comment ratings' });
         }
     }
 }

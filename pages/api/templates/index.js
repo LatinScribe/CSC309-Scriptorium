@@ -105,20 +105,103 @@ export default async function handler(req, res) {
     }
 
     // We now check if the user is authenticated
+    // var payload = null
+    // try {
+    //     payload = verifyToken(req.headers.authorization);
+    // } catch (err) {
+    //     console.log(err);
+    //     return res.status(401).json({
+    //         error: "Unauthorized",
+    //     });
+    // }
+    // if (!payload) {
+    //     return res.status(401).json({
+    //         error: "Unauthorized",
+    //     });
+    // }
+
+    // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
+    // ======== TOKEN HANDLING STARTS HERE ==========
     var payload = null
     try {
+        // attempt to verify the provided access token!!
         payload = verifyToken(req.headers.authorization);
     } catch (err) {
-        console.log(err);
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        // this happens if we can't succesfully verify the access token!!
+        try {
+            // attempt to refresh access token using refresh token
+            console.log(err)
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                // no Refresh token, so we have Token Error
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            if (!new_accessToken) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            // set the payload to be correct using new access token
+            payload = verifyTokenLocal(new_accessToken)
+
+            if (!payload) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+        } catch (err) {
+            // refresh token went wrong somewhere, push token error
+            console.log(err)
+            return res.status(401).json({
+                error: "Token Error",
+            });
+        }
     }
     if (!payload) {
-        return res.status(401).json({
-            error: "Unauthorized",
-        });
+        // access token verification failed
+        try {
+            // attempt to refresh access token with refresh token
+            let new_accessToken
+            if (x_refreshToken) {
+                new_accessToken = attemptRefreshAccess(x_refreshToken);
+            } else {
+                // no Refresh token, so we have Token Error
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            if (!new_accessToken) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+            // set the payload to be correct using new access token
+            payload = verifyTokenLocal(new_accessToken)
+
+            if (!payload) {
+                // new access token not generated!
+                return res.status(401).json({
+                    error: "Token Error",
+                });
+            }
+        } catch (err) {
+            console.log(err)
+            return res.status(401).json({
+                error: "Token Error",
+            });
+        }
     }
+
+    // if we get here, assume that payload is correct!
+    // ========== TOKEN HANDLING ENDS HERE ==========
+
     const user = await prisma.user.findUnique({
         where: {
             username: payload.username,
