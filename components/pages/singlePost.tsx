@@ -20,6 +20,7 @@ import {
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import ReportDialog from "../pages/reportDialog";
+import { render } from "react-dom";
 
 const BlogPostPage = () => {
     const router = useRouter();
@@ -61,7 +62,7 @@ const BlogPostPage = () => {
       const fetchData = async () => {
         try {
 
-            const responseBlog = await fetchBlogPost(postId, session);
+            const responseBlog = await fetchBlogPost(postId);
             setBlogPost(responseBlog);
 
             const commentsResponse = await fetchComments(postId, sortOption, session);
@@ -153,7 +154,7 @@ const BlogPostPage = () => {
             [parentCommentId]: true,  
           }));
           
-      
+          renderComments(comments)
           toast.success("Reply posted!");
         }
 
@@ -197,20 +198,13 @@ const BlogPostPage = () => {
               if (response) {
                 setComments((prev) =>
                   prev.map((comment) =>
-                    comment.id === parentCommentId
-                      ? {
-                          ...comment,
-                          replies: comment.replies.map((reply) =>
-                            reply.id === contentId
-                              ? {
-                                  ...reply,
-                                  upvoteCount: response.upvoteCount,
-                                  downvoteCount: response.downvoteCount,
-                                }
-                              : reply
-                          ),
-                        }
-                      : comment
+                      comment.id === contentId
+                          ? {
+                              ...comment,
+                              upvoteCount: response.upvoteCount,
+                              downvoteCount: response.downvoteCount,
+                          }
+                          : comment
                   )
                 );
                 setCommentVotes((prevVotes) => ({
@@ -280,15 +274,11 @@ const BlogPostPage = () => {
       }));
     };
 
-    const handleSortChange = (e) => {
-      setSortOption(e.target.value);
-    };
+    // const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //   setSortOption(e.target.value);
+    // };
 
-    
-
-    
-
-
+  
     const renderComments = (commentsList: any[]) =>
       commentsList.map((comment) => (
         <div key={comment.id} className="p-4 rounded-md my-2 bg-background-50">
@@ -413,22 +403,7 @@ const BlogPostPage = () => {
                     </div>
                 </div>
             )}
-            {/* Dropdown for Sorting Comments */}
-            <div className="mb-4 flex justify-end items-center space-x-2">
-              <label htmlFor="sortComments" className="text-sm font-medium text-gray-700">
-                Sort comments:
-              </label>
-              <select
-                id="sortComments"
-                value={sortOption}
-                onChange={handleSortChange}
-                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
-              >
-                <option value="newest">Newest</option>
-                <option value="mostValuable">Most Upvotes</option>
-                <option value="mostControversial">Most Downvotes</option>
-              </select>
-            </div>
+            
             {/* Comments List */}
             <div className="p-4 rounded">
                 <h2 className="text-lg font-bold mb-4">Comments</h2>
@@ -443,6 +418,24 @@ const BlogPostPage = () => {
                         Post
                     </Button>
                 </div>
+
+                {/* Dropdown for Sorting Comments */}
+                <div className="p-4 flex justify-end items-center space-x-2">
+                  <label htmlFor="sortComments" className="text-sm font-medium text-gray-700">
+                    Sort comments:
+                  </label>
+                  <select
+                    id="sortComments"
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value as "newest" | "upvotes" | "downvotes")}
+                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="mostValuable">Most Upvotes</option>
+                    <option value="mostControversial">Most Downvotes</option>
+                  </select>
+                </div>
+
                 <div>
                 {comments.length > 0 ? (
                   renderComments(comments)

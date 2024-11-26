@@ -156,7 +156,7 @@ export default function BlogsPage() {
     // Handle editing a blog post
     const handleEditBlog = (blogId: number) => {
         const loadBlogForEditing = async () => {
-            const blog = await fetchBlogPost(blogId, session);  // Fetch the blog data
+            const blog = await fetchBlogPost(blogId);  // Fetch the blog data
 
             setNewBlog({
                 title: blog.title,

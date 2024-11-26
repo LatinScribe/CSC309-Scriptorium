@@ -35,9 +35,10 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
   } from "../ui/alert-dialog";
+  import { SessionContext } from "@/contexts/session";
 
 export default function BlogListPage() {
-    // const { session } = useContext(SessionContext);
+    const { session } = useContext(SessionContext);
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);     
@@ -86,7 +87,7 @@ export default function BlogListPage() {
     const fetchAndSetBlogs = async (queryToSearch: string = searchQuery) => {
         try {
             // Fetch the blogs based on the search query and sort option
-            const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize);
+            const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize, session);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
             setPageCount(response.totalPages);  // page count is updated based on totalPages
         } catch (error) {

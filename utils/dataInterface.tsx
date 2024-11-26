@@ -210,7 +210,7 @@ export async function fetchUserBlogs(session: Session, author: string) {
 }
 
 export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
-    pageSize: number = 5, session: Session) {
+    pageSize: number = 5, session: Session | null) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -227,13 +227,13 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
     return await response.json();
 }
 
-export async function fetchBlogPost(id: number, session: Session ) {
+export async function fetchBlogPost(id: number) {
     const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.accessToken}`,
-            x_refreshToken: session?.refreshToken,
+            // "Authorization": `Bearer ${session?.accessToken}`,
+            // x_refreshToken: session?.refreshToken,
         },
 
     });
@@ -262,6 +262,7 @@ export async function deleteBlog(id: number, session: Session) {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${session.accessToken}`,
+            x_refreshToken: session.refreshToken,
         },
     });
     return await response.json();
@@ -287,7 +288,7 @@ export async function updateBlog(
 }
 
 
-export async function fetchComments(blogId: number, sortOption: string, session: Session) {
+export async function fetchComments(blogId: number, sortOption: string, session: Session | null) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
