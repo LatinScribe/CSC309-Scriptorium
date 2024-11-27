@@ -370,12 +370,18 @@ export default async function handler(req, res) {
                 const totalPosts = await prisma.blogPost.count({
                     where: whereCondition,
                 });
+
+                const totalComments = await prisma.comment.count({
+                    where: { reportsCount: { gt: 0 } },
+                });
                 const totalPages = Math.ceil(totalPosts / pageSize);
+                const totalCommentPages = Math.ceil(totalComments / pageSize);
+                const total = Math.max(totalPages, totalCommentPages);
 
                 const response = {
                     blogPosts: mappedBlogPosts,
                     comments: mappedComments,
-                    totalPages,
+                    totalPages: total,
                     // totalPosts,
                 };
 
