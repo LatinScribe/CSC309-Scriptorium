@@ -51,34 +51,32 @@ export default function BlogListPage() {
     useEffect(() => {
         if (!router.isReady) return;
         const { search, sort, page } = router.query;
-
         // initialize state from URL query params
         if (search) setSearchQuery(search as string);
         if (sort) setSortOption(sort as string);
         if (page) setCurrentPage(Number(page));
         
         fetchAndSetBlogs();
-        
-        
     }, [router.query]);
 
     useEffect(() => {
-        // This effect handles URL updates for the parameters
         if (router.isReady) {
             updateUrl({ search: searchQuery, sort: sortOption, page: currentPage });
+            // fetchAndSetBlogs();
         }
+        
     }, [searchQuery, sortOption, currentPage]);
 
-    useEffect(() => {
-        // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
-        fetchAndSetBlogs();
-    }, [searchQuery, currentPage, sortOption]);
+    // useEffect(() => {
+    //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
+    //     fetchAndSetBlogs();
+    // }, [searchQuery, currentPage, sortOption]);
     
-    // useEffect(() => {   
-    //     if (searchQuery) {  // once searchQuery state is updated, get search results
-    //         handleSearch();
-    //     }
-    // }, [searchQuery]);
+    useEffect(() => {   
+        if (searchQuery) {  // once searchQuery state is updated, get search results
+            fetchAndSetBlogs();
+        }
+    }, [searchQuery]);
     
 
     const fetchAndSetBlogs = async () => {
@@ -187,14 +185,14 @@ export default function BlogListPage() {
                         blogs.map((blog) => (
                             <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
-                                    <h2 className="text-xl font-bold truncate">{blog.title}</h2>
+                                    <h2 className="text-xl font-bold break-words">{blog.title}</h2>
                                     {blog.hidden && (
                                         <div className="flex items-center gap-2 p-4">
                                             <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
                                             <span className="text-red-500 p-1 rounded">Hidden</span>
                                         </div>
                                     )}
-                                    <p className="text-sm text-gray-600 truncate">{blog.description}</p>
+                                    <p className="text-sm text-gray-600 mt-2 line-clamp-3">{blog.description}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                         {blog.tags && blog.tags?.map((tag, index) => (
                                             <span
