@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/pagination"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "../ui/input";
-
 import { Textarea } from "../ui/textarea";
 import {
     AlertDialog,
@@ -44,17 +43,19 @@ export default function BlogListPage() {
     const [pageCount, setPageCount] = useState(1);
 
     const [sortOption, setSortOption] = useState("mostUpvoted"); // default
+    const [filterField, setFilterField] = useState<string>("title");
 
     const router = useRouter();
     
     
     useEffect(() => {
         if (!router.isReady) return;
-        const { search, sort, page } = router.query;
+        const { search, sort, page, field } = router.query;
         // initialize state from URL query params
         if (search) setSearchQuery(search as string);
         if (sort) setSortOption(sort as string);
         if (page) setCurrentPage(Number(page));
+        if (field) setFilterField(field as string);
         
         fetchAndSetBlogs();
     }, [router.query]);
@@ -65,7 +66,7 @@ export default function BlogListPage() {
             // fetchAndSetBlogs();
         }
         
-    }, [searchQuery, sortOption, currentPage]);
+    }, [searchQuery, sortOption, currentPage, filterField]);
 
     // useEffect(() => {
     //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
@@ -81,10 +82,10 @@ export default function BlogListPage() {
 
     const fetchAndSetBlogs = async () => {
         try {
-            // Fetch the blogs based on the search query and sort option
-            const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize, session);
+            
+            const response = await fetchBlogs(searchQuery, sortOption, filterField, currentPage, pageSize, session);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
-            setPageCount(response.totalPages);  // page count is updated based on totalPages
+            setPageCount(response.totalPages);  
         } catch (error) {
             console.error("Search failed:", error);
             toast.error("Failed to fetch blogs.");
@@ -107,12 +108,15 @@ export default function BlogListPage() {
             search: searchQuery || undefined,
             sort: sortOption || undefined,
             page: currentPage || undefined,
+            field: filterField || undefined,
             ...queryUpdates,
         };
         router.push({ pathname: "/blogs", query: newQuery }, undefined, {
             shallow: true,
         });
     };
+
+    
 
     const handleSearch = () => {
         setSearchQuery(inputValue);
@@ -155,10 +159,31 @@ export default function BlogListPage() {
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
                     <div className="flex items-center space-x-6">
-                        <label 
-                            htmlFor="sortOption" 
-                            className="text-sm font-medium whitespace-nowrap"
+                        <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
+                            Search by:
+                        </label>
+                        <Select
+                            value={filterField}
+                            onValueChange={(value: string) => setFilterField(value)}
                         >
+                            <SelectTrigger>
+                            <SelectValue>
+                                    {filterField === "searchTitle" ? "Title"
+                                        : filterField === "searchTag" ? "Tag"
+                                        : filterField === "searchContent"? "Content"
+                                        : filterField === "searchTemplate"? "Template"
+                                        : "All" }
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value=" ">All</SelectItem>
+                                <SelectItem value="searchTitle">Title</SelectItem>
+                                <SelectItem value="searchTag">Tags</SelectItem>
+                                <SelectItem value="searchContent">Content</SelectItem>
+                                <SelectItem value="searchTemplate">Code Templates</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
                             Sort By:
                         </label>
                         <Select

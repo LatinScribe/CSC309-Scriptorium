@@ -215,7 +215,7 @@ export async function fetchUserBlogs(session: Session, author: string, currentPa
     return data;
 }
 
-export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1,
+export async function fetchBlogs(searchTerm: string, sortOption: string, filterField: string, currentPage: number = 1,
     pageSize: number = 5, session: Session | null) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -225,7 +225,7 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
         headers["x_refreshToken"] = session.refreshToken;
     }
 
-    const response = await fetch(`${API_URL}/api/blogs?search=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+    const response = await fetch(`${API_URL}/api/blogs?${filterField}=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
         headers,
 

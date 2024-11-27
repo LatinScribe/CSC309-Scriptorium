@@ -45,15 +45,14 @@ const BlogPostPage = () => {
     // pagination 
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false); 
-    const [hasMore, setHasMore] = useState(true); 
     const [totalPages, setTotalPages] = useState(0);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(5);
 
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false); // Controls Post Report Dialog
     // mapping to store the state for each comment; key is commentID
     const [activeDialogs, setActiveDialogs] = useState<{ [commentId: number]: boolean }>({}); 
     const [selectedReportId, setSelectedReportId] = useState<number | null>(null); // post/comment selected for reporting
-    const [selectedReportType, setSelectedReportType] = useState("blog"); // Type of report: "post" or "comment"
+    const [selectedReportType, setSelectedReportType] = useState("blog"); // type of report: "post" or "comment"
 
     
     const { id } = router.query;
@@ -483,7 +482,7 @@ const BlogPostPage = () => {
                         <span className="text-sm text-gray-400">•</span>
                         <p className="text-gray-600 text-sm">{new Date(blogPost.createdAt).toLocaleString()}</p>
                       </div>
-                    <div className="mt-4">{blogPost.description}</div>
+                    <p className="mt-4">{blogPost.description}</p>
 
                     {/* Code Templates Section */}
                     {blogPost && blogPost.codeTemplates && blogPost.codeTemplates.length > 0 && (
