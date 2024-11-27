@@ -284,8 +284,8 @@ export default function AdminContentPage() {
                         <div>No blogs found for "{searchQuery}".</div>
                     )}
                     {comments?.length > 0 ? (
-                        comments.map((comment) => (
-                            <div key={"Comment"} className="blog-post-card">
+                        comments.map((comment: Comment) => (
+                            <div key={"Comment"} className="blog-post-card" onClick={() => comment.blogPostId && handlePostClick(comment.blogPostId)}>
                                 <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
                                     <h2 className="text-xl font-bold truncate">Reported Comment</h2>
                                     {comment.hidden && (

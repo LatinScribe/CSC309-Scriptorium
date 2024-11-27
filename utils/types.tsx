@@ -64,6 +64,7 @@ export interface Comment {
     id: number;
     content: string;
     parentCommentId?: number;
+    blogPostId?: number;
     tags: string[];
     createdAt: Date;
     flagged: boolean;
