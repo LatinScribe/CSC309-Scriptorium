@@ -157,7 +157,7 @@ export default async function handler(req, res) {
         // if we get here, assume that payload is correct!
         // ========== TOKEN HANDLING ENDS HERE ==========
 
-        if (payload.role !== "USER" || payload.role !== "ADMIN") {
+        if (payload.role !== "USER" && payload.role !== "ADMIN") {
             return res.status(403).json({ error: "Forbidden" });
         }
 
