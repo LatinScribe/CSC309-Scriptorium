@@ -66,11 +66,11 @@ export default function Home() {
         return <RegisterPage />;
       case "/profile":
         return <ProfilePage />;
+      
       case "/blogs":
-
-      return <BlogsSearchPage />;
+        return <BlogListPage />;
       case "/my-blogs": 
-      return <MyBlogsPage />;
+        return <MyBlogsPage />;
 
       case "/templates":
         return <TemplatesPage />;
