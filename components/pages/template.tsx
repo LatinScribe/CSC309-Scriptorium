@@ -181,6 +181,10 @@ export default function TemplatePage() {
         if (!template) {
             return;
         }
+        if (template.content === "") {
+            toast.error("Write some code before running it!");
+            return;
+        }
         toast.info("Running code...");
         setIsRunning(true);
         try {

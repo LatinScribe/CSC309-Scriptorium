@@ -110,6 +110,10 @@ export default function PlaygroundPage() {
     const [stderr, setStderr] = useState("");
 
     const handleRun = async () => {
+        if (code === "") {
+            toast.error("Write some code before running it!");
+            return;
+        }
         toast.info("Running code...");
         setIsRunning(true);
         try {
