@@ -248,14 +248,14 @@ export default function AdminContentPage() {
                                     sortOption === "mostReported" ? 'Most Reported' :
                                     sortOption === 'mostUpvoted' ? 'Most Upvoted' :
                                     sortOption === 'mostDownvoted' ? 'Most Downvoted' :
-                                    sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
+                                    sortOption === 'mostRecent' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="mostReported">Most Reported</SelectItem>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
                                 <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
-                                <SelectItem value="createdAt">Newest</SelectItem>
+                                <SelectItem value="mostRecent">Newest</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -287,6 +287,9 @@ export default function AdminContentPage() {
                                     </div>
                                     <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
+                                    <div className="text-sm text-gray-500">Upvote Count: {blog.upvoteCount}</div>
+                                    <div className="text-sm text-gray-500">Downvote Count: {blog.upvoteCount}</div>
+                                    <div className="text-sm text-gray-500">Creation Time: {blog.createdAt.toLocaleString()}</div>
                                     <div className="flex justify-center mt-2">
                                         <Button onClick={handleHideBlog(blog.id, blog.hidden)}>
                                             {blog.hidden ? "Unhide content" : "Hide content from everyone"}
@@ -324,6 +327,9 @@ export default function AdminContentPage() {
                                     </div>
                                     <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
+                                    <div className="text-sm text-gray-500">Upvote Count: {comment.upvoteCount}</div>
+                                    <div className="text-sm text-gray-500">Downvote Count: {comment.upvoteCount}</div>
+                                    <div className="text-sm text-gray-500">Creation Time: {comment.createdAt.toLocaleString()}</div>
                                     <div className="flex justify-center mt-2">
                                         <Button onClick={handleHideComment(comment.id, comment.hidden)}>
                                             {comment.hidden ? "Unhide content" : "Hide content from everyone"}
