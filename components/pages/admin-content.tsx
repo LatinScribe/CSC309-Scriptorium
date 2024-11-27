@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 import { BlogPost, Comment } from "@/utils/types";
-import { fetchBlogs, fetchReportedContent } from "@/utils/dataInterface";
+import { fetchBlogs, fetchReportedContent, hideContent } from "@/utils/dataInterface";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -156,6 +156,36 @@ export default function AdminContentPage() {
         setCurrentPage(page);
         updateUrl({page});
     };
+
+    const handleHideBlog = (id: number) => async () => {
+        try {
+            if (session) {
+                await hideContent("post", id, session);
+            } else {
+                toast.error("Session is not available.");
+            }
+            toast.success("Blog hidden successfully");
+            fetchAndSetBlogs();
+        } catch (error) {
+            console.error("Failed to hide blog:", error);
+            toast.error("Failed to hide blog");
+        }
+    }
+
+    const handleHideComment = (id: number) => async () => {
+        try {
+            if (session) {
+                await hideContent("comment", id, session);
+            } else {
+                toast.error("Session is not available.");
+            }
+            toast.success("Comment hidden successfully");
+            fetchAndSetBlogs();
+        } catch (error) {
+            console.error("Failed to hide Comment:", error);
+            toast.error("Failed to hide Comment");
+        }
+    }
   
     return (
         <div className="flex justify-center">
@@ -224,7 +254,11 @@ export default function AdminContentPage() {
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="text-sm text-gray-500">Report Count {blog.reportsCount}</div>
+                                    <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
+                                    <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
+                                    <Button onClick={handleHideBlog(blog.id)}>
+                                        Hide this content from everyone
+                                    </Button>
                                 </div>
                             </div>
                         ))
@@ -236,7 +270,12 @@ export default function AdminContentPage() {
                             <div key={"Comment"} className="blog-post-card">
                                 <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
                                     <h2 className="text-xl font-bold truncate">Reported Comment</h2>
-                                    
+                                    {comment.hidden && (
+                                        <div className="flex items-center gap-2 p-4">
+                                            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                            <span className="text-red-500 p-1 rounded">Hidden</span>
+                                        </div>
+                                    )}
                                     <p className="text-sm text-gray-600 truncate">{comment.content}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                         {/* {comment.tags && blog.tags?.map((tag, index) => (
@@ -250,7 +289,11 @@ export default function AdminContentPage() {
                                             </span>
                                         ))} */}
                                     </div>
-                                    <div className="text-sm text-gray-500">Report Count {comment.reportsCount}</div>
+                                    <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
+                                    <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
+                                    <Button onClick={handleHideComment(comment.id)}>
+                                        Hide this content from everyone
+                                    </Button>
                                 </div>
                             </div>
                         ))
