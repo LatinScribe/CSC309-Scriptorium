@@ -35,3 +35,6 @@ Default Admin details:
 UML diagram of our model is available in prisma-UML.png
 
 Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
+
+## Live deployment:
+Visit: https://scriptorium.henrytchen.com/
