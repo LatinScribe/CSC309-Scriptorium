@@ -7,7 +7,8 @@ import prisma from "@/utils/db";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 
 // pages/api/accounts/user
-export default async function handler(req, res) {
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // if (req.method !== "POST" && req.method !=="PUT" && req.method !=="GET" && req.method !=="DELETE") {
     //     return res.status(405).json({ error: "Method not allowed" });
     //   }
@@ -403,7 +404,6 @@ export default async function handler(req, res) {
                     email: true,
                     avatar: true,
                     phoneNumber: true,
-                    role: true,
                     createdAt: true,
                     updatedAt: true,
                 },

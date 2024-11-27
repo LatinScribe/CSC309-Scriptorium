@@ -5,8 +5,8 @@
 import prisma from "@/utils/db";
 import { verifyToken, attemptRefreshAccess, verifyTokenLocal, hashPassword } from "@/utils/auth";
 import { verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername } from "@/utils/verification";
-
-export default async function handler(req, res) {
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
         // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
     // ======== TOKEN HANDLING STARTS HERE ==========

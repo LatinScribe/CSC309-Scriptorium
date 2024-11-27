@@ -1,9 +1,15 @@
+import { CodeTemplate } from "@/utils/backendTypes";
 import prisma from "@/utils/db";
 
-export default async function handler(req, res) {
+interface QueryParams {
+    id?: string;
+}
+
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // GET: get content of a specific template from id
     if (req.method == 'GET') {
-        const { id } = req.query;
+        const { id } = req.query as QueryParams;
         if (!id) {
             return res.status(400).json({
                 error: "Please provide the template id",
@@ -35,7 +41,7 @@ export default async function handler(req, res) {
                 language: true,
                 deleted: true,
             }
-        });
+        }) as CodeTemplate | null;
         if (!template || template.deleted) {
             return res.status(404).json({
                 error: "Template not found",
