@@ -430,7 +430,7 @@ const BlogPostPage = () => {
       ));
 
     return (
-      <div className="mx-auto max-w-7xl p-4">
+      <div className="mx-auto max-w-3xl p-4">
             {blogPost && (
                 <div className="bg-white shadow-md rounded p-6 mb-6">
                     <h1 className="text-2xl font-bold">{blogPost.title}</h1>
@@ -445,32 +445,34 @@ const BlogPostPage = () => {
                     {blogPost && blogPost.codeTemplates && blogPost.codeTemplates.length > 0 && (
                       <div className="mt-6">
                         <h2 className="text-xl font-semibold mb-3">Related Code Templates</h2>
-                        <ul className="space-y-2">
+                        <ul className="space-y-2 list-inside list-disc marker:text-slate-400">
                           {blogPost.codeTemplates.map((template) => (
                             <li key={template.id}>
                               <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <Link href={`/templates/${template.id}`} className="font-medium hover:underline transition">
-                                  {template.title}
-                                </Link>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="max-w-xs sm:max-w-md lg:max-w-lg">
-                                <h3 className="font-semibold text-lg">{template.title}</h3>
-                                <span className="ml-2 text-blue-500 group-hover:text-blue-700">→</span>
-                                <p className="mt-2 text-sm text-slate-700">{template.explanation}</p>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                  {(template.tags || []).map((tag, index) => (
-                                    <span
-                                      key={index}
-                                      className="text-xs font-medium px-2 py-1 rounded"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                                <p className="mt-2 text-xs text-slate-500">Language: {template.language}</p>
-                              </HoverCardContent>
-                            </HoverCard>
+                                <HoverCardTrigger asChild>
+                                  <Link
+                                    href={`/templates/${template.id}`}
+                                    className="font-medium hover:underline transition-colors underline"
+                                  >
+                                    {template.title}
+                                  </Link>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="max-w-xs sm:max-w-sm lg:max-w-lg">
+                                  <h3 className="font-semibold text-lg">{template.title}</h3>
+                                  {/* <p className="mt-2 text-sm text-slate-700">{template.explanation}</p> */}
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {(template.tags || []).map((tag, index) => (
+                                      <span
+                                        key={index}
+                                        className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <p className="mt-2 text-xs text-slate-500">Language: {template.language}</p>
+                                </HoverCardContent>
+                              </HoverCard>
                             </li>
                           ))}
                         </ul>
