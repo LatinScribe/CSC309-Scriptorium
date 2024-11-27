@@ -483,7 +483,7 @@ const BlogPostPage = () => {
                         <span className="text-sm text-gray-400">•</span>
                         <p className="text-gray-600 text-sm">{new Date(blogPost.createdAt).toLocaleString()}</p>
                       </div>
-                    <div className="mt-4">{blogPost.description}</div>
+                    <div className="mt-4"><p>{blogPost.description}</p></div>
 
                     {/* Code Templates Section */}
                     {blogPost && blogPost.codeTemplates && blogPost.codeTemplates.length > 0 && (
