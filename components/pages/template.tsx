@@ -2,15 +2,15 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SessionContext } from "@/contexts/session";
 import { useContext } from "react";
-import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode } from "@/utils/dataInterface";
-import { AlertCircle, CodeIcon, PlayIcon, SaveIcon, Scroll } from "lucide-react";
+import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode, getBlogByTemplate } from "@/utils/dataInterface";
+import { AlertCircle, CodeIcon, DotIcon, ExternalLink, PlayIcon, SaveIcon, Scroll } from "lucide-react";
 import {
     Alert,
     AlertDescription,
     AlertTitle,
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button";
-import { Template } from "@/utils/types";
+import { BlogPost, Template } from "@/utils/types";
 import Link from "next/link";
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
@@ -78,6 +78,7 @@ export default function TemplatePage() {
     const [stderr, setStderr] = useState("");
     const [inputs, setInputs] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState(false);
+    const [linkedBlogPosts, setLinkedBlogPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,8 +88,12 @@ export default function TemplatePage() {
                 setForkTitle(template.title);
                 setForkExplanation(template.explanation || "");
                 setForkTags(template.tags);
+                console.log('fetching blogs');
+                const linkedBlogs = await getBlogByTemplate(id);
+                setLinkedBlogPosts(linkedBlogs);
+                console.log(linkedBlogPosts);
             } catch (error) {
-                console.error("Faxiled to fetch template:", error);
+                console.error("Failed to fetch template:", error);
                 setError(`Failed to fetch template: ${(error as Error).message}`);
             }
         };
@@ -174,6 +179,10 @@ export default function TemplatePage() {
 
     const handleRun = async () => {
         if (!template) {
+            return;
+        }
+        if (template.content === "") {
+            toast.error("Write some code before running it!");
             return;
         }
         toast.info("Running code...");
@@ -482,6 +491,22 @@ export default function TemplatePage() {
                                 <div key={index}>{line}</div>
                             ))}
                         </ScrollArea>
+                        <Separator orientation='horizontal' />
+                        <div className="text-lg font-medium">Linked Blog Posts</div>
+                        {linkedBlogPosts.length === 0 && (
+                            <div className="text-sm text-gray-500">No linked blog posts.</div>
+                        )}
+                        <ul>
+                            {linkedBlogPosts.map((blog) => (
+                                <li key={blog.id} className="flex items-center gap-1">
+                                    <DotIcon />
+                                    <Link href={`/post?id=${blog.id}`}>
+                                        <div className="text-primary">{blog.title}</div>
+                                    </Link>
+                                    <ExternalLink className='h-3' />
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
             )}

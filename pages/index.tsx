@@ -66,11 +66,11 @@ export default function Home() {
         return <RegisterPage />;
       case "/profile":
         return <ProfilePage />;
+      
       case "/blogs":
-
-      return <BlogsSearchPage />;
+        return <BlogListPage />;
       case "/my-blogs": 
-      return <MyBlogsPage />;
+        return <MyBlogsPage />;
 
       case "/templates":
         return <TemplatesPage />;
@@ -102,6 +102,9 @@ export default function Home() {
       }
       if (router.asPath.startsWith("/blogs?")) {
         return <BlogListPage />;
+      }
+      if (router.asPath.startsWith("/my-blogs?")) {
+        return <MyBlogsPage />;
       }
       return <Custom404 />;
     }

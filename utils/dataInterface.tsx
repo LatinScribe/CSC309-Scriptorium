@@ -196,8 +196,8 @@ export async function searchTemplatesByTitle(title: string) {
     return data.templates;
 }
 
-export async function fetchUserBlogs(session: Session, author: string) {
-    const response = await fetch(`${API_URL}/api/blogs?author=${author}`, {
+export async function fetchUserBlogs(session: Session, author: string, currentPage: number, pageSize: number) {
+    const response = await fetch(`${API_URL}/api/blogs?author=${author}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -205,8 +205,8 @@ export async function fetchUserBlogs(session: Session, author: string) {
             x_refreshToken: session.refreshToken,
         },
     });
-    const data = await response.json();
-    return data.blogPosts;
+
+    return await response.json();
 }
 
 export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
@@ -219,11 +219,12 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
         headers["x_refreshToken"] = session.refreshToken;
     }
 
-    const response = await fetch(`${API_URL}/api/blogs?query=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+    const response = await fetch(`${API_URL}/api/blogs?search=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
         headers,
 
     });
+    
     return await response.json();
 }
 
@@ -237,7 +238,18 @@ export async function fetchBlogPost(id: number) {
         },
 
     });
-    return await response.json();
+    const data = await response.json();
+        if (data.codeTemplates && data.codeTemplates.length > 0) {
+            data.codeTemplates = data.codeTemplates.map((template: any) => {
+                if (template.tags && template.tags !== '') {
+                    template.tags = template.tags.split(',').map((tag: string) => tag.trim());
+                } else {
+                    template.tags = [];
+                }
+                return template;
+            });
+    }
+    return data;
 }
 
 export async function createBlog(title: string, 
@@ -391,4 +403,25 @@ export async function reportComment(commentId: number, explanation: string, sess
 
     });
     return await response.json();
+}
+
+export async function getBlogByTemplate(templateId: number) {
+    console.log(templateId);
+    try {
+        const response = await fetch(`${API_URL}/api/blogs/byTemplate?templateId=${templateId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        console.log(data);
+        if (!Array.isArray(data)) {
+            return [];
+        }
+        return data;
+    } catch (error) {
+        console.error("An error occurred while fetching blog by template:", error);
+        throw error;
+    }
 }

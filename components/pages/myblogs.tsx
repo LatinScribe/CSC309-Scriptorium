@@ -36,7 +36,7 @@ import {
     AlertDialogCancel,
   } from "../ui/alert-dialog";
 import { toast } from "sonner"
-import { Pencil2Icon } from "@radix-ui/react-icons";
+import { ExclamationTriangleIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
 export default function BlogsPage() {
     const [isCreating, setIsCreating] = useState(false);
@@ -58,6 +58,10 @@ export default function BlogsPage() {
     const [searchTerm, setSearchTerm] = useState("");  // For template search
     const [filteredTemplates, setFilteredTemplates] = useState([]);  // Filtered templates
     
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [pageSize, setPageSize] = useState(5);
+    const [pageCount, setPageCount] = useState(1);
+
 
     const { session } = useContext(SessionContext);
     const router = useRouter();
@@ -67,41 +71,52 @@ export default function BlogsPage() {
         if (!session || !session?.accessToken || !session?.refreshToken) {
             router.replace("/login"); 
         }
-    }, []); 
+    }, [session, router]);
 
-    if (!session || !session?.accessToken || !session?.refreshToken) {
-        return null; // Don't render the page while redirecting
-    }
-
-
-    // Fetch user's blog posts on component mount
     useEffect(() => {
+        if (!router.isReady) return;
+        const { page } = router.query;
+        if (page) setCurrentPage(Number(page));
+        
+        fetchAndSetUserBlogs();
+    }, [router.query]);
+
+    
+
+    useEffect(() => {
+        if (router.isReady) {
+            router.push({ 
+                pathname: "/my-blogs", 
+                query: { page: currentPage || undefined } }, 
+                undefined, 
+                { shallow: true, }
+            );
+        }
+        fetchAndSetUserBlogs();
+    }, [currentPage]);
+
+    // useEffect(() => {
+    //     fetchAndSetUserBlogs();
+    // }, [currentPage]);
+   
+    const fetchAndSetUserBlogs = async () => {
         if (session && session.accessToken && session.refreshToken) {
             const fetchUserPosts = async () => {
                 try{
-                    const blogs = await fetchUserBlogs(session, session.user.username); 
-                    setBlogs(blogs);
-
+                    const blogsResponse = await fetchUserBlogs(session, session.user.username, currentPage, pageSize); 
+                    setBlogs(blogsResponse.blogPosts);
+                    setPageCount(blogsResponse.totalPages);
                 } catch (error) {
                     console.error("Failed to fetch template:", error);
                     toast.error("Failed to fetch your blog posts.");
                 }
             }
             fetchUserPosts();
-            
-            // fetchUserBlogs(session)
-            //     .then((data) => {
-            //         setBlogs(data);
-            //     })
-            //     .catch((error) => {
-            //         console.error("Failed to fetch blogs:", error);
-            //         toast.error("Failed to fetch your blog posts.");
-            //     });
         } else {
             router.push("/login");
         }
         
-    }, [session, router]);
+    };
 
     // Fetch templates when the search term changes
     useEffect(() => {
@@ -154,46 +169,47 @@ export default function BlogsPage() {
     };
 
     // Handle editing a blog post
-    const handleEditBlog = (blogId: number) => {
-        const loadBlogForEditing = async () => {
-            const blog = await fetchBlogPost(blogId);  // Fetch the blog data
-
-            setNewBlog({
-                title: blog.title,
-                description: blog.description,
-                tags: Array.isArray(blog.tags) ? blog.tags : [], 
-                codeTemplates: blog.codeTemplates || [],
-            });
-            setIsEditing(true);
-            setCurrentBlog(blog); 
-        };
-        loadBlogForEditing();
-
+    const handleEditBlog = (blogId: number, isHidden: boolean) => {
+        if (!isHidden) {
+            const loadBlogForEditing = async () => {
+                const blog = await fetchBlogPost(blogId);  // Fetch the blog data
+    
+                setNewBlog({
+                    title: blog.title,
+                    description: blog.description,
+                    tags: Array.isArray(blog.tags) ? blog.tags : [], 
+                    codeTemplates: blog.codeTemplates || [],
+                });
+                setIsEditing(true);
+                setCurrentBlog(blog); 
+            };
+            loadBlogForEditing();
+        } else {
+            toast.error("Post is hidden and cannot be edited.");
+        }
         
-        //     setNewBlog({
-        //         title: blogToEdit.title,
-        //         description: blogToEdit.description,
-        //         tags: blogToEdit.tags || [],  
-        //         codeTemplates: blogToEdit.templates || [],
-        //     });
-        // }
     };
 
-    // useEffect(() => {
-    //     const loadBlogForEditing = async (blogId: number) => {
-    //       const blog = await fetchBlogPost(blogId);  // Fetch the blog data, including tags
-    //       setNewBlog({
-    //         ...blog,
-    //         tags: Array.isArray(blog.tags) ? blog.tags : [], // Ensure it's an array
-    //       });
-    //     };
-      
-    //     if (newBlog && newBlog.id) {
-    //       loadBlogForEditing(newBlog.id);
-    //     }
-    // }, [newBlog?.id]);
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+          fetchAndSetUserBlogs();
+        }
+    };
 
-    // Handle updating a blog post
+    const handleNextPage = () => {
+        if (currentPage < pageCount) {
+            setCurrentPage(currentPage + 1);
+            fetchAndSetUserBlogs();
+        }
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        fetchAndSetUserBlogs();
+    };
+
+    // Handle updating blog post
     const handleUpdateBlog = () => {
         if (!session || !session.accessToken || !currentBlog) {
             toast.error("You must be logged in to update a blog post");
@@ -546,19 +562,32 @@ export default function BlogsPage() {
                         <p className="text-gray-600">No blog posts available. Please create one!</p>
                     ) : (
                         blogs && blogs.map((blog: BlogPost) => (
-                            <div key={blog.id} className="bg-background p-6 shadow rounded">
+                            <div key={blog.id} className="bg-background p-6 border shadow rounded">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h2 className="text-3xl font-bold">{blog.title}</h2>
+                                        <h2 className="text-2xl font-bold max-w-[20vw] md:max-w-[50vw] truncate">{blog.title}</h2>
+                                        {blog.hidden && (
+                                             <div className="flex items-center gap-2 p-4">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-red-500 p-1 rounded">Hidden</span>
+                                            </div>
+                                        )}
+                                        {blog.flagged && (
+                                            <div className="flex items-center gap-2">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-sm text-red-500 bg-yellow-100 p-1 rounded">Flagged</span>
+                                            </div>
+                                        )}
                                         <p className="text-sm text-gray-500">
                                             Published on {new Date(blog.createdAt).toLocaleDateString()}
                                         </p>
+
                                         {/* Display tags */}
                                         <div className="flex flex-wrap gap-2">
                                             {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
-                                                className="px-2 py-1 text-sm rounded-md mt-4
+                                                className="px-2 py-1 text-sm rounded-md
                                                     bg-gray-200 text-gray-800 
                                                     dark:bg-gray-800 dark:text-gray-100"
                                                 >
@@ -567,8 +596,9 @@ export default function BlogsPage() {
                                             ))}
                                             </div>
                                     </div>
-                                    <div className="flex space-x-4">
-                                        <Button onClick={() => handleEditBlog(blog.id)}>
+                                    <div className="flex space-x-4 flex-grow justify-end">
+                                        <Button onClick={() => handleEditBlog(blog.id, blog.hidden)}
+                                                disabled={blog.hidden}>
                                             Edit Post
                                         </Button>
                                         <Button
@@ -580,11 +610,52 @@ export default function BlogsPage() {
                                         </Button>
                                     </div>
                                 </div>
-                                <p className="text-gray-500 mt-2">{blog.description}</p>
+                                <p className="text-gray-500 mt-2 max-w-[20vw] truncate md:max-w-[50vw]">{blog.description}</p>
+
+
+
                             </div>
                         ))
                     )}
+
+                    {/* Pagination */}
+                    <div className="flex justify-center mt-5">
+                        <Pagination>
+                        <PaginationContent className="flex flex-row justify-center gap-2">
+                            <PaginationItem>
+                            <PaginationPrevious
+                                className={`${currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handlePrevPage}
+                            >
+                                Previous
+                            </PaginationPrevious>
+                        </PaginationItem>
+
+                            {Array.from({ length: pageCount }, (_, index) => (
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        isActive={currentPage === index + 1}
+                                        onClick={() => handlePageChange(index + 1)}
+                                        >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+
+                            <PaginationItem>
+                            <PaginationNext
+                                className={`${currentPage >= pageCount ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handleNextPage} 
+                            >
+                                Next
+                            </PaginationNext>
+                            </PaginationItem>
+                        </PaginationContent>
+                        </Pagination>
+                    </div>
+                    
                 </div>
+                
             )}
         </div>
     );

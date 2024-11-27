@@ -12,12 +12,12 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
         try {
-            // Fetch the blog post by ID from the database
+            // fetch blog post by ID 
             const blogPost = await prisma.blogPost.findUnique({
                 where: { id: Number(id) },
                 include: {
-                    author: true, // Include the author's details (if needed)
-                    codeTemplates: true, // Include related code templates (if needed)
+                    author: true, 
+                    codeTemplates: true, 
                 },
             });
 

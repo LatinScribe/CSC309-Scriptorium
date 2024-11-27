@@ -181,16 +181,16 @@ export default async function handler(req, res) {
             // const userId = payload?.id || null; // if authenticated, extract userid
             const pageNum = parseInt(req.query.page) || 1; // default to 1 
             const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
-            const searchQuery = req.query.query || '';
+            const searchQuery = req.query.search || '';
             const author = req.query.author;
 
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
 
             const orderBy = []; //
-            if (sortOption === 'mostValuable') {
+            if (sortOption === 'mostUpvoted') {
                 orderBy.push({ upvoteCount: 'desc' }, { downvoteCount: 'asc' }, { createdAt: 'desc' });
-            } else if (sortOption === 'mostControversial') {
+            } else if (sortOption === 'mostDownvoted') {
                 orderBy.push({ downvoteCount: 'desc' }, { createdAt: 'desc' });
             } else {
                 orderBy.push({ createdAt: 'desc' }); // Default sort by creation date
@@ -296,13 +296,6 @@ export default async function handler(req, res) {
                 where: whereCondition,
             });
             const totalPages = Math.ceil(totalPosts / pageSize);
-
-            if (mappedBlogPosts.length === 0) {
-
-                console.log("no results");
-
-                return res.status(200).json({ message: "No blog posts found matching your criteria." });
-            }
 
             const response = {
                 blogPosts: mappedBlogPosts,

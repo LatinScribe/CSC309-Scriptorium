@@ -80,6 +80,7 @@ export default async function handler(req, res) {
                 username: username,
             },
         })
+        console.log(userExists);
         if (userExists) {
             return res.status(400).json({
                 error: "USER ALREADY EXISTS",
@@ -94,7 +95,7 @@ export default async function handler(req, res) {
         })
         if (userExists2) {
             return res.status(400).json({
-                error: "USER ALREADY EXISTS",
+                error: "EMAIL ALREADY EXISTS",
             });
         }
     } catch (error) {

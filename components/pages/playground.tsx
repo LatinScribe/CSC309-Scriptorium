@@ -110,6 +110,10 @@ export default function PlaygroundPage() {
     const [stderr, setStderr] = useState("");
 
     const handleRun = async () => {
+        if (code === "") {
+            toast.error("Write some code before running it!");
+            return;
+        }
         toast.info("Running code...");
         setIsRunning(true);
         try {
@@ -142,6 +146,11 @@ export default function PlaygroundPage() {
             ) : (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                     <div className='flex flex-col gap-3 p-4 h-fit'>
+                        <Alert variant="default">
+                            <CodeIcon className="h-4 w-4" />
+                            <AlertTitle>Welcome to the Playground!</AlertTitle>
+                            <AlertDescription>Write and run your code immediately, without needing first log in or create a template.</AlertDescription>
+                        </Alert>
                         <div className="flex gap-3 items-center justify-between">
                             <div className="text-2xl">Playground</div>
                             <>
@@ -204,7 +213,7 @@ export default function PlaygroundPage() {
                                 </Button>
                             )}
                         </div>
-                        <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
+                        <ScrollArea className="rounded-lg border h-[calc(100vh-400px)]">
                             <Editor
                                 value={code}
                                 onValueChange={setCode}
