@@ -392,3 +392,24 @@ export async function reportComment(commentId: number, explanation: string, sess
     });
     return await response.json();
 }
+
+export async function getBlogByTemplate(templateId: number) {
+    console.log(templateId);
+    try {
+        const response = await fetch(`${API_URL}/api/blogs/byTemplate?templateId=${templateId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        console.log(data);
+        if (!Array.isArray(data)) {
+            return [];
+        }
+        return data;
+    } catch (error) {
+        console.error("An error occurred while fetching blog by template:", error);
+        throw error;
+    }
+}

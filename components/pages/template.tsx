@@ -2,15 +2,15 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SessionContext } from "@/contexts/session";
 import { useContext } from "react";
-import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode } from "@/utils/dataInterface";
-import { AlertCircle, CodeIcon, PlayIcon, SaveIcon, Scroll } from "lucide-react";
+import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode, getBlogByTemplate } from "@/utils/dataInterface";
+import { AlertCircle, CodeIcon, ExternalLink, PlayIcon, SaveIcon, Scroll } from "lucide-react";
 import {
     Alert,
     AlertDescription,
     AlertTitle,
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button";
-import { Template } from "@/utils/types";
+import { BlogPost, Template } from "@/utils/types";
 import Link from "next/link";
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
@@ -78,6 +78,7 @@ export default function TemplatePage() {
     const [stderr, setStderr] = useState("");
     const [inputs, setInputs] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState(false);
+    const [linkedBlogPosts, setLinkedBlogPosts] = useState<BlogPost[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,8 +88,12 @@ export default function TemplatePage() {
                 setForkTitle(template.title);
                 setForkExplanation(template.explanation || "");
                 setForkTags(template.tags);
+                console.log('fetching blogs');
+                const linkedBlogs = await getBlogByTemplate(id);
+                setLinkedBlogPosts(linkedBlogs);
+                console.log(linkedBlogPosts);
             } catch (error) {
-                console.error("Faxiled to fetch template:", error);
+                console.error("Failed to fetch template:", error);
                 setError(`Failed to fetch template: ${(error as Error).message}`);
             }
         };
@@ -481,6 +486,20 @@ export default function TemplatePage() {
                             {stderr.split('\n').map((line, index) => (
                                 <div key={index}>{line}</div>
                             ))}
+                        </ScrollArea>
+                        <div className="text-lg font-medium">Linked Blog Posts</div>
+                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                            {linkedBlogPosts.map((blog) => (
+                                <div key={blog.id} className="flex items-center gap-3">
+                                    <Link href={`/post?id=${blog.id}`} className="w-full flex gap-2">
+                                        <div className="text-primary">{blog.title}</div>
+                                        <ExternalLink className="text-sm text-gray-500" />
+                                    </Link>
+                                </div>
+                            ))}
+                            {linkedBlogPosts.length === 0 && (
+                                <div className="text-sm text-gray-500">No linked blog posts.</div>
+                            )}
                         </ScrollArea>
                     </div>
                 </div>
