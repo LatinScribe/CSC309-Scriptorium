@@ -219,7 +219,7 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
         headers["x_refreshToken"] = session.refreshToken;
     }
 
-    const response = await fetch(`${API_URL}/api/blogs?query=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+    const response = await fetch(`${API_URL}/api/blogs?search=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
         headers,
 

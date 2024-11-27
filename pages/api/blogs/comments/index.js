@@ -146,14 +146,14 @@ export default async function handler(req, res) {
             const pageSize = parseInt(req.query.pageSize) || 10;
 
             let orderBy = [];
-            if (sortOption === 'mostValuable') {
+            if (sortOption === 'mostUpvotes') {
                 orderBy = [
                     { upvoteCount: 'desc' },
                     { downvoteCount: 'asc' },
                     { createdAt: 'desc' },
                     { id: 'asc' }
                 ];
-            } else if (sortOption === 'mostControversial') {
+            } else if (sortOption === 'mostDownvotes') {
                 orderBy = [
                     { downvoteCount: 'desc' },
                     { createdAt: 'desc' }, 

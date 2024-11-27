@@ -14,15 +14,9 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "../ui/input";
+
 import { Textarea } from "../ui/textarea";
 import {
     AlertDialog,
@@ -48,43 +42,42 @@ export default function BlogListPage() {
     const [sortOption, setSortOption] = useState("mostValuable"); // Default sort by most upvotes
 
     const router = useRouter();
-    const { search } = router.query;
-    // const postId = id ? Number(id) : null;
-    // const searchQuery = router.query.search ? router.query.search : null;
+    
+    
+    useEffect(() => {
+        if (!router.isReady) return;
+        const { search, sort, page } = router.query;
 
-
-    // useEffect(() => {
-    //     if (search) {
-    //         setSearchQuery(search as string);
-    //         handleSearch();
-    //     }
-    //     // Initialize state from URL query params
-    //     setSortOption((sortOption as string) || "mostValuable");
-    //     // setCurrentPage(Number(page) || 1);
-    // }, [search, sortOption]);
+        // initialize state from URL query params
+        if (search) setSearchQuery(search as string);
+        if (sort) setSortOption(sort as string);
+        if (page) setCurrentPage(Number(page));
+        
+        fetchAndSetBlogs();
+        
+        
+    }, [router.query]);
 
     useEffect(() => {
-        if (search) {   // set searchQuery state
-            setSearchQuery(search as string);
+        // This effect handles URL updates for the parameters
+        if (router.isReady) {
+            updateUrl({ search: searchQuery, sort: sortOption, page: currentPage });
         }
-        setSortOption((sortOption as string) || "mostValuable");
-    }, [search, sortOption]);
-    
-    useEffect(() => {   
-        if (searchQuery) {  // once searchQuery state is updated, get search results
-            handleSearch();
-        }
-    }, [searchQuery]);
-    
+    }, [searchQuery, sortOption, currentPage]);
 
-    // useEffect(() => {
-    //     // Fetch blogs when searchQuery or sortOption changes
-    //     if (searchQuery || sortOption) {
-    //         fetchAndSetBlogs(searchQuery);
+    useEffect(() => {
+        // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
+        fetchAndSetBlogs();
+    }, [searchQuery, currentPage, sortOption]);
+    
+    // useEffect(() => {   
+    //     if (searchQuery) {  // once searchQuery state is updated, get search results
+    //         handleSearch();
     //     }
-    // }, [searchQuery, sortOption]);
+    // }, [searchQuery]);
+    
 
-    const fetchAndSetBlogs = async (queryToSearch: string = searchQuery) => {
+    const fetchAndSetBlogs = async () => {
         try {
             // Fetch the blogs based on the search query and sort option
             const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize, session);
@@ -112,20 +105,20 @@ export default function BlogListPage() {
             page: currentPage || undefined,
             ...queryUpdates,
         };
-        router.replace({ pathname: "/blogs", query: newQuery }, undefined, {
+        router.push({ pathname: "/blogs", query: newQuery }, undefined, {
             shallow: true,
         });
     };
 
     const handleSearch = () => {
         setSearchQuery(inputValue);
-        setCurrentPage(1); // Reset to first page when searching
-        fetchAndSetBlogs(searchQuery);
-        updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
+        setCurrentPage(1); // Reset to first page 
+        // fetchAndSetBlogs(searchQuery); 
     };
 
     const handleSortChange = (newSort: string) => {
         setSortOption(newSort);
+        setCurrentPage(1);
         updateUrl({ sort: newSort, page: 1 });
     };
 
@@ -137,11 +130,12 @@ export default function BlogListPage() {
         });
     };
 
+
     const handlePaginationClick = (page: number) => {
         setCurrentPage(page);
+        updateUrl({page});
     };
   
-
     return (
         <div className="flex justify-center">
             <div className="flex flex-col justify-center container pt-10 px-5 gap-5">
@@ -157,18 +151,30 @@ export default function BlogListPage() {
                         />                                                          
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
-                    <div>
-                        <label htmlFor="sortOption" className="mr-2">Sort By:</label>
-                        <select
-                            id="sortOption"
-                            value={sortOption}
-                            onChange={(e) => handleSortChange(e.target.value)}
-                            className="border p-2"
+                    <div className="flex items-center space-x-6">
+                        <label 
+                            htmlFor="sortOption" 
+                            className="text-sm font-medium whitespace-nowrap"
                         >
-                            <option value="mostUpvoted">Most Upvoted</option>
-                            <option value="mostControversial">Most Downvoted</option>
-                            <option value="createdAt">Newest</option>
-                        </select>
+                            Sort By:
+                        </label>
+                        <Select
+                            value={sortOption}
+                            onValueChange={(value: string) => handleSortChange(value)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue>{ 
+                                    sortOption === 'mostUpvoted' ? 'Most Upvoted' :
+                                    sortOption === 'mostControversial' ? 'Most Downvoted' :
+                                    sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
+                                }</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
+                                <SelectItem value="mostControversial">Most Downvoted</SelectItem>
+                                <SelectItem value="createdAt">Newest</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
                 <div className="flex flex-col gap-5">

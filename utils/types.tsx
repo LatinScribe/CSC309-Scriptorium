@@ -57,6 +57,7 @@ export interface BlogPost {
     reportsCount: number;
     hidden: boolean;
     author: User;
+    codeTemplates: Template[];
 }
 
 export interface Comment {
