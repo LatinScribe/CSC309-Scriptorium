@@ -132,6 +132,7 @@ export default function BlogsPage() {
 
     const resetFields = () => {
         setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });
+        setSearchTerm("");
     };
 
     const handleCreateBlog = () => {
@@ -241,9 +242,11 @@ export default function BlogsPage() {
                 setBlogs(blogs.map((blog) => (blog.id === updatedPost.id ? updatedPost : blog)));
                 setIsEditing(false);
                 setCurrentBlog(null);
-                setNewBlog({ title: "", description: "", tags: [], codeTemplates: [] });  // Reset selected templates
+                resetFields();
             })
             .catch(console.error);
+
+        
     };
 
     // Handle adding a tag
@@ -352,9 +355,13 @@ export default function BlogsPage() {
                                 <div className="flex items-center space-x-2 mb-2">
                                     <Input
                                         type="text"
-                                        placeholder="Add a tag"
+                                        placeholder="Add a tag (max 40 characters)"
                                         value={tagInput}
-                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onChange={(e) => {
+                                            if (e.target.value.length <= 40) { //char limit
+                                                setTagInput(e.target.value);
+                                            }
+                                        }}
                                         className="w-64 px-2 py-1"
                                         />
                                         <Button onClick={handleAddTag}> + </Button>
@@ -393,10 +400,10 @@ export default function BlogsPage() {
                                             <div
                                                 key={template.id}
                                                 onClick={() => handleAddTemplate(template)}
-                                                className="p-3 cursor-pointer hover:bg-gray-100"
+                                                className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 "
                                             >
                                                 <span> {template.title} </span>
-                                                <span className="text-sm text-gray-500">by {template.author?.username}</span>
+                                                <span className="text-sm text-gray-400">by {template.author?.username}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -472,9 +479,13 @@ export default function BlogsPage() {
                                 <div className="flex items-center space-x-2 mb-2">
                                     <Input
                                         type="text"
-                                        placeholder="Add a tag"
+                                        placeholder="Add a tag (max 40 characters)"
                                         value={tagInput}
-                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onChange={(e) => {
+                                            if (e.target.value.length <= 40) { //char limit
+                                                setTagInput(e.target.value);
+                                            }
+                                        }}
                                         className="w-64 px-2 py-1"
                                         />
                                         <Button onClick={handleAddTag}> + </Button>
@@ -514,10 +525,10 @@ export default function BlogsPage() {
                                             <div
                                                 key={template.id}
                                                 onClick={() => handleAddTemplate(template)} // Add template to selected list
-                                                className="p-3 cursor-pointer hover:bg-gray-100"
+                                                className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
                                             >
                                                 <span>{template.title}</span>
-                                                <span className="text-sm text-gray-500">by {template.author?.username}</span>
+                                                <span className="text-sm text-gray-400 ml-1">by {template.author?.username}</span>
                                             </div>
                                             ))}
                                     </div>
@@ -557,15 +568,15 @@ export default function BlogsPage() {
             
             {/* Display User's Blog Posts*/}
             {!isEditing && !isCreating && (
-                <div className="grid gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     {(Array.isArray(blogs) && blogs.length === 0) ? (
                         <p className="text-gray-600">No blog posts available. Please create one!</p>
                     ) : (
                         blogs && blogs.map((blog: BlogPost) => (
-                            <div key={blog.id} className="bg-background p-6 border shadow rounded">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h2 className="text-2xl font-bold max-w-[20vw] md:max-w-[50vw] truncate">{blog.title}</h2>
+                            <div key={blog.id} className="bg-background p-6 border shadow rounded w-full max-w-full">
+                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center">
+                                    <div className="flex-grow">
+                                        <h2 className="text-2xl font-bold break-words md:max-w-[70vw] sm:max-w-[50vw] ">{blog.title}</h2>
                                         {blog.hidden && (
                                              <div className="flex items-center gap-2 p-4">
                                                 <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
@@ -578,42 +589,41 @@ export default function BlogsPage() {
                                                 <span className="text-sm text-red-500 bg-yellow-100 p-1 rounded">Flagged</span>
                                             </div>
                                         )}
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-500 mb-4">
                                             Published on {new Date(blog.createdAt).toLocaleDateString()}
                                         </p>
 
                                         {/* Display tags */}
-                                        <div className="flex flex-wrap gap-2">
+                                        <div className="flex flex-wrap gap-2 md:max-w-[70vw] mb-8">
                                             {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
-                                                className="px-2 py-1 text-sm rounded-md
+                                                className="px-2 py-1 text-xs rounded-md
                                                     bg-gray-200 text-gray-800 
-                                                    dark:bg-gray-800 dark:text-gray-100"
+                                                    dark:bg-gray-800 dark:text-gray-100
+                                                    sm:px-2 sm:py-0.5 sm:text-base
+                                                    "
                                                 >
                                                 {tag}
                                                 </span>
                                             ))}
                                             </div>
                                     </div>
-                                    <div className="flex space-x-4 flex-grow justify-end">
-                                        <Button onClick={() => handleEditBlog(blog.id, blog.hidden)}
-                                                disabled={blog.hidden}>
-                                            Edit Post
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => handleDeleteBlog(blog.id)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
                                 </div>
-                                <p className="text-gray-500 mt-2 max-w-[20vw] truncate md:max-w-[50vw]">{blog.description}</p>
-
-
-
+                                <p className="text-gray-500 mt-2 line-clamp-3 md:max-w-[50vw] ">{blog.description}</p>
+                                <div className="mt-4 flex justify-end space-x-4">
+                                    <Button onClick={() => handleEditBlog(blog.id, blog.hidden)}
+                                            disabled={blog.hidden}>
+                                        Edit Post
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => handleDeleteBlog(blog.id)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
                             </div>
                         ))
                     )}

@@ -143,7 +143,7 @@ export default async function handler(req, res) {
 
             const { sortOption } = req.query;
             const pageNum = parseInt(req.query.pageNum) || 1;
-            const pageSize = parseInt(req.query.pageSize) || 10;
+            const pageSize = parseInt(req.query.pageSize) || 5;
 
             let orderBy = [];
             if (sortOption === 'mostUpvotes') {
@@ -194,7 +194,7 @@ export default async function handler(req, res) {
                 };
             }
 
-            // fetch comments (with pagination)
+            // fetch all comments
             const comments = await prisma.comment.findMany({
                 where: whereCondition, 
                 orderBy: orderBy, 
@@ -205,25 +205,55 @@ export default async function handler(req, res) {
                         },
                     },
                 },
-                skip: (pageNum - 1) * pageSize,
-                take: pageSize,
+                // skip: (pageNum - 1) * pageSize,
+                // take: pageSize,
             });
+
+            // ======== nest comments ==========
+
+            const mapCommentsToParent = (comments) => {
+                const commentMap = {};
+                const result = [];
+
+                comments.forEach((comment) => {
+                    commentMap[comment.id] = {
+                        ...comment,
+                        replies: [] // create a replies field for each comment
+                    };
+                });
+
+                comments.forEach((comment) => {
+                    if (comment.parentCommentId) {
+                        // comment has a parent; push it to the parent's replies array
+                        commentMap[comment.parentCommentId].replies.push(commentMap[comment.id]);
+                    } else {
+                        // add top level comments to the result
+                        result.push(commentMap[comment.id]);
+                    }
+                });
+                return result;
+            };
+
+            const nestedComments = mapCommentsToParent(comments);
+            // apply pagination to top-level comments only
+            const paginatedTopLevel = nestedComments.slice((pageNum - 1) * pageSize, pageNum * pageSize);
 
             // iterates over comments array and copies all properties of the post object 
             // plus adds isReported flag that represents whether the comment is hidden and userId 
             // userId matches the authorId of the post 
             // (this field is specific to the requestor and indicates the comments that should show as flagged
             // to the author)
-            const mappedComments = comments.map((post) => ({
-                ...post,
-                isReported: post.hidden && post.authorId === userId,
+            const mappedComments = paginatedTopLevel.map((comment) => ({
+                ...comment,
+                isReported: comment.hidden && comment.authorId === userId,
+                replies: comment.replies.map((reply) => ({
+                    ...reply,
+                    isReported: reply.hidden && reply.authorId === userId,
+                })),
             }));
 
             // calculating the total number of pages for pagination:
-            // count the total number of comments 
-            const totalPosts = await prisma.comment.count({
-                where: whereCondition,
-            });
+            const totalPosts = nestedComments.length;
             const totalPages = Math.ceil(totalPosts / pageSize);
 
             const response = {
@@ -235,7 +265,7 @@ export default async function handler(req, res) {
             res.status(200).json(response);
         } catch (error) {
             // res.status(500).json({ error: "Could not fetch comment", details: error.message });
-            res.status(500).json({ error: "Could not fetch comment" });
+            res.status(500).json({ error: "Could not fetch comment", details: error.message });
         }
     } else if (req.method === 'POST') { // handle comment creation
         // user access

@@ -43,9 +43,9 @@ const BlogPostPage = () => {
     const [blogVote, setBlogVote] = useState<"upvoted" | "downvoted" | null>(null);
     const [commentVotes, setCommentVotes] = useState<Record<number, "upvoted" | "downvoted" | null>>({});
     // pagination 
-    const [currentPage, setCurrentPage] = useState(1); // Track the current page
-    const [loading, setLoading] = useState(false); // To show loading state
-    const [hasMore, setHasMore] = useState(true); // Track if there are more comments
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(false); 
+    const [hasMore, setHasMore] = useState(true); 
     const [totalPages, setTotalPages] = useState(0);
     const [pageSize] = useState(20);
 
@@ -62,7 +62,6 @@ const BlogPostPage = () => {
 
 
     useEffect(() => {
-      // Wait for the router to be ready to make sure the query is populated
         if (!postId) {
             console.log("Couldn't load post");  
             return;
@@ -74,8 +73,8 @@ const BlogPostPage = () => {
             setBlogPost(responseBlog);
 
             const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
-            const nestedComments = nestComments(commentsResponse.comments);
-            setComments(nestedComments);
+            // const nestedComments = nestComments(commentsResponse.comments);
+            setComments(commentsResponse.comments);
             setTotalPages(commentsResponse.totalPages);
 
         } catch (error) {
@@ -94,14 +93,15 @@ const BlogPostPage = () => {
         console.log("Couldnt load post");  
         return;
       }
+      setCurrentPage(1);
       // sorting
       const getComments = async () => {
         try {
           console.log("Fetching comments for post:", postId);
-          const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+          const commentsResponse = await fetchComments(postId, sortOption, 1, session);
           if (Array.isArray(commentsResponse.comments)) {
-            const nestedComments = nestComments(commentsResponse.comments);
-            setComments(nestedComments);
+            // const nestedComments = nestComments(commentsResponse.comments);
+            setComments(commentsResponse.comments);
           } else {
             console.error("Expected an array of comments, but got:", commentsResponse.comments);
             setComments([]); 
@@ -117,27 +117,43 @@ const BlogPostPage = () => {
 
     }, [sortOption]); 
     
-    // const loadMoreComments = async () => {
-    //   if (!postId) {
-    //     console.log("Invalid postId");  
-    //     return;
-    //   }
+    const loadMoreComments = async () => {
+      if (currentPage < totalPages) {
+        const nextPage = currentPage + 1;
+        setCurrentPage(nextPage); 
+      }
+    };
 
-    //   if (currentPage < totalPages) {
-    //     const nextPage = currentPage + 1;
-    //     setCurrentPage(nextPage); 
-    //     try{
-    //       const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
-    //       const newComments = newCommentsResponse.comments;
+    useEffect(() => {
+      if (!postId) {
+        console.log("Invalid postId");  
+        return;
+      }
+
+      const fetchCommentsForNewPage = async () => {
+        try {
+          const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+          const newComments = newCommentsResponse.comments;
           
-    //       setComments((prevComments) => [...prevComments, ...newComments]);
-    //     } catch (error) {
-    //       console.error("Failed to load more comments:", error);
-    //       toast.error("Failed to load more comments.");
-    //     }
-    //   }
-
-    // };
+          setComments((prevComments) => [...prevComments, ...newComments]);
+          // setComments((prevComments) => {
+          //   const newCommentIds = newComments.map(comment => comment.id);
+          //   const filteredNewComments = newComments.filter(comment => 
+          //     !prevComments.some(prevComment => prevComment.id === comment.id)
+          //   );
+          //   return [...prevComments, ...filteredNewComments];
+          // });
+        } catch (error) {
+          console.error("Failed to load more comments:", error);
+          toast.error("Failed to load more comments.");
+        }
+        
+      };
+    
+      if (currentPage > 1) {
+        fetchCommentsForNewPage();
+      }
+    }, [currentPage]);
   
 
     const handleCommentSubmit = async () => {
@@ -461,7 +477,7 @@ const BlogPostPage = () => {
                   )}
 
 
-                    <h1 className="text-2xl font-bold">{blogPost.title}</h1>
+                    <h1 className="text-2xl font-bold break-words md:max-w-[70vw] ">{blogPost.title}</h1>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1 text-gray-600 text-sm">By <UserCard user={blogPost.author} /></div>
                         <span className="text-sm text-gray-400">•</span>
@@ -594,26 +610,26 @@ const BlogPostPage = () => {
                   </div>
 
                   <div>
-                  {comments.length > 0 ? (
+                  {comments?.length > 0 ? (
                     renderComments(comments)
                     
                   ) : (     
                     <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                   )}
                   {/* Load More Button */}
-                  {/* {(currentPage < totalPages) && (
+                  {(currentPage < totalPages) && (
                     <div className="flex justify-center mt-4">
                       <Button
                         onClick={loadMoreComments}
                         variant="outline"
                         size="sm"
                         className="px-4 py-2 text-blue-500"
-                        disabled={loading} // Disable while loading
+                        // disabled={loading} // Disable while loading
                       >
                         {loading ? "Loading..." : "Load More"}
                       </Button>
                     </div>
-                  )} */}
+                  )}
 
                   
                   </div>
@@ -624,31 +640,31 @@ const BlogPostPage = () => {
 }
 
 
-const nestComments = (comments: Comment[]) => {
-  const commentMap = new Map();
+// const nestComments = (comments: Comment[]) => {
+//   const commentMap = new Map();
 
 
-  comments.forEach((comment: Comment) => {
-    comment.replies = []; 
-    commentMap.set(comment.id, comment);
-  });
+//   comments.forEach((comment: Comment) => {
+//     comment.replies = []; 
+//     commentMap.set(comment.id, comment);
+//   });
 
-  const roots: Comment[] = [];
+//   const roots: Comment[] = [];
 
-  comments.forEach((comment) => {
-    if (comment.parentCommentId) {
-      // attach as a reply to its parent
-      const parent = commentMap.get(comment.parentCommentId);
-      if (parent) {
-        parent.replies.push(comment);
-      }
-    } else { // top level comment
-      roots.push(comment);
-    }
-  });
+//   comments.forEach((comment) => {
+//     if (comment.parentCommentId) {
+//       // attach as a reply to its parent
+//       const parent = commentMap.get(comment.parentCommentId);
+//       if (parent) {
+//         parent.replies.push(comment);
+//       }
+//     } else { // top level comment
+//       roots.push(comment);
+//     }
+//   });
 
-  return roots; // only returns top level comments
-};
+//   return roots; // only returns top level comments
+// };
 
 export default BlogPostPage;
 
