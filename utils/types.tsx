@@ -8,7 +8,7 @@ export interface Filters {
     title?: string;
     content?: string;
     tags?: string[];
-    ids?: string[];
+    template?: string;
     author?: string;
 }
 

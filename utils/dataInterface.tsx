@@ -19,9 +19,6 @@ export async function fetchTemplates(filters: Filters, page: number, pageSize: n
         if (filters.tags) {
             queryParams.append("tags", filters.tags.join(","));
         }
-        if (filters.ids) {
-            queryParams.append("ids", filters.ids.join(","));
-        }
         if (filters.author) {
             queryParams.append("author", filters.author);
         }
@@ -215,8 +212,8 @@ export async function fetchUserBlogs(session: Session, author: string, currentPa
     return data;
 }
 
-export async function fetchBlogs(searchTerm: string, sortOption: string, filterField: string, currentPage: number = 1,
-    pageSize: number = 5, session: Session | null) {
+export async function fetchBlogs(sortOption: string, currentPage: number = 1,
+    pageSize: number = 5, session: Session | null, searchTitle?: string, searchContent?: string, searchTags?: string, searchTemplate?: string) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -225,7 +222,7 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, filterF
         headers["x_refreshToken"] = session.refreshToken;
     }
 
-    const response = await fetch(`${API_URL}/api/blogs?${filterField}=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+    const response = await fetch(`${API_URL}/api/blogs?sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}&searchTitle=${searchTitle}&searchContent=${searchContent}&searchTag=${searchTags}&searchTemplate=${searchTemplate}`, {
         method: "GET",
         headers,
 

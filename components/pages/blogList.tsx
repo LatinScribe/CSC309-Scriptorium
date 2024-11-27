@@ -31,11 +31,15 @@ import {
   import { SessionContext } from "@/contexts/session";
 import { Separator } from "../ui/separator";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import AdvancedSearchModal from "../AdvancedSearch";
 
 export default function BlogListPage() {
     const { session } = useContext(SessionContext);
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchContent, setSearchContent] = useState<string>("");
+    const [searchTag, setSearchTag] = useState<string>("");
+    const [searchTemplate, setSearchTemplate] = useState<string>("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);     
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -43,47 +47,48 @@ export default function BlogListPage() {
     const [pageCount, setPageCount] = useState(1);
 
     const [sortOption, setSortOption] = useState("mostUpvoted"); // default
-    const [filterField, setFilterField] = useState<string>("title");
 
     const router = useRouter();
     
     
     useEffect(() => {
         if (!router.isReady) return;
-        const { search, sort, page, field } = router.query;
+        const { title, sort, page, content, tag, template } = router.query;
         // initialize state from URL query params
-        if (search) setSearchQuery(search as string);
+        if (title) setSearchQuery(title as string);
         if (sort) setSortOption(sort as string);
         if (page) setCurrentPage(Number(page));
-        if (field) setFilterField(field as string);
+        if (content) setSearchContent(content as string);
+        if (tag) setSearchTag(tag as string);
+        if (template) setSearchTemplate(template as string);
         
         fetchAndSetBlogs();
     }, [router.query]);
 
     useEffect(() => {
         if (router.isReady) {
-            updateUrl({ search: searchQuery, sort: sortOption, page: currentPage });
+            updateUrl({ title: searchQuery, sort: sortOption, page: currentPage, content: searchContent, tag: searchTag, template: searchTemplate });
             // fetchAndSetBlogs();
         }
         
-    }, [searchQuery, sortOption, currentPage, filterField]);
+    }, [searchQuery, sortOption, currentPage, searchContent, searchTag, searchTemplate]);
 
     // useEffect(() => {
     //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
     //     fetchAndSetBlogs();
     // }, [searchQuery, currentPage, sortOption]);
     
-    useEffect(() => {   
-        if (searchQuery) {  // once searchQuery state is updated, get search results
-            fetchAndSetBlogs();
-        }
-    }, [searchQuery]);
+    // useEffect(() => {   
+    //     if (searchQuery) {  // once searchQuery state is updated, get search results
+    //         fetchAndSetBlogs();
+    //     }
+    // }, [searchQuery]);
     
 
     const fetchAndSetBlogs = async () => {
         try {
             
-            const response = await fetchBlogs(searchQuery, sortOption, filterField, currentPage, pageSize, session);
+            const response = await fetchBlogs(sortOption, currentPage, pageSize, session, searchQuery, searchContent, searchTag, searchTemplate);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
             setPageCount(response.totalPages);  
         } catch (error) {
@@ -105,10 +110,12 @@ export default function BlogListPage() {
     };
     const updateUrl = (queryUpdates: { [key: string]: string | number }) => {
         const newQuery = {
-            search: searchQuery || undefined,
+            title: searchQuery || undefined,
             sort: sortOption || undefined,
             page: currentPage || undefined,
-            field: filterField || undefined,
+            content: searchContent || undefined,
+            tag: searchTag || undefined,
+            template: searchTemplate || undefined,
             ...queryUpdates,
         };
         router.push({ pathname: "/blogs", query: newQuery }, undefined, {
@@ -155,11 +162,17 @@ export default function BlogListPage() {
                             className="w-36 md:w-48 lg:w-96 xl:w-96"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}        //update local input state
-                        />                                                          
+                        />             
+                        <AdvancedSearchModal showIdFilter={true} onFiltersChange={(filters) => {
+                            if (filters.title) setInputValue(filters.title);
+                            if (filters.content) setSearchContent(filters.content);
+                            if (filters.tags) setSearchTag(filters.tags.join(","));
+                            if (filters.template) setSearchTemplate(filters.template);
+                        }} />
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
                     <div className="flex items-center space-x-6">
-                        <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
+                        {/* <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
                             Search by:
                         </label>
                         <Select
@@ -182,7 +195,7 @@ export default function BlogListPage() {
                                 <SelectItem value="searchContent">Content</SelectItem>
                                 <SelectItem value="searchTemplate">Code Templates</SelectItem>
                             </SelectContent>
-                        </Select>
+                        </Select> */}
                         <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
                             Sort By:
                         </label>
