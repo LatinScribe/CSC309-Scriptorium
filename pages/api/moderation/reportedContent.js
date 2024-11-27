@@ -260,7 +260,7 @@ export default async function handler(req, res) {
                                     },
                                 },
                             },
-                        ], reportsCount: { gt: 0 }, // only include reported posts
+                        ], reportsCount: { gt: 0 }, deleted: false,// only include reported posts
                     };
                 }
 

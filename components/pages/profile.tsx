@@ -54,8 +54,8 @@ export default function ProfilePage() {
                     setPhoneNumber(profile.phoneNumber || "");
                     setAvatar(profile.avatar || "");
                     setEmail(profile.email);
-                    setUpdatedAt(profile.updatedAt ? new Date(profile.updatedAt).toUTCString() : "Unknown");
-                    setCreatedAt(profile.createdAt ? new Date(profile.createdAt).toUTCString() : "Unknown");
+                    setUpdatedAt(profile.updatedAt ? new Date(profile.updatedAt).toLocaleString() : "Unknown");
+                    setCreatedAt(profile.createdAt ? new Date(profile.createdAt).toLocaleString() : "Unknown");
                 })
                 .catch((error) => console.error("Failed to fetch profile:", error));
         }
