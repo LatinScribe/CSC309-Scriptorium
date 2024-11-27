@@ -117,27 +117,27 @@ const BlogPostPage = () => {
 
   }, [sortOption]);
 
-  // const loadMoreComments = async () => {
-  //   if (!postId) {
-  //     console.log("Invalid postId");  
-  //     return;
-  //   }
+  const loadMoreComments = async () => {
+    if (!postId) {
+      console.log("Invalid postId");  
+      return;
+    }
 
-  //   if (currentPage < totalPages) {
-  //     const nextPage = currentPage + 1;
-  //     setCurrentPage(nextPage); 
-  //     try{
-  //       const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
-  //       const newComments = newCommentsResponse.comments;
+    if (currentPage < totalPages) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage); 
+      try{
+        const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+        const newComments = newCommentsResponse.comments;
 
-  //       setComments((prevComments) => [...prevComments, ...newComments]);
-  //     } catch (error) {
-  //       console.error("Failed to load more comments:", error);
-  //       toast.error("Failed to load more comments.");
-  //     }
-  //   }
+        setComments((prevComments) => [...prevComments, ...newComments]);
+      } catch (error) {
+        console.error("Failed to load more comments:", error);
+        toast.error("Failed to load more comments.");
+      }
+    }
 
-  // };
+  };
 
 
   const handleCommentSubmit = async () => {
@@ -610,7 +610,7 @@ const BlogPostPage = () => {
               <p className="text-gray-500">No comments yet. Be the first to comment!</p>
             )}
             {/* Load More Button */}
-            {/* {(currentPage < totalPages) && (
+            {(currentPage < totalPages) && (
                     <div className="flex justify-center mt-4">
                       <Button
                         onClick={loadMoreComments}
@@ -633,8 +633,8 @@ const BlogPostPage = () => {
 }
 
 
-// const nestComments = (comments: Comment[]) => {
-//   const commentMap = new Map();
+const nestComments = (comments: Comment[]) => {
+  const commentMap = new Map();
 
 
   comments.forEach((comment: Comment) => {
@@ -642,22 +642,22 @@ const BlogPostPage = () => {
     commentMap.set(comment.id, comment);
   });
 
-//   const roots: Comment[] = [];
+  const roots: Comment[] = [];
 
-//   comments.forEach((comment) => {
-//     if (comment.parentCommentId) {
-//       // attach as a reply to its parent
-//       const parent = commentMap.get(comment.parentCommentId);
-//       if (parent) {
-//         parent.replies.push(comment);
-//       }
-//     } else { // top level comment
-//       roots.push(comment);
-//     }
-//   });
+  comments.forEach((comment) => {
+    if (comment.parentCommentId) {
+      // attach as a reply to its parent
+      const parent = commentMap.get(comment.parentCommentId);
+      if (parent) {
+        parent.replies.push(comment);
+      }
+    } else { // top level comment
+      roots.push(comment);
+    }
+  });
 
-//   return roots; // only returns top level comments
-// };
+  return roots; // only returns top level comments
+};
 
 export default BlogPostPage;
 
