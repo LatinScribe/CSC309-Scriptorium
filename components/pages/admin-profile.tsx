@@ -24,14 +24,14 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select"
-  
+} from "@/components/ui/select"
+
 
 export default function AdminProfile() {
     const { session, setSession, logout } = useContext(SessionContext);
 
     const router = useRouter();
-    const {query} = router;
+    const { query } = router;
     const username_query = query.username ? decodeURIComponent(query.username as string) : "";
 
     if (!session) {
@@ -127,6 +127,11 @@ export default function AdminProfile() {
 
                 })
                 .catch((error) => {
+                    // handle token error
+                    if (error === "Token Error") {
+                        logout();
+                        router.push("/login");
+                    }
                     console.error("Registration failed:", error);
                     setError(error.message || "Registration failed");
                 });
@@ -155,6 +160,11 @@ export default function AdminProfile() {
                     router.push("/admin-account");
                 })
                 .catch((error) => {
+                    // handle token error
+                    if (error === "Token Error") {
+                        logout();
+                        router.push("/login");
+                    }
                     console.error("Registration failed:", error);
                     setError(error.message || "Registration failed");
                 });
@@ -169,15 +179,15 @@ export default function AdminProfile() {
 
     // from https://gist.github.com/amirhp-com/ffaa19639912f587e67aaabe26b5c728
     // you can try: https://henrytchen.com/images/Profile3_compressed.jpg
-    let isValid = function(urlTocheck="", defaultValue=false){
+    let isValid = function (urlTocheck = "", defaultValue = false) {
         var image = new Image();
         image.src = urlTocheck;
         if (image.width == 0) {
-           return defaultValue;
+            return defaultValue;
         } else {
-           return true;
+            return true;
         }
-     }
+    }
 
     return (
         <div className="flex flex-col items-center justify-center h-screen text-textcolor">
@@ -185,161 +195,161 @@ export default function AdminProfile() {
                 This is admin sorcery, I sure hope you know what you are doing!
             </div>
             {(avatar && isValid(avatar)) ? (
-            <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
-                <img src={avatar} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover" />
-            </div>
+                <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
+                    <img src={avatar} alt="Profile Avatar" className="w-24 h-24 rounded-full object-cover" />
+                </div>
             ) : (
-            <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
-                <img src={API_URL+"/no-avatar.png"} alt="No Avatar" className="w-24 h-24 rounded-full object-cover" />
-            </div>
+                <div className="col-span-1 md:col-span-2 flex justify-center mt-4">
+                    <img src={API_URL + "/no-avatar.png"} alt="No Avatar" className="w-24 h-24 rounded-full object-cover" />
+                </div>
             )}
 
             <h1 className="text-3xl font-semibold p-4">Profile</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg p-4">
-            <Input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
-            <Input
-                type="text"
-                placeholder="New Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Choose new Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Confirm new Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type="text"
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <Input
-                type="text"
-                placeholder="Avatar (URL)"
-                value={avatar}
-                onChange={(e) => setAvatar(e.target.value)}
-                className="p-2 border border-gray-300 rounded"
-                autoComplete="off"
-            />
-            <div className="relative">
+                <Input autoComplete="false" name="hidden" type="text" style={{ display: "none" }} />
                 <Input
-                type="text"
-                placeholder="Email (current)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="p-2 border border-gray-300 rounded w-full"
-                autoComplete="off"
+                    type="text"
+                    placeholder="New Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
                 />
-            </div>
-            <div className="col-span-1 md:col-span-2 flex items-center">
-                <input
-                type="checkbox"
-                checked={showPassword}
-                onChange={() => setShowPassword(!showPassword)}
-                className="mr-2"
+                <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Choose new Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
                 />
-                <label>Show Password</label>
-            </div>
-            <div className="col-span-1 md:col-span-2 flex items-center">
-                <label className="mr-2">Role:</label>
-                <Select value={userRole} onValueChange={(value: string) => setUserRole(value)}>
-                    <SelectTrigger className="p-2 border border-gray-300 rounded w-24">
-                        <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="USER">User</SelectItem>
-                        <SelectItem value="ADMIN">Admin</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
+                <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm new Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
+                />
+                <Input
+                    type="text"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
+                />
+                <Input
+                    type="text"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
+                />
+                <Input
+                    type="text"
+                    placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
+                />
+                <Input
+                    type="text"
+                    placeholder="Avatar (URL)"
+                    value={avatar}
+                    onChange={(e) => setAvatar(e.target.value)}
+                    className="p-2 border border-gray-300 rounded"
+                    autoComplete="off"
+                />
+                <div className="relative">
+                    <Input
+                        type="text"
+                        placeholder="Email (current)"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="p-2 border border-gray-300 rounded w-full"
+                        autoComplete="off"
+                    />
+                </div>
+                <div className="col-span-1 md:col-span-2 flex items-center">
+                    <input
+                        type="checkbox"
+                        checked={showPassword}
+                        onChange={() => setShowPassword(!showPassword)}
+                        className="mr-2"
+                    />
+                    <label>Show Password</label>
+                </div>
+                <div className="col-span-1 md:col-span-2 flex items-center">
+                    <label className="mr-2">Role:</label>
+                    <Select value={userRole} onValueChange={(value: string) => setUserRole(value)}>
+                        <SelectTrigger className="p-2 border border-gray-300 rounded w-24">
+                            <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="USER">User</SelectItem>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
 
-                <Button onClick={handelProfileChange} className="col-span-1">
-                Edit profile
-                </Button>
-
-                <AlertDialog >
-                <AlertDialogTrigger asChild>
-                    <Button>
-                    Delete Account
+                    <Button onClick={handelProfileChange} className="col-span-1">
+                        Edit profile
                     </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-background">
-                    <AlertDialogHeader>
-                    <AlertDialogTitle>
-                        Confirm Delete
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to Delete the account for {oldusername}
-                    </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                    <AlertDialogCancel>
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction onClick={handelDeleteAccount} className="bg-destructive">
-                        Delete Account
-                    </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-                </AlertDialog>
 
-            </div>
-            {error && (
-                <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4 p-4">
-                    {error}
-                    <Button onClick={handelAccountReturn} className="col-span-1 mt-2">
-                        Go back to account selection
-                    </Button>
+                    <AlertDialog >
+                        <AlertDialogTrigger asChild>
+                            <Button>
+                                Delete Account
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-background">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Confirm Delete
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to Delete the account for {oldusername}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>
+                                    Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction onClick={handelDeleteAccount} className="bg-destructive">
+                                    Delete Account
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
                 </div>
-            )}
-            {message && (
-                <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4 p-4">
-                    {message}
-                </div>
-            )}
-            {createdAt && (
-                <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
-                    {"Account created at: " + String(createdAt)}
-                </div>
-            )}
-            {updatedAt && (
-                <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
-                    {"Account updated at: " + String(updatedAt)}
-                </div>
-            )}
+                {error && (
+                    <div className="col-span-1 md:col-span-2 text-red-500 text-center mt-4 p-4">
+                        {error}
+                        <Button onClick={handelAccountReturn} className="col-span-1 mt-2">
+                            Go back to account selection
+                        </Button>
+                    </div>
+                )}
+                {message && (
+                    <div className="col-span-1 md:col-span-2 text-green-500 text-center mt-4 p-4">
+                        {message}
+                    </div>
+                )}
+                {createdAt && (
+                    <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
+                        {"Account created at: " + String(createdAt)}
+                    </div>
+                )}
+                {updatedAt && (
+                    <div className="col-span-1 md:col-span-2 text text-center mt-4 p-4">
+                        {"Account updated at: " + String(updatedAt)}
+                    </div>
+                )}
             </div>
         </div>
     );

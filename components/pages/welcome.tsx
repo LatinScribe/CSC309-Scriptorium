@@ -83,18 +83,22 @@ export default function WelcomePage() {
 
     useEffect(() => {
         const fetchFeaturedTemplates = async () => {
-            const templates = await Promise.all(
-                featuredTemplatesIds.map(async (id) => {
-                    const template = await fetchTemplate(id);
-                    return {
-                        user: template.author,
-                        title: template.title,
-                        content: template.explanation || '',
-                        tags: template.tags,
-                    };
-                })
-            );
-            setFeaturedTemplates(templates);
+            try {
+                const templates = await Promise.all(
+                    featuredTemplatesIds.map(async (id) => {
+                        const template = await fetchTemplate(id);
+                        return {
+                            user: template.author,
+                            title: template.title,
+                            content: template.explanation || '',
+                            tags: template.tags,
+                        };
+                    })
+                );
+                setFeaturedTemplates(templates);
+            } catch (error) {
+                toast.error("Failed to fetch featured templates");
+            }
         };
         const fetchFeaturedBlogs = async () => {
             const blogs = await Promise.all(
