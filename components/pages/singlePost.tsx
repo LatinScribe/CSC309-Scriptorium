@@ -461,7 +461,7 @@ const BlogPostPage = () => {
                   )}
 
 
-                    <h1 className="text-2xl font-bold">{blogPost.title}</h1>
+                    <h1 className="text-2xl font-bold break-words md:max-w-[70vw] ">{blogPost.title}</h1>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1 text-gray-600 text-sm">By <UserCard user={blogPost.author} /></div>
                         <span className="text-sm text-gray-400">•</span>
