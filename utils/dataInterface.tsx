@@ -443,7 +443,13 @@ export async function fetchReportedContent(searchTerm: string, sortOption: strin
 
     });
 
-    return await response.json();
+    // CHECK FOR TOKEN ERROR
+    const responseData = await response.json();
+    if (response.status === 401 && responseData.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return responseData;
 }
 
 export async function hideContent(type: string, id: number, state: string = "true", session: Session) {
@@ -459,6 +465,11 @@ export async function hideContent(type: string, id: number, state: string = "tru
         headers: headers,
         body: JSON.stringify({ type, id, state }),
     });
+    // CHECK FOR TOKEN ERROR
+    const responseData = await response.json();
+    if (response.status === 401 && responseData.error === "Token Error") {
+        throw new Error("Token Error");
+    }
 
-    return await response.json();
+    return responseData;
 }

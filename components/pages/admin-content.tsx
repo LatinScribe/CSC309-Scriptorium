@@ -34,7 +34,7 @@ import { Separator } from "../ui/separator";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export default function AdminContentPage() {
-    const { session } = useContext(SessionContext);
+    const { session, logout } = useContext(SessionContext);
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]); 
@@ -103,8 +103,13 @@ export default function AdminContentPage() {
                 useRouter().push("/login");
             }
         } catch (error) {
+            // handle token error
+            if (error === "Token Error") {
+                logout();
+                router.push("/login");
+            }
             console.error("Search failed:", error);
-            toast.error("Failed to fetch blogs.");
+            toast.error("Failed to fetch Reported Content.");
         }
         console.log("fetchAndSetBlogs", searchQuery, sortOption);
         console.log(blogs);
@@ -175,6 +180,11 @@ export default function AdminContentPage() {
             }
             fetchAndSetBlogs();
         } catch (error) {
+            // handle token error
+            if (error === "Token Error") {
+                logout();
+                router.push("/login");
+            }
             console.error("Failed to hide blog:", error);
             toast.error("Failed to hide blog");
         }
@@ -198,6 +208,11 @@ export default function AdminContentPage() {
             }
             fetchAndSetBlogs();
         } catch (error) {
+            // handle token error
+            if (error === "Token Error") {
+                logout();
+                router.push("/login");
+            }
             console.error("Failed to hide Comment:", error);
             toast.error("Failed to hide Comment");
         }
