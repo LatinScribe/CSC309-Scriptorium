@@ -48,7 +48,6 @@ export default function BlogListPage() {
     const [sortOption, setSortOption] = useState("mostValuable"); // Default sort by most upvotes
 
     const router = useRouter();
-    const { search } = router.query;
     // const postId = id ? Number(id) : null;
     // const searchQuery = router.query.search ? router.query.search : null;
 
@@ -64,17 +63,22 @@ export default function BlogListPage() {
     // }, [search, sortOption]);
 
     useEffect(() => {
-        if (search) {   // set searchQuery state
-            setSearchQuery(search as string);
-        }
-        setSortOption((sortOption as string) || "mostValuable");
-    }, [search, sortOption]);
+        // if (search) {   // set searchQuery state
+        //     setSearchQuery(search as string);
+        // }
+        // setSortOption((sortOption as string) || "mostValuable");
+        fetchAndSetBlogs();
+    }, [router.query]);
+
+    useEffect(() => {
+        updateUrl({ page: currentPage })
+    }, [currentPage]);
     
-    useEffect(() => {   
-        if (searchQuery) {  // once searchQuery state is updated, get search results
-            handleSearch();
-        }
-    }, [searchQuery]);
+    // useEffect(() => {   
+    //     if (searchQuery) {  // once searchQuery state is updated, get search results
+    //         handleSearch();
+    //     }
+    // }, [searchQuery]);
     
 
     // useEffect(() => {
@@ -84,7 +88,7 @@ export default function BlogListPage() {
     //     }
     // }, [searchQuery, sortOption]);
 
-    const fetchAndSetBlogs = async (queryToSearch: string = searchQuery) => {
+    const fetchAndSetBlogs = async () => {
         try {
             // Fetch the blogs based on the search query and sort option
             const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize, session);
@@ -94,6 +98,8 @@ export default function BlogListPage() {
             console.error("Search failed:", error);
             toast.error("Failed to fetch blogs.");
         }
+        console.log("fetchAndSetBlogs", searchQuery, sortOption);
+        console.log(blogs);
 
         // const query: { [key: string]: string } = {};
         // if (searchQuery) query.query = searchQuery;
@@ -120,7 +126,7 @@ export default function BlogListPage() {
     const handleSearch = () => {
         setSearchQuery(inputValue);
         setCurrentPage(1); // Reset to first page when searching
-        fetchAndSetBlogs(searchQuery);
+        fetchAndSetBlogs();
         updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
     };
 
@@ -174,7 +180,7 @@ export default function BlogListPage() {
                 <div className="flex flex-col gap-5">
                     {blogs?.length > 0 ? (
                         blogs.map((blog) => (
-                            <div key={blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
+                            <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border border-gray-300 rounded-lg">
                                     <h2 className="text-xl font-bold">{blog.title}</h2>
                                     <p className="text-sm text-gray-600">{blog.description}</p>

@@ -87,7 +87,7 @@ export default function WelcomePage() {
                             </SelectItem>
                         </SelectContent>
                     </Select>
-                    <AdvancedSearchModal onFiltersChange={handleFiltersChange} showIdFilter={true} />
+                    {/* <AdvancedSearchModal onFiltersChange={handleFiltersChange} showIdFilter={true} /> */}
                     <Button onClick={handleSearch}>Search</Button>
                 </div>
             </div>

@@ -67,12 +67,7 @@ export default function BlogsPage() {
         if (!session || !session?.accessToken || !session?.refreshToken) {
             router.replace("/login"); 
         }
-    }, []); 
-
-    if (!session || !session?.accessToken || !session?.refreshToken) {
-        return null; // Don't render the page while redirecting
-    }
-
+    }, []);
 
     // Fetch user's blog posts on component mount
     useEffect(() => {
