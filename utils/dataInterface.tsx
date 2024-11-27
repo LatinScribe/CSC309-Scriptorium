@@ -446,7 +446,7 @@ export async function fetchReportedContent(searchTerm: string, sortOption: strin
     return await response.json();
 }
 
-export async function hideContent(type: string, id: number, session: Session) {
+export async function hideContent(type: string, id: number, state: string = "true", session: Session) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
@@ -457,7 +457,7 @@ export async function hideContent(type: string, id: number, session: Session) {
     const response = await fetch(`${API_URL}/api/moderation/reportedContent`, {
         method: "PATCH",
         headers: headers,
-        body: JSON.stringify({ type, id }),
+        body: JSON.stringify({ type, id, state }),
     });
 
     return await response.json();

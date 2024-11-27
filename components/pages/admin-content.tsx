@@ -157,14 +157,22 @@ export default function AdminContentPage() {
         updateUrl({page});
     };
 
-    const handleHideBlog = (id: number) => async () => {
+    const handleHideBlog = (id: number, hidden:boolean) => async () => {
         try {
             if (session) {
-                await hideContent("post", id, session);
+                if (!hidden) {
+                    await hideContent("post", id, "true",session);
+                } else {
+                    await hideContent("post", id, "false",session);
+                }
             } else {
                 toast.error("Session is not available.");
             }
+            if (hidden) {
+                toast.success("Blog unhidden successfully");
+            } else {
             toast.success("Blog hidden successfully");
+            }
             fetchAndSetBlogs();
         } catch (error) {
             console.error("Failed to hide blog:", error);
@@ -172,14 +180,22 @@ export default function AdminContentPage() {
         }
     }
 
-    const handleHideComment = (id: number) => async () => {
+    const handleHideComment = (id: number, hidden: boolean) => async () => {
         try {
             if (session) {
-                await hideContent("comment", id, session);
+                if (!hidden) {
+                await hideContent("comment",id, "true",session);
+                } else {
+                    await hideContent("comment",id, "false",session);
+                }
             } else {
                 toast.error("Session is not available.");
             }
+            if (hidden) {
             toast.success("Comment hidden successfully");
+            } else {
+                toast.success("Comment unhidden successfully");
+            }
             fetchAndSetBlogs();
         } catch (error) {
             console.error("Failed to hide Comment:", error);
@@ -257,8 +273,8 @@ export default function AdminContentPage() {
                                     <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
                                     <div className="flex justify-center mt-2">
-                                        <Button onClick={handleHideBlog(blog.id)}>
-                                            Hide content from everyone
+                                        <Button onClick={handleHideBlog(blog.id, blog.hidden)}>
+                                            {blog.hidden ? "Unhide content" : "Hide content from everyone"}
                                         </Button>
                                     </div>
                                 </div>
@@ -294,8 +310,8 @@ export default function AdminContentPage() {
                                     <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
                                     <div className="flex justify-center mt-2">
-                                        <Button onClick={handleHideComment(comment.id)}>
-                                            Hide content from everyone
+                                        <Button onClick={handleHideComment(comment.id, comment.hidden)}>
+                                            {comment.hidden ? "Unhide content" : "Hide content from everyone"}
                                         </Button>
                                     </div>
                                 </div>
