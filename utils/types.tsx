@@ -38,7 +38,7 @@ export interface Template {
     explanation?: string;
     tags: string[];
     forkedSourceId?: number;
-    author?: User;
+    author: User;
     authorId?: number;
     content: string;
     language: string;

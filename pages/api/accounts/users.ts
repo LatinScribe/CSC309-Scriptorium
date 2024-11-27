@@ -7,96 +7,125 @@ import prisma from "@/utils/db";
 //import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import { verifyUsername } from "@/utils/verification";
 
+interface QueryParams {
+    username?: string;
+    firstName_bool?: boolean;
+    lastName_bool?: boolean;
+    email_bool?: boolean;
+    avatar_bool?: boolean;
+    phoneNumber_bool?: boolean;
+    createdAt_bool?: boolean;
+    role_bool?: boolean;
+    page?: number;
+    pageSize?: number;
+}
+
+function parseQueryParams(query: NextApiRequest['query']): QueryParams {
+    const {
+        username,
+        firstName_bool,
+        lastName_bool,
+        email_bool,
+        avatar_bool,
+        phoneNumber_bool,
+        createdAt_bool,
+        role_bool,
+        page,
+        pageSize
+    } = query;
+
+    return {
+        username: username as string,
+        firstName_bool: firstName_bool === 'true',
+        lastName_bool: lastName_bool === 'true',
+        email_bool: email_bool === 'true',
+        avatar_bool: avatar_bool === 'true',
+        phoneNumber_bool: phoneNumber_bool === 'true',
+        createdAt_bool: createdAt_bool === 'true',
+        role_bool: role_bool === 'true',
+        page: page ? parseInt(page as string, 10) : undefined,
+        pageSize: pageSize ? parseInt(pageSize as string, 10) : undefined,
+    };
+}
+
 // pages/api/accounts/user
-export default async function handler(req, res) {
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === "GET") {
         // FILTER and RETRIEVE USER(s) based on username
         //const { username, firstName_bool, lastName_bool, email_bool, avatar_bool, phoneNumber_bool, createdAt_bool, role_bool, page, pageSize } = req.body;
-        const username = req.query.username;
-        const firstName_bool = req.query.firstName_bool === 'true';
-        const lastName_bool = req.query.lastName_bool === 'true';
-        const email_bool = req.query.email_bool === 'true';
-        const avatar_bool = req.query.avatar_bool === 'true';
-        const phoneNumber_bool = req.query.phoneNumber_bool === 'true';
-        const createdAt_bool = req.query.createdAt_bool === 'true';
-        const role_bool = req.query.role_bool === 'true';
-        const page = req.query.page;
-        const pageSize = req.query.pageSize;
+        const queryParams = parseQueryParams(req.query);
 
-        if (page && isNaN(parseInt(page))) {
+        if (queryParams.page && isNaN(queryParams.page)) {
             return res.status(400).json({
                 error: "Page should be a number",
             });
         }
-        if (pageSize && isNaN(parseInt(pageSize))) {
+        if (queryParams.pageSize && isNaN(queryParams.pageSize)) {
             return res.status(400).json({
                 error: "Page size should be a number",
             });
         }
 
         // default to 1 and 5
-        var page_num = page
-        var pageSize_num = pageSize
-        if (!page || !pageSize) {
-            page_num = 1;
-            pageSize_num = 5;
-        }
+        var page_num = queryParams.page || 1;
+        var pageSize_num = queryParams.pageSize || 5;
 
-        if (!username) {
+        if (!queryParams.username) {
             return res.status(400).json({
                 error: "Please provide all the required fields",
             });
         }
 
-        var firstname = firstName_bool
+        var firstname = queryParams.firstName_bool
         // check if user wants output. Default to false!
         if (!firstname || typeof firstname !== "boolean") {
             firstname = false
         }
-        var lastName = lastName_bool
+        var lastName = queryParams.lastName_bool
         // check if user wants output. Default to false!
         if (!lastName || typeof lastName !== "boolean") {
             lastName = false
         }
-        var email = email_bool
+        var email = queryParams.email_bool
         // check if user wants output. Default to false!
         if (!email || typeof email !== "boolean") {
             email = false
         }
-        var avatar = avatar_bool
+        var avatar = queryParams.avatar_bool
         // check if user wants output. Default to false!
         if (!avatar || typeof avatar !== "boolean") {
             avatar = false
         }
-        var phonenumber = phoneNumber_bool
+        var phonenumber = queryParams.phoneNumber_bool
         // check if user wants output. Default to false!
         if (!phonenumber || typeof phonenumber !== "boolean") {
             phonenumber = false
         }
 
-        var createdat = createdAt_bool
+        var createdat = queryParams.createdAt_bool
         // check if user wants output. Default to false!
         if (!createdat || typeof createdat !== "boolean") {
             createdat = false
         }
 
-        var role = role_bool
+        var role = queryParams.role_bool
         // check if user wants output. Default to false!
         if (!role || typeof role !== "boolean") {
             role = false
         }
         try {
             // verify username 
-            if (!verifyUsername(username)) {
+            if (!verifyUsername(queryParams.username)) {
                 return res.status(400).json({
                     error: "NOT A VALID USERNAME FORMAT: USERNAME SHOULD BE ALPHA-NUMERIC or underscore OF AT LEAST LENGTH 2",
                 });
             }
 
-            let where = {};
+            let where: { username?: { contains: string } } = {};
 
             where.username = {
-                contains: username,
+                contains: queryParams.username,
                 // mode: "insensitive",
             }
             let users = await prisma.user.findMany({

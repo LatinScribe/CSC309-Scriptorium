@@ -520,6 +520,7 @@ export default async function handler(req, res) {
         });
     } catch (error) {
         // res.status(500).json({ error: 'Could not create blog post', details: error.message });
+        console.log(error);
         res.status(500).json({ error: 'Could not create blog post', details: error.message });
     }
 } else {

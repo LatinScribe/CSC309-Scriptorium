@@ -1,103 +1,12 @@
-// MUST BE AN ADMIN TO USE THIS ENDPOINT
-// CAN BE USED TO REGISTER BOTH USERS AND ADMINS
+// THIS ENDPOINT TO BE USED BY USERS TO REGISTER FOR A NEW ACCOUNT
+// NOT FOR ADMINS TO REGISTER ADMIN ACCOUNTS
 
-import { hashPassword, generateSalt, verifyToken, attemptRefreshAccess, verifyTokenLocal } from "@/utils/auth";
+import { hashPassword, generateSalt } from "@/utils/auth";
 import { verifyEmail, verifyFirstname, verifyLastname, verifyPassword, verifyPhonenumber, verifyUsername, verifyRole } from "@/utils/verification";
 import prisma from "@/utils/db";
 
-export default async function handler(req, res) {
-
-    // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
-    // ======== TOKEN HANDLING STARTS HERE ==========
-    const { x_refreshToken } = req.headers;
-    var payload = null
-    try {
-        // attempt to verify the provided access token!!
-        payload = verifyToken(req.headers.authorization);
-    } catch (err) {
-        // this happens if we can't succesfully verify the access token!!
-        try {
-            // attempt to refresh access token using refresh token
-            console.log(err)
-            let new_accessToken
-            if (x_refreshToken) {
-                new_accessToken = attemptRefreshAccess(x_refreshToken);
-            } else {
-                // no Refresh token, so we have Token Error
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-            if (!new_accessToken) {
-                // new access token not generated!
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-            // set the payload to be correct using new access token
-            payload = verifyTokenLocal(new_accessToken)
-
-            if (!payload) {
-                // new access token not generated!
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-        } catch (err) {
-            // refresh token went wrong somewhere, push token error
-            console.log(err)
-            return res.status(401).json({
-                error: "Token Error",
-            });
-        }
-    }
-    if (!payload) {
-        // access token verification failed
-        try {
-            // attempt to refresh access token with refresh token
-            let new_accessToken
-            if (x_refreshToken) {
-                new_accessToken = attemptRefreshAccess(x_refreshToken);
-            } else {
-                // no Refresh token, so we have Token Error
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-            if (!new_accessToken) {
-                // new access token not generated!
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-            // set the payload to be correct using new access token
-            payload = verifyTokenLocal(new_accessToken)
-
-            if (!payload) {
-                // new access token not generated!
-                return res.status(401).json({
-                    error: "Token Error",
-                });
-            }
-        } catch (err) {
-            console.log(err)
-            return res.status(401).json({
-                error: "Token Error",
-            });
-        }
-    }
-
-    // if we get here, assume that payload is correct!
-    // ========== TOKEN HANDLING ENDS HERE ==========
-
-    if (payload.role !== "ADMIN") {
-        return res.status(403).json({
-            error: "Forbidden",
-        });
-    }
-
-    // actual api starts
-
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
@@ -108,7 +17,7 @@ export default async function handler(req, res) {
     // check if user wants output. Default to false!
     if (!output || typeof output !== "boolean") {
         output = false
-    }
+    } 
 
     // currently only requiring username, password, email, and role
     if (!username || !role || !password || !email) {
@@ -116,9 +25,9 @@ export default async function handler(req, res) {
             error: "Please provide all the required fields",
         });
     }
-    if (role !== "USER" && role !== "ADMIN") {
+    if (role !== "USER") {
         return res.status(400).json({
-            error: "ROLE MUST BE USER or ADMIN",
+            error: "ROLE MUST BE USER",
         });
     }
 
@@ -172,6 +81,7 @@ export default async function handler(req, res) {
                 username: username,
             },
         })
+        console.log(userExists);
         if (userExists) {
             return res.status(400).json({
                 error: "USER ALREADY EXISTS",
@@ -186,7 +96,7 @@ export default async function handler(req, res) {
         })
         if (userExists2) {
             return res.status(400).json({
-                error: "USER ALREADY EXISTS",
+                error: "EMAIL ALREADY EXISTS",
             });
         }
     } catch (error) {
@@ -223,6 +133,7 @@ export default async function handler(req, res) {
                 createdAt: true,
             },
         });
+
         if (output) {
             return res.status(201).json({ user });
         } else {
@@ -232,6 +143,7 @@ export default async function handler(req, res) {
         console.log(error);
         return res.status(500).json({
             error: "Error creating user! Unsuccessful! Please try again!",
+
         });
     }
 }

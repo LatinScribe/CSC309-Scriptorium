@@ -65,7 +65,7 @@ export async function fetchTemplate(id: number): Promise<Template> {
         if (responseData.tags === '') {
             responseData.tags = [];
         } else {
-            responseData.tags = responseData.tags.split(",");
+            responseData.tags = responseData.tags?.split(",");
         }
         return await responseData;
     } catch (error) {

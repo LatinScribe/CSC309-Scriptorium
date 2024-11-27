@@ -1,15 +1,17 @@
 // THIS ENDPOINT IS USED BY BOTH USERS AND ADMINS TO LOGIN
+import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from "@/utils/db";
 import { comparePassword, generateAccessToken, generateRefreshToken, verifyTokenLocal, hashPasswordSaltOnly } from "@/utils/auth";
 import { verifyPassword, verifyUsername } from "@/utils/verification";
+import { User } from "@/utils/backendTypes";
 
-export default async function handler(req, res) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // only allows for POST
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { username, password } = req.body;
+    const { username, password } = req.body as { username: string; password: string };
 
     // must provide username + password
     if (!username || !password) {
@@ -19,7 +21,6 @@ export default async function handler(req, res) {
     }
 
     try {
-
         // verify the creds
         if (!verifyPassword(password)) {
             return res.status(400).json({
@@ -34,22 +35,18 @@ export default async function handler(req, res) {
         }
 
         // check if username + password valid
-        const user = await prisma.user.findUnique({
+        const user: User | null = await prisma.user.findUnique({
             where: {
                 username,
             },
         });
 
         if (!user) {
-            return res.status(400).json({
-                error: "Invalid Credentials",
-            });
+            return res.status(401).json({ error: "Invalid username or password" });
         }
 
         const hashed_pass = await hashPasswordSaltOnly(password, user.salt)
 
-        // console.log("password: ", password)
-        // console.log("hashed_pass: ", hashed_pass)
         if (!user || !(await comparePassword(hashed_pass, user.password))) {
             return res.status(401).json({
                 error: "Invalid credentials",
@@ -65,12 +62,10 @@ export default async function handler(req, res) {
         // credentials valid, generating access and refresh tokens....
         // set to be an hour from now
         var milliseconds_hour = new Date().getTime() + (1 * 60 * 60 * 1000);
-        // one_hour_later.setHours(one_hour_later.getHours() + 1)
         const one_hour_later = new Date(milliseconds_hour)
 
         // set to be a day from now
         var milliseconds_day = new Date().getTime() + (24 * 60 * 60 * 1000);
-        // one_day_later.setDate(one_day_later.getDate() + 1)
         const one_day_later = new Date(milliseconds_day)
 
         const Accesstoken = generateAccessToken({ role: user.role, username: user.username, expiresAt: one_hour_later });

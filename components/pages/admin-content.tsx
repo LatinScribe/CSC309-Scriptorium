@@ -49,10 +49,10 @@ export default function AdminContentPage() {
     const router = useRouter();
     
     if (!session) {
-        useRouter().push("/login");
+        router.push("/login");
     }
     if (session && !(session.user.role === "ADMIN")) {
-        useRouter().push("/");
+        router.push("/");
     }
 
     useEffect(() => {
@@ -201,7 +201,7 @@ export default function AdminContentPage() {
             } else {
                 toast.error("Session is not available.");
             }
-            if (hidden) {
+            if (!hidden) {
             toast.success("Comment hidden successfully");
             } else {
                 toast.success("Comment unhidden successfully");
@@ -248,93 +248,93 @@ export default function AdminContentPage() {
                                     sortOption === "mostReported" ? 'Most Reported' :
                                     sortOption === 'mostUpvoted' ? 'Most Upvoted' :
                                     sortOption === 'mostDownvoted' ? 'Most Downvoted' :
-                                    sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
+                                    sortOption === 'mostRecent' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className='bg-background'>
                                 <SelectItem value="mostReported">Most Reported</SelectItem>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
                                 <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
-                                <SelectItem value="createdAt">Newest</SelectItem>
+                                <SelectItem value="mostRecent">Newest</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
-                <div className="flex flex-col gap-5">
-                    {blogs?.length > 0 ? (
-                        blogs.map((blog) => (
-                            <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
-                                <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
-                                    <h2 className="text-xl font-bold truncate">{blog.title}</h2>
-                                    {blog.hidden && (
-                                        <div className="flex items-center gap-2 p-4">
-                                            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-                                            <span className="text-red-500 p-1 rounded">Hidden</span>
+                <div className="flex flex-row gap-5">
+                    <div className="flex flex-col gap-5 w-1/2">
+                        <h2 className="text-xl font-bold">Blogs</h2>
+                        {blogs?.length > 0 ? (
+                            blogs.map((blog) => (
+                                <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
+                                    <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
+                                        <h2 className="text-xl font-bold truncate">{blog.title}</h2>
+                                        {blog.hidden && (
+                                            <div className="flex items-center gap-2 p-4">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-red-500 p-1 rounded">Hidden</span>
+                                            </div>
+                                        )}
+                                        <p className="text-sm text-gray-600 truncate">{blog.description}</p>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {blog.tags && blog.tags?.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="px-2 py-1 text-sm rounded-md
+                                                        bg-gray-200 text-gray-800 
+                                                        dark:bg-gray-800 dark:text-gray-100"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
                                         </div>
-                                    )}
-                                    <p className="text-sm text-gray-600 truncate">{blog.description}</p>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {blog.tags && blog.tags?.map((tag, index) => (
-                                            <span
-                                                key={index}
-                                                className="px-2 py-1 text-sm rounded-md
-                                                    bg-gray-200 text-gray-800 
-                                                    dark:bg-gray-800 dark:text-gray-100"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                    <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
-                                    <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
-                                    <div className="flex justify-center mt-2">
-                                        <Button onClick={handleHideBlog(blog.id, blog.hidden)}>
-                                            {blog.hidden ? "Unhide content" : "Hide content from everyone"}
-                                        </Button>
+                                        <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
+                                        <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
+                                        <div className="text-sm text-gray-500">Upvote Count: {blog.upvoteCount}</div>
+                                        <div className="text-sm text-gray-500">Downvote Count: {blog.upvoteCount}</div>
+                                        <div className="text-sm text-gray-500">Creation Time: {blog.createdAt.toLocaleString()}</div>
+                                        <div className="flex justify-center mt-2">
+                                            <Button onClick={handleHideBlog(blog.id, blog.hidden)}>
+                                                {blog.hidden ? "Unhide content" : "Hide content from everyone"}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div>No blogs found for "{searchQuery}".</div>
-                    )}
-                    {comments?.length > 0 ? (
-                        comments.map((comment: Comment) => (
-                            <div key={"Comment"} className="blog-post-card" onClick={() => comment.blogPostId && handlePostClick(comment.blogPostId)}>
-                                <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
-                                    <h2 className="text-xl font-bold truncate">Reported Comment</h2>
-                                    {comment.hidden && (
-                                        <div className="flex items-center gap-2 p-4">
-                                            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-                                            <span className="text-red-500 p-1 rounded">Hidden</span>
+                            ))
+                        ) : (
+                            <div>No blogs found for "{searchQuery}".</div>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-5 w-1/2">
+                        <h2 className="text-xl font-bold">Comments</h2>
+                        {comments?.length > 0 ? (
+                            comments.map((comment: Comment) => (
+                                <div key={'c' + comment.id} className="blog-post-card" onClick={() => comment.blogPostId && handlePostClick(comment.blogPostId)}>
+                                    <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
+                                        <h2 className="text-xl font-bold truncate">Reported Comment</h2>
+                                        {comment.hidden && (
+                                            <div className="flex items-center gap-2 p-4">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-red-500 p-1 rounded">Hidden</span>
+                                            </div>
+                                        )}
+                                        <p className="text-sm text-gray-600 truncate">{comment.content}</p>
+                                        <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
+                                        <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
+                                        <div className="text-sm text-gray-500">Upvote Count: {comment.upvoteCount}</div>
+                                        <div className="text-sm text-gray-500">Downvote Count: {comment.upvoteCount}</div>
+                                        <div className="text-sm text-gray-500">Creation Time: {comment.createdAt.toLocaleString()}</div>
+                                        <div className="flex justify-center mt-2">
+                                            <Button onClick={handleHideComment(comment.id, comment.hidden)}>
+                                                {comment.hidden ? "Unhide content" : "Hide content from everyone"}
+                                            </Button>
                                         </div>
-                                    )}
-                                    <p className="text-sm text-gray-600 truncate">{comment.content}</p>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        {/* {comment.tags && blog.tags?.map((tag, index) => (
-                                            <span
-                                                key={index}
-                                                className="px-2 py-1 text-sm rounded-md
-                                                    bg-gray-200 text-gray-800 
-                                                    dark:bg-gray-800 dark:text-gray-100"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))} */}
-                                    </div>
-                                    <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
-                                    <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
-                                    <div className="flex justify-center mt-2">
-                                        <Button onClick={handleHideComment(comment.id, comment.hidden)}>
-                                            {comment.hidden ? "Unhide content" : "Hide content from everyone"}
-                                        </Button>
                                     </div>
                                 </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div>No blogs found for "{searchQuery}".</div>
-                    )}
+                            ))
+                        ) : (
+                            <div>No comments found for "{searchQuery}".</div>
+                        )}
+                    </div>
                 </div>
                 <div className="flex justify-center mt-5">
                     <Pagination>
