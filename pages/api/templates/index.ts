@@ -1,12 +1,55 @@
 import prisma from "@/utils/db";
-import { verifyToken } from "@/utils/auth";
+import { attemptRefreshAccess, verifyToken, verifyTokenLocal } from "@/utils/auth";
 
 const SUPPORTED_LANGUAGES = ["python", "javascript", "java", "cpp", "c", "rust", "go", "ruby", "php", "perl", "swift", "brainfuck"];
 
-export default async function handler(req, res) {
+interface QueryParams {
+    title?: string;
+    tags?: string;
+    content?: string;
+    author?: string;
+    page?: string;
+    pageSize?: string;
+}
+
+interface BodyParams {
+    title: string;
+    explanation: string;
+    tags: string[];
+    forkedSourceId: string;
+    language: string;
+}
+
+interface UpdateParams {
+    id: string;
+    title: string;
+    explanation: string;
+    tags: string[];
+    content: string;
+}
+
+interface whereType {
+    title?: {
+        contains: string;
+    };
+    content?: {
+        contains: string;
+    };
+    author?: {
+        is: {
+            username: {
+                equals: string;
+            };
+        };
+    };
+}
+
+import { NextApiRequest, NextApiResponse } from 'next';
+import { CodeTemplate, User } from "@/utils/backendTypes";
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // GET: return template metadata list based on filters (title, tags, content, author)
     if (req.method === "GET") {
-        const { title, tags, content, author, page, pageSize } = req.query;
+        const { title, tags, content, author, page, pageSize } = req.query as QueryParams;
         if (tags && typeof tags !== "string") {
             return res.status(400).json({
                 error: "Tags should be a string",
@@ -32,7 +75,7 @@ export default async function handler(req, res) {
                 error: "Author should be a string",
             });
         }
-        let where = {};
+        let where: whereType = {};
         if (title) {
             where.title = {
                 contains: title,
@@ -81,13 +124,13 @@ export default async function handler(req, res) {
                 modifiedAt: true,
                 language: true,
             },
-        });
+        }) as CodeTemplate[];
         // filter out all deleted templates
         templates = templates.filter((template) => !template.deleted);
         // filter all templates that have all the tags
         if (tags) {
             templates = templates.filter((template) => {
-                return template.tags && tags.split(',').every(tag => template.tags.split(',').includes(tag));
+                return template.tags !== null && tags.split(',').every(tag => template.tags!.split(',').includes(tag));
             });
         }
         const start = (parseInt(page) - 1) * parseInt(pageSize);
@@ -97,7 +140,7 @@ export default async function handler(req, res) {
             templates: paginatedTemplates,
             pagination: {
                 totalSize: templates.length,
-                totalPages: Math.ceil(templates.length / pageSize),
+                totalPages: Math.ceil(templates.length / parseInt(pageSize)),
                 page: parseInt(page),
                 pageSize: parseInt(pageSize),
             }
@@ -123,6 +166,7 @@ export default async function handler(req, res) {
     // api middleware (USE THIS TO REFRESH/GET THE TOKEN DATA)
     // ======== TOKEN HANDLING STARTS HERE ==========
     var payload = null
+    const x_refreshToken = req.headers['x-refresh-token'];
     try {
         // attempt to verify the provided access token!!
         payload = verifyToken(req.headers.authorization);
@@ -206,7 +250,7 @@ export default async function handler(req, res) {
         where: {
             username: payload.username,
         },
-    });
+    }) as User;
 
     let tagsString;
 
@@ -214,7 +258,7 @@ export default async function handler(req, res) {
     // I'm intending this to be run before the user types any code
     // (e.g. a popup where the user will first define tht title, explanation, tags, etc)
     if (req.method === "POST") {
-        const { title, explanation, tags, forkedSourceId, language } = req.body;
+        const { title, explanation, tags, forkedSourceId, language }: BodyParams = req.body;
         if (!title) {
             return res.status(400).json({
                 error: "Please provide a title",
@@ -256,18 +300,27 @@ export default async function handler(req, res) {
         if (forkedSourceId) {
             const source = await prisma.codeTemplate.findUnique({
                 where: {
-                    id: forkedSourceId,
+                    id: parseInt(forkedSourceId),
                 },
-            });
+            }) as CodeTemplate;
             if (!source) {
                 return res.status(404).json({
                     error: "Source template not found",
                 });
             }
-            content = source.content;
+            if (!source.content) {
+                content = ''
+            } else {
+                content = source.content;
+            }
             templateLanguage = source.language;
         }
         // the token only contains the username, so we need to query the user to get the id
+        if (!user) {
+            return res.status(401).json({
+                error: "Unauthorized",
+            });
+        }
         const template = await prisma.codeTemplate.create({
             data: {
                 title,
@@ -279,17 +332,17 @@ export default async function handler(req, res) {
                         id: user.id,
                     },
                 },
-                forkedSourceId,
+                forkedSourceId: forkedSourceId ? parseInt(forkedSourceId) : undefined,
                 language: templateLanguage,
                 deleted: false,
             },
-        });
+        }) as CodeTemplate;
         return res.status(201).json(template);
     }
 
     // PUT: update an existing template
     if (req.method === "PUT") {
-        const { id, title, explanation, tags, content } = req.body;
+        const { id, title, explanation, tags, content }: UpdateParams = req.body;
         if (!id) {
             return res.status(400).json({
                 error: "Please provide a template id",
@@ -327,7 +380,7 @@ export default async function handler(req, res) {
         // check if the template exists, and if the author is the user
         const template = await prisma.codeTemplate.findUnique({
             where: {
-                id: id,
+                id: parseInt(id),
             },
         });
         if (!template || template.deleted) {
@@ -335,14 +388,14 @@ export default async function handler(req, res) {
                 error: "Template not found",
             });
         }
-        if (template.authorId !== user.id && user.role !== "ADMIN") {
+        if (!user || (template.authorId !== user.id && user.role !== "ADMIN")) {
             return res.status(403).json({
                 error: "You are not the author of this template",
             });
         }
         const updatedTemplate = await prisma.codeTemplate.update({
             where: {
-                id: id,
+                id: parseInt(id),
             },
             data: {
                 title,
@@ -351,7 +404,7 @@ export default async function handler(req, res) {
                 content,
                 modifiedAt: new Date(),
             },
-        });
+        }) as CodeTemplate;
         return res.status(200).json(updatedTemplate);
     }
 
@@ -374,7 +427,7 @@ export default async function handler(req, res) {
             where: {
                 id: id,
             },
-        });
+        }) as CodeTemplate;
         if (!template || template.deleted) {
             return res.status(404).json({
                 error: "Template not found",
@@ -382,7 +435,7 @@ export default async function handler(req, res) {
         }
         console.log(template.authorId);
         // check if the user is the author, or is an admin
-        if (template.authorId !== user.id && user.role !== "ADMIN") {
+        if (!user || (template.authorId !== user.id && user.role !== "ADMIN")) {
             return res.status(403).json({
                 error: "You are not the author of this template",
             });

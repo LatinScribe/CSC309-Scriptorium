@@ -38,7 +38,7 @@ const dockerImages = {
 const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
 const MEMORY_LIMIT = '512m';
 
-function getDockerCommand(language, directory, fileName) {
+function getDockerCommand(language: keyof typeof dockerImages, directory: string, fileName: string) {
     const image = dockerImages[language];
     let command;
 
@@ -97,30 +97,22 @@ function getDockerCommand(language, directory, fileName) {
     return `docker run --rm -i -v ${directory}:/code --memory=${MEMORY_LIMIT} ${image} sh -c "${command}"`;
 }
 
-// function getCommand(language, filePath) {
-//     switch (language) {
-//         case "python":
-//             return `python3 ${filePath}`;
-//         case "javascript":
-//             return `node ${filePath}`;
-//         case "java":
-//             return `javac ${filePath} && java ${filePath.replace(/\.java$/, "")}`;
-//         case "c":
-//             return `gcc ${filePath} -o ${filePath.replace(/\.c$/, "")} && ${filePath.replace(/\.c$/, "")}`;
-//         case "cpp":
-//             return `g++ ${filePath} -o ${filePath.replace(/\.cpp$/, "")} && ${filePath.replace(/\.cpp$/, "")}`;
-//         default:
-//             return null;
-//     }
-// }
+interface ExecuteRequest {
+    code: string;
+    language: string;
+    input: string[];
+}
 
-export default async function handler(req, res) {
+import { NextApiRequest, NextApiResponse } from 'next';
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }
 
     // input will be an array of strings (for stdin), or an empty array
-    const { code, language, input } = req.body;
+
+    const body: ExecuteRequest = req.body;
+    const { code, language, input } = body;
 
     if (!code || !language || !input) {
         return res.status(400).json({
@@ -137,7 +129,7 @@ export default async function handler(req, res) {
             error: "Input should be an array",
         });
     }
-    if (!fileExtension[language]) {
+    if (!(language in fileExtension)) {
         return res.status(400).json({
             error: "Invalid language, supported languages are: " + Object.keys(fileExtension).join(", "),
         });
@@ -146,7 +138,7 @@ export default async function handler(req, res) {
     // execute the code
     const identifier = uuidv4();
     const directory = path.join("/tmp", identifier);
-    const fileName = `main.${fileExtension[language]}`;
+    const fileName = `main.${fileExtension[language as keyof typeof fileExtension]}`;
     const filePath = path.join(directory, fileName);
     if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
@@ -155,7 +147,7 @@ export default async function handler(req, res) {
         fs.writeFileSync(filePath, code);
         console.log('file created')
 
-        const command = getDockerCommand(language, directory, fileName);
+        const command = getDockerCommand(language as keyof typeof dockerImages, directory, fileName);
         const child = spawn(command, { shell: true });
 
         if (input.length > 0) {
