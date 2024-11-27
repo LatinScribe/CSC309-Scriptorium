@@ -251,7 +251,7 @@ export default function AdminContentPage() {
                                     sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className='bg-background'>
                                 <SelectItem value="mostReported">Most Reported</SelectItem>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
                                 <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
