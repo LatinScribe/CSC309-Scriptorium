@@ -70,8 +70,7 @@ const BlogPostPage = () => {
 
             const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
             const nestedComments = nestComments(commentsResponse.comments);
-            setComments((prevComments) => [...prevComments, ...nestedComments]);
-            // setComments(nestedComments);
+            setComments(nestedComments);
             setTotalPages(commentsResponse.totalPages);
 
         } catch (error) {
@@ -93,6 +92,7 @@ const BlogPostPage = () => {
       // sorting
       const getComments = async () => {
         try {
+          console.log("Fetching comments for post:", postId);
           const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
           if (Array.isArray(commentsResponse.comments)) {
             const nestedComments = nestComments(commentsResponse.comments);
