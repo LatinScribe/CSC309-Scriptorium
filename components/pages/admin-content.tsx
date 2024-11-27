@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
-import { BlogPost } from "@/utils/types";
+import { BlogPost, Comment } from "@/utils/types";
 import { fetchBlogs, fetchReportedContent } from "@/utils/dataInterface";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -37,13 +37,14 @@ export default function AdminContentPage() {
     const { session } = useContext(SessionContext);
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [blogs, setBlogs] = useState<BlogPost[]>([]);     
+    const [blogs, setBlogs] = useState<BlogPost[]>([]); 
+    const [comments, setComments] = useState<Comment[]>([]);    
 
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [pageCount, setPageCount] = useState(1);
 
-    const [sortOption, setSortOption] = useState("mostUpvoted"); // default
+    const [sortOption, setSortOption] = useState("mostReported"); // default
 
     const router = useRouter();
     
@@ -97,6 +98,7 @@ export default function AdminContentPage() {
                 const response = await fetchReportedContent(searchQuery, sortOption, currentPage, pageSize, session);
                 setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
                 setPageCount(response.totalPages);  // page count is updated based on totalPages
+                setComments(response.comments);     // returned comments are stored in the comments state
             } else {
                 useRouter().push("/login");
             }
@@ -182,12 +184,14 @@ export default function AdminContentPage() {
                         >
                             <SelectTrigger>
                                 <SelectValue>{ 
+                                    sortOption === "mostReported" ? 'Most Reported' :
                                     sortOption === 'mostUpvoted' ? 'Most Upvoted' :
                                     sortOption === 'mostDownvoted' ? 'Most Downvoted' :
                                     sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="mostReported">Most Reported</SelectItem>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
                                 <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
                                 <SelectItem value="createdAt">Newest</SelectItem>
@@ -201,7 +205,7 @@ export default function AdminContentPage() {
                             <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
                                     <h2 className="text-xl font-bold truncate">{blog.title}</h2>
-                                     {blog.hidden && (
+                                    {blog.hidden && (
                                         <div className="flex items-center gap-2 p-4">
                                             <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
                                             <span className="text-red-500 p-1 rounded">Hidden</span>
@@ -220,7 +224,33 @@ export default function AdminContentPage() {
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="text-sm text-gray-500">By {/*blog.author.username*/"Number of reports:" + blog.reportsCount}</div>
+                                    <div className="text-sm text-gray-500">Report Count {blog.reportsCount}</div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div>No blogs found for "{searchQuery}".</div>
+                    )}
+                    {comments?.length > 0 ? (
+                        comments.map((comment) => (
+                            <div key={"Comment"} className="blog-post-card">
+                                <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
+                                    <h2 className="text-xl font-bold truncate">Reported Comment</h2>
+                                    
+                                    <p className="text-sm text-gray-600 truncate">{comment.content}</p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {/* {comment.tags && blog.tags?.map((tag, index) => (
+                                            <span
+                                                key={index}
+                                                className="px-2 py-1 text-sm rounded-md
+                                                    bg-gray-200 text-gray-800 
+                                                    dark:bg-gray-800 dark:text-gray-100"
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))} */}
+                                    </div>
+                                    <div className="text-sm text-gray-500">Report Count {comment.reportsCount}</div>
                                 </div>
                             </div>
                         ))

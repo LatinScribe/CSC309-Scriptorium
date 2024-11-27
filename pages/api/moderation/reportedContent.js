@@ -218,7 +218,10 @@ export default async function handler(req, res) {
                 orderBy.push({ downvoteCount: 'desc' }, { createdAt: 'desc' });
             } else if (sortOption === 'mostRecent') {
                 orderBy.push({ createdAt: 'desc' });
-            } else {
+            } else if (sortOption === 'mostReported') {
+                orderBy.push({ reportsCount: 'desc' });
+            }
+            else {
                 orderBy.push({ reportsCount: 'desc' }); // Default sort by most reported
             }
 
@@ -322,18 +325,32 @@ export default async function handler(req, res) {
                 orderBy: orderBy,
             });
 
+            // get comments with reportsCount > 0
+            const comments = await prisma.comment.findMany({
+                where: { reportsCount: { gt: 0 } },
+                orderBy: orderBy,
+                skip: (pageNum - 1) * pageSize,           // pagination offset
+                take: pageSize,
+            });
+
             // iterates over blogPosts array and copies all properties of the post object 
             // plus adds isReported flag that represents whether the post is hidden and userId 
             // userId matches the authorId of the post 
             // (this field is specific to the requestor and indicates the posts that should show as flagged
             // to the autho)
-            let mappedBlogPosts = blogPosts.map((post) => ({
+            let mappedBlogPosts = blogPosts.flat().map((post) => ({
                 ...post,
 
                 tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
 
-                //isHidden: post.hidden, // isReported flag is set to true if the post is hidden
-                //numReported: post.reportsCount, // numReported is set to the number of reports
+                isHidden: post.hidden, // isReported flag is set to true if the post is hidden
+                numReported: post.reportsCount, // numReported is set to the number of reports
+            }));
+
+            let mappedComments = comments.flat().map((comment) => ({
+                ...comment,
+                isHidden: comment.hidden,
+                numReported: comment.reportsCount,
             }));
 
             // calculating the total number of pages for pagination:
@@ -345,6 +362,7 @@ export default async function handler(req, res) {
 
             const response = {
                 blogPosts: mappedBlogPosts,
+                comments: mappedComments,
                 totalPages,
                 // totalPosts,
             };
