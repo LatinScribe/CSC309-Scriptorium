@@ -162,7 +162,7 @@ export default function NavBar() {
                                         {session?.user?.role === "ADMIN" && (
                                             <>
                                                 <li>
-                                                    <Link href="/moderation" className="flex items-center space-x-2 text-primary">
+                                                    <Link href="/admin-content" className="flex items-center space-x-2 text-primary">
                                                         <FaceIcon />
                                                         <span>(Admin) Moderation</span>
                                                     </Link>

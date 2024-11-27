@@ -25,6 +25,7 @@ import WorkInProgress from "@/components/pages/work-in-progress";
 import AdminAccount from "@/components/pages/admin-account";
 import AdminProfile from "@/components/pages/admin-profile";
 import MyTemplatesPage from "@/components/pages/mytemplates";
+import AdminContentPage from "@/components/pages/admin-content";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -84,6 +85,8 @@ export default function Home() {
         return <AdminProfile />;
       case "/my-templates":
         return <MyTemplatesPage />;
+      case "/admin-content":
+        return <AdminContentPage />;
       default:
       if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;
@@ -105,6 +108,9 @@ export default function Home() {
       }
       if (router.asPath.startsWith("/my-blogs?")) {
         return <MyBlogsPage />;
+      }
+      if (router.asPath.startsWith("/admin-content?")) {
+        return <AdminContentPage />;
       }
       return <Custom404 />;
     }

@@ -425,3 +425,23 @@ export async function getBlogByTemplate(templateId: number) {
         throw error;
     }
 }
+
+// =========== MODERATION ===========
+export async function fetchReportedContent(searchTerm: string, sortOption: string, currentPage: number = 1, 
+    pageSize: number = 5, session: Session) {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    if (session) {
+        headers["Authorization"] = `Bearer ${session.accessToken}`;
+        headers["x_refreshToken"] = session.refreshToken;
+    }
+
+    const response = await fetch(`${API_URL}/api/moderation/reportedContent?search=${searchTerm}&sort=${sortOption}&page=${currentPage}&pageSize=${pageSize}`, {
+        method: "GET",
+        headers,
+
+    });
+    
+    return await response.json();
+}

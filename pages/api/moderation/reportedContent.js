@@ -167,39 +167,198 @@ export default async function handler(req, res) {
             res.status(500).json({ error: 'Could not hide content' });
         }
     } else if (req.method === 'GET') {
-        const { type } = req.query; // get the 'type' query parameter
+        // const { type } = req.query; // get the 'type' query parameter
+
+        // try {
+        //     if (type === 'post') {
+        //         // get blog posts with reportsCount > 0
+        //         const blogPosts = await prisma.blogPost.findMany({
+        //             where: { reportsCount: { gt: 0 } },
+        //             orderBy: { reportsCount: 'desc' },
+        //             include: {
+        //                 comments: {
+        //                     where: { reportsCount: { gt: 0 } }, // only include reported comments
+        //                     orderBy: { reportsCount: 'desc' },
+        //                 },
+        //             },
+        //         });
+        //         return res.status(200).json({ blogPosts });
+        //     }
+
+        //     else if (type === 'comment') {
+        //         // get comments with reportsCount > 0
+        //         const comments = await prisma.comment.findMany({
+        //             where: { reportsCount: { gt: 0 } },
+        //             orderBy: { reportsCount: 'desc' },
+        //         });
+        //         return res.status(200).json({ comments });
+        //     }
+
+        //     // check param
+        //     res.status(400).json({ error: "Invalid type parameter. Use 'post' or 'comment'." });
+        // } catch (error) {
+        //     console.error("Error fetching data:", error);
+        //     res.status(500).json({ error: 'Could not fetch reports' });
+        // }
+
 
         try {
-            if (type === 'post') {
-                // get blog posts with reportsCount > 0
-                const blogPosts = await prisma.blogPost.findMany({
-                    where: { reportsCount: { gt: 0 } },
-                    orderBy: { reportsCount: 'desc' },
-                    include: {
-                        comments: {
-                            where: { reportsCount: { gt: 0 } }, // only include reported comments
-                            orderBy: { reportsCount: 'desc' },
+            const pageNum = parseInt(req.query.page) || 1; // default to 1 
+            const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
+            const searchQuery = req.query.search || '';
+            const author = req.query.author;
+
+            const sortOption = req.query.sort;
+            const templateId = req.query.templateId; // for searching by code template
+
+            const orderBy = []; //
+            if (sortOption === 'mostUpvoted') {
+                orderBy.push({ upvoteCount: 'desc' }, { downvoteCount: 'asc' }, { createdAt: 'desc' });
+            } else if (sortOption === 'mostDownvoted') {
+                orderBy.push({ downvoteCount: 'desc' }, { createdAt: 'desc' });
+            } else if (sortOption === 'mostRecent') {
+                orderBy.push({ createdAt: 'desc' });
+            } else {
+                orderBy.push({ reportsCount: 'desc' }); // Default sort by most reported
+            }
+
+            let whereCondition;
+
+            if (templateId) { // search by code template
+                whereCondition = {
+                    codeTemplates: {
+                        some: {
+                            id: Number(templateId),     // match blog posts that 
                         },
                     },
-                });
-                return res.status(200).json({ blogPosts });
+                };
+            } else { // searches all blog posts
+                whereCondition = {
+                    OR: [ // matching of any of these fields (search could match title, description, tags)
+                        { title: { contains: searchQuery } },
+                        { description: { contains: searchQuery } },
+                        { tags: { contains: searchQuery } },
+                        {
+                            codeTemplates: {
+                                some: {
+                                    title: { contains: searchQuery },
+                                },
+                            },
+                        },
+                    ], reportsCount: { gt: 0 }, // only include reported posts
+                };
             }
 
-            else if (type === 'comment') {
-                // get comments with reportsCount > 0
-                const comments = await prisma.comment.findMany({
-                    where: { reportsCount: { gt: 0 } },
-                    orderBy: { reportsCount: 'desc' },
-                });
-                return res.status(200).json({ comments });
-            }
+            // manage visibility of hidden content
+            // if (userId) {
+            //     whereCondition = {
+            //         AND: [
+            //             whereCondition, // (combine with previous where conditition)
+            //             {
+            //                 OR: [
+            //                     { hidden: false },
+            //                     { authorId: userId }, // let authors see their hidden content
+            //                 ],
+            //             },
+            //             { deleted: false }, // deleted posts not shown for everyone
+            //         ],
+            //     };
+            // } else {
+            //     whereCondition = {
+            //         AND: [
+            //             whereCondition,
+            //             { hidden: false }, // only non-hidden content is returned for unauthenticated users
+            //             { deleted: false },
+            //         ],
+            //     };
+            // }
 
-            // check param
-            res.status(400).json({ error: "Invalid type parameter. Use 'post' or 'comment'." });
+
+            // if (author) {
+            //     whereCondition.AND = whereCondition.AND || [whereCondition];
+            //     whereCondition.AND.push({
+            //         author: {
+            //             is: {
+            //                 username: {
+            //                     equals: author,
+            //                 },
+            //             },
+            //         },
+            //     });
+            // }
+
+
+            // const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
+            //     where: whereCondition,
+            //     include: { // relations
+            //         codeTemplates: true,         // fetch each blog post and all the related code templates stored in codeTemplatse field
+            //         author: {
+            //             select: {
+            //                 username: true,
+            //             },
+            //         },
+            //     },
+            //     skip: (pageNum - 1) * pageSize,           // pagination offset
+            //     take: pageSize,
+            //     orderBy: orderBy,
+            // });
+
+            //get blog posts with reportsCount > 0
+            const blogPosts = await prisma.blogPost.findMany({
+                //where: { reportsCount: { gt: 0 } },
+                where: whereCondition,
+                include: {
+                    comments: {
+                        where: { reportsCount: { gt: 0 } }, // only include reported comments
+                        orderBy: orderBy,
+                    // }, author: {
+                    //     select: {
+                    //         username: true,
+                    //     },
+                    },
+                },
+                skip: (pageNum - 1) * pageSize,           // pagination offset
+                take: pageSize,
+                orderBy: orderBy,
+            });
+
+            // iterates over blogPosts array and copies all properties of the post object 
+            // plus adds isReported flag that represents whether the post is hidden and userId 
+            // userId matches the authorId of the post 
+            // (this field is specific to the requestor and indicates the posts that should show as flagged
+            // to the autho)
+            let mappedBlogPosts = blogPosts.map((post) => ({
+                ...post,
+
+                tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
+
+                //isHidden: post.hidden, // isReported flag is set to true if the post is hidden
+                //numReported: post.reportsCount, // numReported is set to the number of reports
+            }));
+
+            // calculating the total number of pages for pagination:
+            // count the total number of blog posts 
+            const totalPosts = await prisma.blogPost.count({
+                where: whereCondition,
+            });
+            const totalPages = Math.ceil(totalPosts / pageSize);
+
+            const response = {
+                blogPosts: mappedBlogPosts,
+                totalPages,
+                // totalPosts,
+            };
+
+            console.log("sending response");
+            //                 totalPosts,
+            //             };
+
+
+            res.status(200).json(response);
         } catch (error) {
-            console.error("Error fetching data:", error);
-            res.status(500).json({ error: 'Could not fetch reports' });
+            res.status(500).json({ error: 'Could not fetch blog posts', details: error.message });
         }
+
     } else {
         res.setHeader('Allow', ['PATCH', 'GET']);
         res.status(405).end(`Method ${req.method} Not Allowed`);
