@@ -436,7 +436,7 @@ export default async function handler(req, res) {
     // if we get here, assume that payload is correct!
     // ========== TOKEN HANDLING ENDS HERE ==========
 
-    if (payload.role !== "USER" || payload.role !== "ADMIN") {
+    if (payload.role !== "USER" && payload.role !== "ADMIN") {
         return res.status(403).json({ error: "Forbidden" });
     }
 
@@ -483,6 +483,7 @@ export default async function handler(req, res) {
         });
     } catch (error) {
         // res.status(500).json({ error: 'Could not create blog post', details: error.message });
+        console.log(error);
         res.status(500).json({ error: 'Could not create blog post', details: error.message });
     }
 } else {
