@@ -21,6 +21,7 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import ReportDialog from "../pages/reportDialog";
 import { render } from "react-dom";
+import UserCard from "../usercard";
 
 const BlogPostPage = () => {
     const router = useRouter();
@@ -330,7 +331,7 @@ const BlogPostPage = () => {
             </div>
             
             {/* Comment Content */}
-            <p className="text-base text-gray-800 mt-1">{comment.content}</p>
+            <p className="text-base mt-1">{comment.content}</p>
             
             <div className="flex gap-2 mt-2">
               <Button 
@@ -412,7 +413,7 @@ const BlogPostPage = () => {
             {blogPost && (
                 <div className="bg-white shadow-md rounded p-6 mb-6">
                     <h1 className="text-2xl font-bold">{blogPost.title}</h1>
-                    <p className="text-gray-600 text-sm">By {blogPost.author.username}</p>
+                    <div className="flex gap-1 text-gray-600 text-sm">By <UserCard user={blogPost.author} /></div>
                     <p className="text-gray-600 text-sm">{new Date(blogPost.createdAt).toLocaleString()}</p>
                     <div className="mt-4">{blogPost.description}</div>
                     <div className="mt-4 flex items-center gap-2">
@@ -461,14 +462,14 @@ const BlogPostPage = () => {
 
                 {/* Dropdown for Sorting Comments */}
                 <div className="p-4 flex justify-end items-center space-x-2">
-                  <label htmlFor="sortComments" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="sortComments" className="text-sm font-medium">
                     Sort comments:
                   </label>
                   <select
                     id="sortComments"
                     value={sortOption}
                     onChange={(e) => setSortOption(e.target.value as "newest" | "upvotes" | "downvotes")}
-                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700"
+                    className="p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="newest">Newest</option>
                     <option value="mostValuable">Most Upvotes</option>

@@ -36,6 +36,7 @@ import {
     AlertDialogCancel,
   } from "../ui/alert-dialog";
   import { SessionContext } from "@/contexts/session";
+import { Separator } from "../ui/separator";
 
 export default function BlogListPage() {
     const { session } = useContext(SessionContext);
@@ -181,10 +182,22 @@ export default function BlogListPage() {
                     {blogs?.length > 0 ? (
                         blogs.map((blog) => (
                             <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
-                                <div className="cursor-pointer p-4 border border-gray-300 rounded-lg">
-                                    <h2 className="text-xl font-bold">{blog.title}</h2>
-                                    <p className="text-sm text-gray-600">{blog.description}</p>
-                                    <p className="text-sm text-gray-400">By {blog.author.username}</p>
+                                <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
+                                    <h2 className="text-xl font-bold truncate">{blog.title}</h2>
+                                    <p className="text-sm text-gray-600 truncate">{blog.description}</p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {blog.tags && blog.tags?.map((tag, index) => (
+                                            <span
+                                                key={index}
+                                                className="px-2 py-1 text-sm rounded-md
+                                                    bg-gray-200 text-gray-800 
+                                                    dark:bg-gray-800 dark:text-gray-100"
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="text-sm text-gray-500">By {blog.author.username}</div>
                                 </div>
                             </div>
                         ))

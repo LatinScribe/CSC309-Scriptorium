@@ -541,10 +541,10 @@ export default function BlogsPage() {
                         <p className="text-gray-600">No blog posts available. Please create one!</p>
                     ) : (
                         blogs && blogs.map((blog: BlogPost) => (
-                            <div key={blog.id} className="bg-background p-6 shadow rounded">
+                            <div key={blog.id} className="bg-background p-6 border shadow rounded">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h2 className="text-3xl font-bold">{blog.title}</h2>
+                                        <h2 className="text-2xl font-bold max-w-[20vw] md:max-w-[50vw] truncate">{blog.title}</h2>
                                         <p className="text-sm text-gray-500">
                                             Published on {new Date(blog.createdAt).toLocaleDateString()}
                                         </p>
@@ -553,7 +553,7 @@ export default function BlogsPage() {
                                             {blog.tags && blog.tags?.map((tag, index) => (
                                                 <span
                                                 key={index}
-                                                className="px-2 py-1 text-sm rounded-md mt-4
+                                                className="px-2 py-1 text-sm rounded-md
                                                     bg-gray-200 text-gray-800 
                                                     dark:bg-gray-800 dark:text-gray-100"
                                                 >
@@ -575,7 +575,7 @@ export default function BlogsPage() {
                                         </Button>
                                     </div>
                                 </div>
-                                <p className="text-gray-500 mt-2">{blog.description}</p>
+                                <p className="text-gray-500 mt-2 max-w-[20vw] truncate md:max-w-[50vw]">{blog.description}</p>
                             </div>
                         ))
                     )}
