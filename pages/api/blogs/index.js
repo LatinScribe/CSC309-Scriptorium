@@ -186,6 +186,11 @@ export default async function handler(req, res) {
 
             const sortOption = req.query.sort;
             const templateId = req.query.templateId; // for searching by code template
+            const searchTitle = req.query.searchTitle || '';
+            const searchContent = req.query.searchContent || '';
+            const searchTag = req.query.searchTag || '';
+            const searchTemplate = req.query.searchTemplate || '';
+
 
             const orderBy = []; //
             if (sortOption === 'mostUpvoted') {
@@ -196,17 +201,30 @@ export default async function handler(req, res) {
                 orderBy.push({ createdAt: 'desc' }); // Default sort by creation date
             }
 
-            let whereCondition;
+            let whereCondition = {};
 
-            if (templateId) { // search by code template
-                whereCondition = {
-                    codeTemplates: {
-                        some: {
-                            id: Number(templateId),     // match blog posts that 
-                        },
+
+            if (searchTitle) {
+                whereCondition.title = { contains: searchTitle };
+            }
+            
+            if (searchContent) {
+                whereCondition.description = { contains: searchContent };
+            }
+            
+            if (searchTag) {
+                whereCondition.tags = { contains: searchTag };
+            }
+            
+            if (searchTemplate) {
+                whereCondition.codeTemplates = {
+                    some: {
+                        title: { contains: searchTemplate },
                     },
                 };
-            } else { // searches all blog posts
+            }
+
+            if (searchQuery && !searchTemplate && !searchTitle && !searchTag &&!searchContent) {
                 whereCondition = {
                     OR: [ // matching of any of these fields (search could match title, description, tags)
                         { title: { contains: searchQuery } },
@@ -222,6 +240,31 @@ export default async function handler(req, res) {
                     ],
                 };
             }
+
+            // if (templateId) { // search by code template
+            //     whereCondition = {
+            //         codeTemplates: {
+            //             some: {
+            //                 id: Number(templateId),     // match blog posts that 
+            //             },
+            //         },
+            //     };
+            // } else { // searches all blog posts
+            //     whereCondition = {
+            //         OR: [ // matching of any of these fields (search could match title, description, tags)
+            //             { title: { contains: searchQuery } },
+            //             { description: { contains: searchQuery } },
+            //             { tags: { contains: searchQuery } },
+            //             {
+            //                 codeTemplates: {
+            //                     some: {
+            //                         title: { contains: searchQuery },
+            //                     },
+            //                 },
+            //             },
+            //         ],
+            //     };
+            // }
 
             // manage visibility of hidden content
             if (userId) {
@@ -302,10 +345,6 @@ export default async function handler(req, res) {
                 totalPages,
                 // totalPosts,
             };
-
-            console.log("sending response");
-            //                 totalPosts,
-            //             };
 
 
             res.status(200).json(response);
@@ -436,7 +475,7 @@ export default async function handler(req, res) {
     // if we get here, assume that payload is correct!
     // ========== TOKEN HANDLING ENDS HERE ==========
 
-    if (payload.role !== "USER" || payload.role !== "ADMIN") {
+    if (payload.role !== "USER" && payload.role !== "ADMIN") {
         return res.status(403).json({ error: "Forbidden" });
     }
 
