@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SessionContext } from "@/contexts/session";
 import { useContext } from "react";
 import { fetchTemplate, updateTemplate, createTemplate, deleteTemplate, executeCode, getBlogByTemplate } from "@/utils/dataInterface";
-import { AlertCircle, CodeIcon, ExternalLink, PlayIcon, SaveIcon, Scroll } from "lucide-react";
+import { AlertCircle, CodeIcon, DotIcon, ExternalLink, PlayIcon, SaveIcon, Scroll } from "lucide-react";
 import {
     Alert,
     AlertDescription,
@@ -487,20 +487,22 @@ export default function TemplatePage() {
                                 <div key={index}>{line}</div>
                             ))}
                         </ScrollArea>
+                        <Separator orientation='horizontal' />
                         <div className="text-lg font-medium">Linked Blog Posts</div>
-                        <ScrollArea className="p-4 border rounded-lg max-h-64">
+                        {linkedBlogPosts.length === 0 && (
+                            <div className="text-sm text-gray-500">No linked blog posts.</div>
+                        )}
+                        <ul>
                             {linkedBlogPosts.map((blog) => (
-                                <div key={blog.id} className="flex items-center gap-3">
-                                    <Link href={`/post?id=${blog.id}`} className="w-full flex gap-2">
+                                <li key={blog.id} className="flex items-center gap-1">
+                                    <DotIcon />
+                                    <Link href={`/post?id=${blog.id}`}>
                                         <div className="text-primary">{blog.title}</div>
-                                        <ExternalLink className="text-sm text-gray-500" />
                                     </Link>
-                                </div>
+                                    <ExternalLink className='h-3' />
+                                </li>
                             ))}
-                            {linkedBlogPosts.length === 0 && (
-                                <div className="text-sm text-gray-500">No linked blog posts.</div>
-                            )}
-                        </ScrollArea>
+                        </ul>
                     </div>
                 </div>
             )}

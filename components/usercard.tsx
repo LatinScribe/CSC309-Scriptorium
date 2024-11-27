@@ -17,7 +17,7 @@ export default function UserCard({ user }: { user: User }) {
                     <span className="underline">{user.username}</span>
                 </div>
             </HoverCardTrigger>
-            <HoverCardContent>
+            <HoverCardContent className='bg-background'>
                 <div className="flex flex-row gap-2 items-center">
                     <div className='w-10 h-10 flex items-center justify-center'>
                     { user.avatar ? (

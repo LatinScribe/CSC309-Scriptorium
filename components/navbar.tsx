@@ -3,7 +3,7 @@ import { SessionContext } from "@/contexts/session";
 import React, { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { CodeIcon, FaceIcon, Pencil2Icon, PersonIcon } from "@radix-ui/react-icons";
+import { CodeIcon, FaceIcon, MixIcon, Pencil2Icon, PersonIcon } from "@radix-ui/react-icons";
 import {
     Sheet,
     SheetContent,
@@ -25,11 +25,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "./ui/label";
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, MoonIcon } from "lucide-react";
+import { useReward } from 'react-rewards';
 
 export default function NavBar() {
     const { session, logout } = useContext(SessionContext);
     const { theme, setTheme } = useTheme();
+
+    const { reward, isAnimating } = useReward('rewardId', 'confetti');
 
     useEffect(() => {
         console.log('aaaa')
@@ -50,7 +53,8 @@ export default function NavBar() {
         <div>
             <nav className="flex justify-between p-4 align-center items-center">
                 <div className="hidden md:flex space-x-4 items-center">
-                    <Link href="/" className="font-bold hover:text-gray-300">
+                    <Link href="/" className="font-bold flex gap-1 items-center hover:text-gray-300" id='rewardId' onClick={reward}>
+                        <MixIcon />
                         Scriptorium
                     </Link>
                     <Link href="/templates" className="hover:text-gray-300">
@@ -102,7 +106,8 @@ export default function NavBar() {
                 <ul className="flex space-x-4 items-center">
                     <li>
                         <div className="flex items-center space-x-2">
-                            <Label htmlFor="theme-switch">
+                            <Label htmlFor="theme-switch" className='flex items-center'>
+                                <MoonIcon className='h-4' />
                                 Dark Mode
                             </Label>
                             <Switch
