@@ -206,7 +206,13 @@ export async function fetchUserBlogs(session: Session, author: string, currentPa
         },
     });
 
-    return await response.json();
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+    
+    return data;
 }
 
 export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
@@ -224,8 +230,14 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
         headers,
 
     });
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
     
-    return await response.json();
+    return data;
 }
 
 export async function fetchBlogPost(id: number) {
@@ -238,17 +250,23 @@ export async function fetchBlogPost(id: number) {
         },
 
     });
+
     const data = await response.json();
-        if (data.codeTemplates && data.codeTemplates.length > 0) {
-            data.codeTemplates = data.codeTemplates.map((template: any) => {
-                if (template.tags && template.tags !== '') {
-                    template.tags = template.tags.split(',').map((tag: string) => tag.trim());
-                } else {
-                    template.tags = [];
-                }
-                return template;
-            });
+    // check token error 
+    // if (data.status === 401 && data.error === "Token Error") {
+    //     throw new Error("Token Error");
+    // }
+    if (data.codeTemplates && data.codeTemplates.length > 0) {
+        data.codeTemplates = data.codeTemplates.map((template: any) => {
+            if (template.tags && template.tags !== '') {
+                template.tags = template.tags.split(',').map((tag: string) => tag.trim());
+            } else {
+                template.tags = [];
+            }
+            return template;
+        });
     }
+
     return data;
 }
 
@@ -266,8 +284,16 @@ export async function createBlog(title: string,
         },
         body: JSON.stringify({ title, description, tags, codeTemplates }),
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
+    
 
 export async function deleteBlog(id: number, session: Session) {
     const response = await fetch(`${API_URL}/api/blogs/post?id=${id}`, {
@@ -277,7 +303,13 @@ export async function deleteBlog(id: number, session: Session) {
             x_refreshToken: session.refreshToken,
         },
     });
-    return await response.json();
+    
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+    return data;
 }
 
 export async function updateBlog(
@@ -296,7 +328,13 @@ export async function updateBlog(
         },
         body: JSON.stringify({ title, description, tags, codeTemplates }),
     });
-    return await response.json();
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 
@@ -316,7 +354,13 @@ export async function fetchComments(blogId: number, sortOption: string, pageNum:
         headers,
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+    return data;
 }
 
 export async function fetchCommentbyId(id: number, includeReplies: boolean, session: Session) {
@@ -329,7 +373,14 @@ export async function fetchCommentbyId(id: number, includeReplies: boolean, sess
             x_refreshToken: session?.refreshToken,
         },
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 export async function postComment(blogId: number, content: string, parentCommentId: null | number, session: Session): Promise<Comment>  {
@@ -343,7 +394,14 @@ export async function postComment(blogId: number, content: string, parentComment
         body: JSON.stringify({ content, parentCommentId }),
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 export async function rateBlog(id: number, action: string, session: Session)  {
@@ -357,7 +415,14 @@ export async function rateBlog(id: number, action: string, session: Session)  {
         body: JSON.stringify({ action }),
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data
 }
 
 export async function reportBlog(blogPostId: number, explanation: string, session: Session)  {
@@ -374,7 +439,14 @@ export async function reportBlog(blogPostId: number, explanation: string, sessio
         }),
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 export async function rateComment(id: number, action: string, session: Session)  {
@@ -388,7 +460,14 @@ export async function rateComment(id: number, action: string, session: Session) 
         body: JSON.stringify({ action }),
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 export async function reportComment(commentId: number, explanation: string, session: Session)  {
@@ -402,7 +481,14 @@ export async function reportComment(commentId: number, explanation: string, sess
         body: JSON.stringify({ commentId, explanation }),
 
     });
-    return await response.json();
+
+    // check token error 
+    const data = await response.json();
+    if (data.status === 401 && data.error === "Token Error") {
+        throw new Error("Token Error");
+    }
+
+    return data;
 }
 
 export async function getBlogByTemplate(templateId: number) {

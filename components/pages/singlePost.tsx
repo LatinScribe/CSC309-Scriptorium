@@ -62,7 +62,6 @@ const BlogPostPage = () => {
 
 
     useEffect(() => {
-      // Wait for the router to be ready to make sure the query is populated
         if (!postId) {
             console.log("Couldn't load post");  
             return;
@@ -130,7 +129,7 @@ const BlogPostPage = () => {
         console.log("Invalid postId");  
         return;
       }
-      
+
       const fetchCommentsForNewPage = async () => {
         try {
           const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
@@ -611,7 +610,7 @@ const BlogPostPage = () => {
                   </div>
 
                   <div>
-                  {comments.length > 0 ? (
+                  {comments?.length > 0 ? (
                     renderComments(comments)
                     
                   ) : (     
