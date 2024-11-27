@@ -190,7 +190,7 @@ export default function AdminContentPage() {
     return (
         <div className="flex justify-center">
             <div className="flex flex-col justify-center container pt-10 px-5 gap-5">
-                <div className="text-2xl">Search Blogs</div>
+                <div className="text-2xl">Search Reported Content</div>
                 <div className="flex justify-between flex-wrap">
                     <div className="flex gap-3 pb-3 flex-wrap">
                         <Input
@@ -256,9 +256,11 @@ export default function AdminContentPage() {
                                     </div>
                                     <div className="text-sm text-gray-500">Report Count: {blog.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {blog.hidden ? "Yes" : "No"}</div>
-                                    <Button onClick={handleHideBlog(blog.id)}>
-                                        Hide this content from everyone
-                                    </Button>
+                                    <div className="flex justify-center mt-2">
+                                        <Button onClick={handleHideBlog(blog.id)}>
+                                            Hide content from everyone
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         ))
@@ -291,9 +293,11 @@ export default function AdminContentPage() {
                                     </div>
                                     <div className="text-sm text-gray-500">Report Count: {comment.reportsCount}</div>
                                     <div className="text-sm text-gray-500">Hidden: {comment.hidden ? "Yes" : "No"}</div>
-                                    <Button onClick={handleHideComment(comment.id)}>
-                                        Hide this content from everyone
-                                    </Button>
+                                    <div className="flex justify-center mt-2">
+                                        <Button onClick={handleHideComment(comment.id)}>
+                                            Hide content from everyone
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         ))
