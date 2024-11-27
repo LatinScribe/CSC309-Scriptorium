@@ -58,6 +58,10 @@ export default function BlogsPage() {
     const [searchTerm, setSearchTerm] = useState("");  // For template search
     const [filteredTemplates, setFilteredTemplates] = useState([]);  // Filtered templates
     
+    const [currentPage, setCurrentPage] = useState(1); 
+    const [pageSize, setPageSize] = useState(5);
+    const [pageCount, setPageCount] = useState(1);
+
 
     const { session } = useContext(SessionContext);
     const router = useRouter();
@@ -67,36 +71,37 @@ export default function BlogsPage() {
         if (!session || !session?.accessToken || !session?.refreshToken) {
             router.replace("/login"); 
         }
-    }, []);
+    }, [session, router]);
 
-    // Fetch user's blog posts on component mount
+    useEffect(() => {
+        if (router.isReady) {
+            router.push({ 
+                pathname: "/blogs", 
+                query: { page: currentPage || undefined } }, 
+                undefined, 
+                { shallow: true, }
+            );
+        }
+    }, [currentPage, router]);
+   
     useEffect(() => {
         if (session && session.accessToken && session.refreshToken) {
             const fetchUserPosts = async () => {
                 try{
-                    const blogs = await fetchUserBlogs(session, session.user.username); 
+                    const blogs = await fetchUserBlogs(session, session.user.username, currentPage, pageSize); 
                     setBlogs(blogs);
-
+                    setPageCount(blogs.totalPages);
                 } catch (error) {
                     console.error("Failed to fetch template:", error);
                     toast.error("Failed to fetch your blog posts.");
                 }
             }
             fetchUserPosts();
-            
-            // fetchUserBlogs(session)
-            //     .then((data) => {
-            //         setBlogs(data);
-            //     })
-            //     .catch((error) => {
-            //         console.error("Failed to fetch blogs:", error);
-            //         toast.error("Failed to fetch your blog posts.");
-            //     });
         } else {
             router.push("/login");
         }
         
-    }, [session, router]);
+    }, [session, router, currentPage, pageSize]);
 
     // Fetch templates when the search term changes
     useEffect(() => {
@@ -174,19 +179,21 @@ export default function BlogsPage() {
         // }
     };
 
-    // useEffect(() => {
-    //     const loadBlogForEditing = async (blogId: number) => {
-    //       const blog = await fetchBlogPost(blogId);  // Fetch the blog data, including tags
-    //       setNewBlog({
-    //         ...blog,
-    //         tags: Array.isArray(blog.tags) ? blog.tags : [], // Ensure it's an array
-    //       });
-    //     };
-      
-    //     if (newBlog && newBlog.id) {
-    //       loadBlogForEditing(newBlog.id);
-    //     }
-    // }, [newBlog?.id]);
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < pageCount) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
     // Handle updating a blog post
     const handleUpdateBlog = () => {
@@ -579,6 +586,41 @@ export default function BlogsPage() {
                             </div>
                         ))
                     )}
+                    {/* Pagination */}
+                    <div className="flex justify-center mt-5">
+                        <Pagination>
+                        <PaginationContent className="flex flex-row justify-center gap-2">
+                            <PaginationItem>
+                            <PaginationPrevious
+                                className={`${currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handlePrevPage}
+                            >
+                                Previous
+                            </PaginationPrevious>
+                            </PaginationItem>
+
+                            {Array.from({ length: pageCount }, (_, index) => (
+                            <PaginationItem key={index}>
+                                <PaginationLink
+                                isActive={currentPage === index + 1}
+                                onClick={() => handlePageChange(index + 1)}
+                                >
+                                {index + 1}
+                                </PaginationLink>
+                            </PaginationItem>
+                            ))}
+
+                            <PaginationItem>
+                            <PaginationNext
+                                className={`${currentPage >= pageCount ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                onClick={handleNextPage} 
+                            >
+                                Next
+                            </PaginationNext>
+                            </PaginationItem>
+                        </PaginationContent>
+                        </Pagination>
+                    </div>
                 </div>
             )}
         </div>

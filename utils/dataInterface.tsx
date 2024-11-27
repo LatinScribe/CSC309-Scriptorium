@@ -196,8 +196,8 @@ export async function searchTemplatesByTitle(title: string) {
     return data.templates;
 }
 
-export async function fetchUserBlogs(session: Session, author: string) {
-    const response = await fetch(`${API_URL}/api/blogs?author=${author}`, {
+export async function fetchUserBlogs(session: Session, author: string, currentPage: number, pageSize: number) {
+    const response = await fetch(`${API_URL}/api/blogs?author=${author}&page=${currentPage}&pageSize=${pageSize}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

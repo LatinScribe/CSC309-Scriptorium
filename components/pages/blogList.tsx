@@ -37,9 +37,11 @@ export default function BlogListPage() {
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);     
+
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(5);
     const [pageCount, setPageCount] = useState(1);
+
     const [sortOption, setSortOption] = useState("mostValuable"); // Default sort by most upvotes
 
     const router = useRouter();
@@ -233,9 +235,9 @@ export default function BlogListPage() {
                                     <PaginationLink
                                         isActive={currentPage === index + 1}
                                         onClick={() => {
-                                            // Update the current page and fetch blogs for that page
-                                            setCurrentPage(index + 1); // Update the state for the current page
-                                            fetchAndSetBlogs(); // Call the function to fetch blogs with the updated currentPage
+                                            // update current page and fetch blogs for that page
+                                            setCurrentPage(index + 1); 
+                                            fetchAndSetBlogs();
                                         }}
                                     >
                                         {index + 1}
