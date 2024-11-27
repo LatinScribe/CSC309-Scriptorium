@@ -181,11 +181,15 @@ export default async function handler(req, res) {
             // const userId = payload?.id || null; // if authenticated, extract userid
             const pageNum = parseInt(req.query.page) || 1; // default to 1 
             const pageSize = parseInt(req.query.pageSize) || 10; // default to 10
-            const searchQuery = req.query.search || '';
             const author = req.query.author;
 
             const sortOption = req.query.sort;
-            const templateId = req.query.templateId; // for searching by code template
+            // const templateId = req.query.templateId || []; // for searching by code template
+            const searchTitle = req.query.searchTitle || '';
+            const searchContent = req.query.searchContent || '';
+            const searchTag = req.query.searchTag || '';
+            const searchTemplate = req.query.searchTemplate || '';
+
 
             const orderBy = []; //
             if (sortOption === 'mostUpvoted') {
@@ -196,32 +200,66 @@ export default async function handler(req, res) {
                 orderBy.push({ createdAt: 'desc' }); // Default sort by creation date
             }
 
-            let whereCondition;
+            let whereCondition = {};
 
-            if (templateId) { // search by code template
-                whereCondition = {
-                    codeTemplates: {
-                        some: {
-                            id: Number(templateId),     // match blog posts that 
-                        },
+
+            if (searchTitle) {
+                whereCondition.title = { contains: searchTitle };
+            }
+            
+            if (searchContent) {
+                whereCondition.description = { contains: searchContent };
+            }
+            
+            if (searchTemplate) {
+                whereCondition.codeTemplates = {
+                    some: {
+                        title: { contains: searchTemplate },
                     },
                 };
-            } else { // searches all blog posts
-                whereCondition = {
-                    OR: [ // matching of any of these fields (search could match title, description, tags)
-                        { title: { contains: searchQuery } },
-                        { description: { contains: searchQuery } },
-                        { tags: { contains: searchQuery } },
-                        {
-                            codeTemplates: {
-                                some: {
-                                    title: { contains: searchQuery },
-                                },
-                            },
-                        },
-                    ],
-                };
             }
+
+            // if (searchQuery && !searchTemplate && !searchTitle && !searchTag &&!searchContent) {
+            //     whereCondition = {
+            //         OR: [ // matching of any of these fields (search could match title, description, tags)
+            //             { title: { contains: searchQuery } },
+            //             { description: { contains: searchQuery } },
+            //             { tags: { contains: searchQuery } },
+            //             {
+            //                 codeTemplates: {
+            //                     some: {
+            //                         title: { contains: searchQuery },
+            //                     },
+            //                 },
+            //             },
+            //         ],
+            //     };
+            // }
+
+            // if (templateId) { // search by code template
+            //     whereCondition = {
+            //         codeTemplates: {
+            //             some: {
+            //                 id: Number(templateId),     // match blog posts that 
+            //             },
+            //         },
+            //     };
+            // } else { // searches all blog posts
+            //     whereCondition = {
+            //         OR: [ // matching of any of these fields (search could match title, description, tags)
+            //             { title: { contains: searchQuery } },
+            //             { description: { contains: searchQuery } },
+            //             { tags: { contains: searchQuery } },
+            //             {
+            //                 codeTemplates: {
+            //                     some: {
+            //                         title: { contains: searchQuery },
+            //                     },
+            //                 },
+            //             },
+            //         ],
+            //     };
+            // }
 
             // manage visibility of hidden content
             if (userId) {
@@ -262,7 +300,7 @@ export default async function handler(req, res) {
             }
 
 
-            const blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
+            let blogPosts = await prisma.blogPost.findMany({ // use find many to get list of posts from db
                 where: whereCondition,
                 include: { // relations
                     codeTemplates: true,         // fetch each blog post and all the related code templates stored in codeTemplatse field
@@ -272,17 +310,25 @@ export default async function handler(req, res) {
                         },
                     },
                 },
-                skip: (pageNum - 1) * pageSize,           // pagination offset
-                take: pageSize,
                 orderBy: orderBy,
             });
+
+            // Iterate over blog posts and filter by searchTag if provided
+            if (searchTag) {
+                blogPosts = blogPosts.filter(post => {
+                    const tagsArray = post.tags ? post.tags.split(',').map(tag => tag.trim()) : [];
+                    return tagsArray.includes(searchTag.split(',').map(tag => tag.trim())[0]);
+                });
+            }
+            const totalPosts = blogPosts.length;
+            const paginatedBlogPosts = blogPosts.slice((pageNum - 1) * pageSize, pageNum * pageSize);
 
             // iterates over blogPosts array and copies all properties of the post object 
             // plus adds isReported flag that represents whether the post is hidden and userId 
             // userId matches the authorId of the post 
             // (this field is specific to the requestor and indicates the posts that should show as flagged
             // to the autho)
-            let mappedBlogPosts = blogPosts.map((post) => ({
+            let mappedBlogPosts = paginatedBlogPosts.map((post) => ({
                 ...post,
 
                 tags: post.tags ? post.tags.split(",") : [], // Ensure tags are an array
@@ -290,11 +336,6 @@ export default async function handler(req, res) {
                 isReported: post.hidden && post.authorId === userId,
             }));
 
-            // calculating the total number of pages for pagination:
-            // count the total number of blog posts 
-            const totalPosts = await prisma.blogPost.count({
-                where: whereCondition,
-            });
             const totalPages = Math.ceil(totalPosts / pageSize);
 
             const response = {
@@ -302,10 +343,6 @@ export default async function handler(req, res) {
                 totalPages,
                 // totalPosts,
             };
-
-            console.log("sending response");
-            //                 totalPosts,
-            //             };
 
 
             res.status(200).json(response);
