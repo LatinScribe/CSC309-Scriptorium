@@ -205,8 +205,8 @@ export async function fetchUserBlogs(session: Session, author: string, currentPa
             x_refreshToken: session.refreshToken,
         },
     });
-    const data = await response.json();
-    return data.blogPosts;
+
+    return await response.json();
 }
 
 export async function fetchBlogs(searchTerm: string, sortOption: string, currentPage: number = 1, 
@@ -224,6 +224,7 @@ export async function fetchBlogs(searchTerm: string, sortOption: string, current
         headers,
 
     });
+    
     return await response.json();
 }
 
@@ -237,7 +238,18 @@ export async function fetchBlogPost(id: number) {
         },
 
     });
-    return await response.json();
+    const data = await response.json();
+        if (data.codeTemplates && data.codeTemplates.length > 0) {
+            data.codeTemplates = data.codeTemplates.map((template: any) => {
+                if (template.tags && template.tags !== '') {
+                    template.tags = template.tags.split(',').map((tag: string) => tag.trim());
+                } else {
+                    template.tags = [];
+                }
+                return template;
+            });
+    }
+    return data;
 }
 
 export async function createBlog(title: string, 

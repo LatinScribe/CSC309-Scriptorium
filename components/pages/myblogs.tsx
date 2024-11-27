@@ -36,7 +36,7 @@ import {
     AlertDialogCancel,
   } from "../ui/alert-dialog";
 import { toast } from "sonner"
-import { Pencil2Icon } from "@radix-ui/react-icons";
+import { ExclamationTriangleIcon, Pencil2Icon } from "@radix-ui/react-icons";
 
 export default function BlogsPage() {
     const [isCreating, setIsCreating] = useState(false);
@@ -74,23 +74,38 @@ export default function BlogsPage() {
     }, [session, router]);
 
     useEffect(() => {
+        if (!router.isReady) return;
+        const { page } = router.query;
+        if (page) setCurrentPage(Number(page));
+        
+        fetchAndSetUserBlogs();
+    }, [router.query]);
+
+    
+
+    useEffect(() => {
         if (router.isReady) {
             router.push({ 
-                pathname: "/blogs", 
+                pathname: "/my-blogs", 
                 query: { page: currentPage || undefined } }, 
                 undefined, 
                 { shallow: true, }
             );
         }
-    }, [currentPage, router]);
+        fetchAndSetUserBlogs();
+    }, [currentPage]);
+
+    // useEffect(() => {
+    //     fetchAndSetUserBlogs();
+    // }, [currentPage]);
    
-    useEffect(() => {
+    const fetchAndSetUserBlogs = async () => {
         if (session && session.accessToken && session.refreshToken) {
             const fetchUserPosts = async () => {
                 try{
-                    const blogs = await fetchUserBlogs(session, session.user.username, currentPage, pageSize); 
-                    setBlogs(blogs);
-                    setPageCount(blogs.totalPages);
+                    const blogsResponse = await fetchUserBlogs(session, session.user.username, currentPage, pageSize); 
+                    setBlogs(blogsResponse.blogPosts);
+                    setPageCount(blogsResponse.totalPages);
                 } catch (error) {
                     console.error("Failed to fetch template:", error);
                     toast.error("Failed to fetch your blog posts.");
@@ -101,7 +116,7 @@ export default function BlogsPage() {
             router.push("/login");
         }
         
-    }, [session, router, currentPage, pageSize]);
+    };
 
     // Fetch templates when the search term changes
     useEffect(() => {
@@ -154,48 +169,47 @@ export default function BlogsPage() {
     };
 
     // Handle editing a blog post
-    const handleEditBlog = (blogId: number) => {
-        const loadBlogForEditing = async () => {
-            const blog = await fetchBlogPost(blogId);  // Fetch the blog data
-
-            setNewBlog({
-                title: blog.title,
-                description: blog.description,
-                tags: Array.isArray(blog.tags) ? blog.tags : [], 
-                codeTemplates: blog.codeTemplates || [],
-            });
-            setIsEditing(true);
-            setCurrentBlog(blog); 
-        };
-        loadBlogForEditing();
-
+    const handleEditBlog = (blogId: number, isHidden: boolean) => {
+        if (!isHidden) {
+            const loadBlogForEditing = async () => {
+                const blog = await fetchBlogPost(blogId);  // Fetch the blog data
+    
+                setNewBlog({
+                    title: blog.title,
+                    description: blog.description,
+                    tags: Array.isArray(blog.tags) ? blog.tags : [], 
+                    codeTemplates: blog.codeTemplates || [],
+                });
+                setIsEditing(true);
+                setCurrentBlog(blog); 
+            };
+            loadBlogForEditing();
+        } else {
+            toast.error("Post is hidden and cannot be edited.");
+        }
         
-        //     setNewBlog({
-        //         title: blogToEdit.title,
-        //         description: blogToEdit.description,
-        //         tags: blogToEdit.tags || [],  
-        //         codeTemplates: blogToEdit.templates || [],
-        //     });
-        // }
     };
 
     const handlePrevPage = () => {
         if (currentPage > 1) {
           setCurrentPage(currentPage - 1);
+          fetchAndSetUserBlogs();
         }
     };
 
     const handleNextPage = () => {
         if (currentPage < pageCount) {
             setCurrentPage(currentPage + 1);
+            fetchAndSetUserBlogs();
         }
     };
 
-    const handlePageChange = (page) => {
+    const handlePageChange = (page: number) => {
         setCurrentPage(page);
+        fetchAndSetUserBlogs();
     };
 
-    // Handle updating a blog post
+    // Handle updating blog post
     const handleUpdateBlog = () => {
         if (!session || !session.accessToken || !currentBlog) {
             toast.error("You must be logged in to update a blog post");
@@ -552,9 +566,22 @@ export default function BlogsPage() {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h2 className="text-2xl font-bold max-w-[20vw] md:max-w-[50vw] truncate">{blog.title}</h2>
+                                        {blog.hidden && (
+                                             <div className="flex items-center gap-2 p-4">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-red-500 p-1 rounded">Hidden</span>
+                                            </div>
+                                        )}
+                                        {blog.flagged && (
+                                            <div className="flex items-center gap-2">
+                                                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                                <span className="text-sm text-red-500 bg-yellow-100 p-1 rounded">Flagged</span>
+                                            </div>
+                                        )}
                                         <p className="text-sm text-gray-500">
                                             Published on {new Date(blog.createdAt).toLocaleDateString()}
                                         </p>
+
                                         {/* Display tags */}
                                         <div className="flex flex-wrap gap-2">
                                             {blog.tags && blog.tags?.map((tag, index) => (
@@ -569,8 +596,9 @@ export default function BlogsPage() {
                                             ))}
                                             </div>
                                     </div>
-                                    <div className="flex space-x-4">
-                                        <Button onClick={() => handleEditBlog(blog.id)}>
+                                    <div className="flex space-x-4 flex-grow justify-end">
+                                        <Button onClick={() => handleEditBlog(blog.id, blog.hidden)}
+                                                disabled={blog.hidden}>
                                             Edit Post
                                         </Button>
                                         <Button
@@ -583,9 +611,13 @@ export default function BlogsPage() {
                                     </div>
                                 </div>
                                 <p className="text-gray-500 mt-2 max-w-[20vw] truncate md:max-w-[50vw]">{blog.description}</p>
+
+
+
                             </div>
                         ))
                     )}
+
                     {/* Pagination */}
                     <div className="flex justify-center mt-5">
                         <Pagination>
@@ -597,17 +629,17 @@ export default function BlogsPage() {
                             >
                                 Previous
                             </PaginationPrevious>
-                            </PaginationItem>
+                        </PaginationItem>
 
                             {Array.from({ length: pageCount }, (_, index) => (
-                            <PaginationItem key={index}>
-                                <PaginationLink
-                                isActive={currentPage === index + 1}
-                                onClick={() => handlePageChange(index + 1)}
-                                >
-                                {index + 1}
-                                </PaginationLink>
-                            </PaginationItem>
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        isActive={currentPage === index + 1}
+                                        onClick={() => handlePageChange(index + 1)}
+                                        >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
                             ))}
 
                             <PaginationItem>
@@ -621,7 +653,9 @@ export default function BlogsPage() {
                         </PaginationContent>
                         </Pagination>
                     </div>
+                    
                 </div>
+                
             )}
         </div>
     );

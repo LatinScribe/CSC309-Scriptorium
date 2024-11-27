@@ -31,6 +31,7 @@ import {
   } from "../ui/alert-dialog";
   import { SessionContext } from "@/contexts/session";
 import { Separator } from "../ui/separator";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export default function BlogListPage() {
     const { session } = useContext(SessionContext);
@@ -42,7 +43,7 @@ export default function BlogListPage() {
     const [pageSize, setPageSize] = useState(5);
     const [pageCount, setPageCount] = useState(1);
 
-    const [sortOption, setSortOption] = useState("mostValuable"); // Default sort by most upvotes
+    const [sortOption, setSortOption] = useState("mostUpvoted"); // default
 
     const router = useRouter();
     
@@ -152,7 +153,6 @@ export default function BlogListPage() {
                             className="w-36 md:w-48 lg:w-96 xl:w-96"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}        //update local input state
-                            // searchQuery state changes here:
                         />                                                          
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
@@ -170,13 +170,13 @@ export default function BlogListPage() {
                             <SelectTrigger>
                                 <SelectValue>{ 
                                     sortOption === 'mostUpvoted' ? 'Most Upvoted' :
-                                    sortOption === 'mostControversial' ? 'Most Downvoted' :
+                                    sortOption === 'mostDownvoted' ? 'Most Downvoted' :
                                     sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
-                                <SelectItem value="mostControversial">Most Downvoted</SelectItem>
+                                <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
                                 <SelectItem value="createdAt">Newest</SelectItem>
                             </SelectContent>
                         </Select>
@@ -188,6 +188,12 @@ export default function BlogListPage() {
                             <div key={'b' + blog.id} className="blog-post-card" onClick={() => handlePostClick(blog.id)}>
                                 <div className="cursor-pointer p-4 border rounded-lg flex flex-col gap-2">
                                     <h2 className="text-xl font-bold truncate">{blog.title}</h2>
+                                    {blog.hidden && (
+                                        <div className="flex items-center gap-2 p-4">
+                                            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                                            <span className="text-red-500 p-1 rounded">Hidden</span>
+                                        </div>
+                                    )}
                                     <p className="text-sm text-gray-600 truncate">{blog.description}</p>
                                     <div className="flex flex-wrap items-center gap-2">
                                         {blog.tags && blog.tags?.map((tag, index) => (

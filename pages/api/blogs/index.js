@@ -188,9 +188,9 @@ export default async function handler(req, res) {
             const templateId = req.query.templateId; // for searching by code template
 
             const orderBy = []; //
-            if (sortOption === 'mostValuable') {
+            if (sortOption === 'mostUpvoted') {
                 orderBy.push({ upvoteCount: 'desc' }, { downvoteCount: 'asc' }, { createdAt: 'desc' });
-            } else if (sortOption === 'mostControversial') {
+            } else if (sortOption === 'mostDownvoted') {
                 orderBy.push({ downvoteCount: 'desc' }, { createdAt: 'desc' });
             } else {
                 orderBy.push({ createdAt: 'desc' }); // Default sort by creation date

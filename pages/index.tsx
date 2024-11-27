@@ -103,6 +103,9 @@ export default function Home() {
       if (router.asPath.startsWith("/blogs?")) {
         return <BlogListPage />;
       }
+      if (router.asPath.startsWith("/my-blogs?")) {
+        return <MyBlogsPage />;
+      }
       return <Custom404 />;
     }
   };
