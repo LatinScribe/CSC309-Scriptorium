@@ -344,6 +344,16 @@ const BlogPostPage = () => {
       commentsList.map((comment) => (
         <div key={comment.id} className="p-4 rounded-md my-2 bg-background-50">
           <div className="flex flex-col gap-2">
+            {/* Hidden Badge for Comment */}
+            {comment.hidden && (
+              <div className="flex items-center gap-2 bg-yellow-100 p-2 rounded-md mb-4">
+                <ExclamationTriangleIcon className="text-yellow-800" />
+                <div className="text-sm text-yellow-800 font-semibold">
+                  Your comment has been hidden. It cannot be seen by others.
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <p className="text-sm text-gray-500 font-semibold">{comment.author?.username}</p>
               <span className="text-sm text-gray-400">•</span>
@@ -359,7 +369,8 @@ const BlogPostPage = () => {
                 variant="outline" 
                 size="sm" 
                 className="px-1 py-1 flex items-center"
-                // className={commentVotes[comment.id] === "upvoted" ? "text-green-500" : ""}
+                disabled={blogPost?.hidden}
+
               >
                 <ThickArrowUpIcon /> {comment.upvoteCount}
               </Button>
@@ -368,6 +379,7 @@ const BlogPostPage = () => {
                 variant="outline" 
                 size="sm"
                 className="px-1 py-1 flex items-center"
+                disabled={blogPost?.hidden}
               >
                 <ThickArrowDownIcon /> {comment.downvoteCount}
               </Button>
@@ -376,6 +388,7 @@ const BlogPostPage = () => {
                 variant="outline" 
                 size="sm" 
                 className="px-2 py-1 flex items-center space-x-1 ml-4"
+                disabled={blogPost?.hidden}
               >
                 <ExclamationTriangleIcon /> report
               </Button>
@@ -405,6 +418,7 @@ const BlogPostPage = () => {
                 setRepliesText((prev) => ({ ...prev, [comment.id]: "" })); // Clear reply text after submitting
               }}
               className="ml-2"
+              disabled={blogPost?.hidden}
             >
               Reply
             </Button>
@@ -434,6 +448,19 @@ const BlogPostPage = () => {
       <div className="mx-auto max-w-3xl p-4">
             {blogPost && (
                 <div className="bg-white shadow-md rounded p-6 mb-6">
+
+                  {blogPost.hidden && (
+                    <div className="bg-yellow-100 text-yellow-800 border-l-4 border-yellow-600 p-4 mb-4 flex items-center gap-2">
+                      <ExclamationTriangleIcon className="h-5 w-5" />
+                      <div>
+                        <h3 className="font-semibold">Your post has been hidden.</h3>
+                        <p className="text-sm">No one else can see your post. It has been flagged for review.</p>
+                        <p className="text-sm">Your post has {blogPost.reportsCount || 0} reports.</p>
+                      </div>
+                    </div>
+                  )}
+
+
                     <h1 className="text-2xl font-bold">{blogPost.title}</h1>
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1 text-gray-600 text-sm">By <UserCard user={blogPost.author} /></div>
@@ -455,15 +482,17 @@ const BlogPostPage = () => {
                                     href={`/templates/${template.id}`}
                                     className="font-medium hover:underline transition-colors underline"
                                   >
+                                    <span className="truncate" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                     {template.title}
+                                  </span>
                                   </Link>
                                 </HoverCardTrigger>
                                 <HoverCardContent className="max-w-xs sm:max-w-sm lg:max-w-lg">
                                   <h3 className="font-semibold text-lg">{template.title}</h3>
                                   {/* <p className="mt-2 text-sm text-slate-700">{template.explanation}</p> */}
                                   <div className="mt-2 flex flex-wrap gap-2">
-                                    {(template.tags || []).map((tag, index) => (
-                                      <span
+                                  {(Array.isArray(template.tags) ? template.tags : []).map((tag, index) => (
+                                    <span
                                         key={index}
                                         className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700"
                                       >
@@ -483,19 +512,21 @@ const BlogPostPage = () => {
 
 
                     <div className="mt-4 flex items-center gap-2">
-                      <Button onClick={() => handleVote("upvote", blogPost.id, true)} variant="outline" size="sm"
-                        // className={blogVote === "upvoted" ? "text-green-500" : ""} 
+                      <Button 
+                        onClick={() => handleVote("upvote", blogPost.id, true)} variant="outline" size="sm"
+                        disabled={blogPost.hidden}
                         >
                         <ThickArrowUpIcon/> {blogPost.upvoteCount}</Button>
                       <Button 
                         onClick={() => handleVote("downvote", blogPost.id, true)} 
                         variant="outline" 
                         size="sm"
-                        // className={blogVote === "downvoted" ? "text-red-500" : ""} 
+                        disabled={blogPost.hidden}
                         >
                         <ThickArrowDownIcon/> {blogPost.downvoteCount}</Button>
                       <Button 
                         onClick={() => openReportDialog("blog", blogPost.id)} 
+                        disabled={blogPost.hidden}
                         variant="outline" size="sm" className="px-2 py-1 flex items-center space-x-1 ml-4">
                         <ExclamationTriangleIcon/> report </Button>
                       {isPostDialogOpen && (
@@ -515,75 +546,79 @@ const BlogPostPage = () => {
             
             
             {/* Comments List */}
-            <div className="p-4 rounded">
-                <h2 className="text-lg font-bold mb-4">Comments</h2>
-                <div className="mb-4 flex">
-                    <Input
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..."
-                        className="flex-grow"
-                    />
-                    <Button onClick={handleCommentSubmit} className="ml-2">
-                        Post
-                    </Button>
-                </div>
-                
-
-                {/* Dropdown for Sorting Comments */}
-                <div className="p-4 flex justify-end items-center space-x-2">
-                  <label 
-                    htmlFor="sortComments" 
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Sort comments:
-                  </label>
-                  <Select
-                    value={sortOption}
-                    onValueChange={(value: string) => setSortOption(value as "newest" | "mostUpvotes" | "mostDownvotes")}
-                  >
-                    <SelectTrigger className="w-32 border rounded-md px-3 py-2  ">
-                      <SelectValue>
-                        {
-                          sortOption === 'mostUpvotes' ? 'Most Upvotes' :
-                          sortOption === 'mostDownvotes' ? 'Most Downvotes' :
-                          sortOption === 'newest' ? 'Newest' : 'Select Sort'
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="border rounded-md bg-white shadow-lg mt-1">
-                      <SelectItem value="newest" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Newest</SelectItem>
-                      <SelectItem value="mostUpvotes" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Most Upvotes</SelectItem>
-                      <SelectItem value="mostDownvotes" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Most Downvotes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                {comments.length > 0 ? (
-                  renderComments(comments)
-                  
-                ) : (     
-                  <p className="text-gray-500">No comments yet. Be the first to comment!</p>
-                )}
-                {/* Load More Button */}
-                {/* {(currentPage < totalPages) && (
-                  <div className="flex justify-center mt-4">
-                    <Button
-                      onClick={loadMoreComments}
-                      variant="outline"
-                      size="sm"
-                      className="px-4 py-2 text-blue-500"
-                      disabled={loading} // Disable while loading
-                    >
-                      {loading ? "Loading..." : "Load More"}
-                    </Button>
+            {blogPost && (
+              <div className="p-4 rounded">
+                  <h2 className="text-lg font-bold mb-4">Comments</h2>
+                  <div className="mb-4 flex">
+                      <Input
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Write a comment..."
+                          className="flex-grow"
+                      />
+                      <Button 
+                        onClick={handleCommentSubmit} className="ml-2"
+                        disabled={blogPost.hidden}>
+                          Post
+                      </Button>
                   </div>
-                )} */}
+                  
 
-                
-                </div>
-            </div>
+                  {/* Dropdown for Sorting Comments */}
+                  <div className="p-4 flex justify-end items-center space-x-2">
+                    <label 
+                      htmlFor="sortComments" 
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Sort comments:
+                    </label>
+                    <Select
+                      value={sortOption}
+                      onValueChange={(value: string) => setSortOption(value as "newest" | "mostUpvotes" | "mostDownvotes")}
+                    >
+                      <SelectTrigger className="w-32 border rounded-md px-3 py-2  ">
+                        <SelectValue>
+                          {
+                            sortOption === 'mostUpvotes' ? 'Most Upvotes' :
+                            sortOption === 'mostDownvotes' ? 'Most Downvotes' :
+                            sortOption === 'newest' ? 'Newest' : 'Select Sort'
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="border rounded-md bg-white shadow-lg mt-1">
+                        <SelectItem value="newest" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Newest</SelectItem>
+                        <SelectItem value="mostUpvotes" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Most Upvotes</SelectItem>
+                        <SelectItem value="mostDownvotes" className="px-4 py-2 text-gray-700 hover:bg-gray-100">Most Downvotes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                  {comments.length > 0 ? (
+                    renderComments(comments)
+                    
+                  ) : (     
+                    <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+                  )}
+                  {/* Load More Button */}
+                  {/* {(currentPage < totalPages) && (
+                    <div className="flex justify-center mt-4">
+                      <Button
+                        onClick={loadMoreComments}
+                        variant="outline"
+                        size="sm"
+                        className="px-4 py-2 text-blue-500"
+                        disabled={loading} // Disable while loading
+                      >
+                        {loading ? "Loading..." : "Load More"}
+                      </Button>
+                    </div>
+                  )} */}
+
+                  
+                  </div>
+              </div>
+            )}
         </div>
     );
 }
