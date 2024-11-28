@@ -39,6 +39,8 @@ Use our provided postman collection (see sciptorium.post_collection) to test the
 ## Live deployment:
 Visit: https://scriptorium.henrytchen.com/
 
+-----
+
 ### Tips for deploying this project locally:
 
 #### Linux
