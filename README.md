@@ -39,8 +39,13 @@ Use our provided postman collection (see sciptorium.post_collection) to test the
 ## Live deployment:
 Visit: https://scriptorium.henrytchen.com/
 
-### Notes for windows:
-- We recommend running this in WSL with docker preconfigured for WSL: https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers
+### Tips for deploying this project locally:
+
+#### Linux
+- The abouve documentation has been tailored for linux users (we've tested it on Ubuntu)
+
+#### Notes for Windows Users:
+- We recommend running this in WSL (Linux) with docker preconfigured for WSL: https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers
 - IF you receive errors when running startup.sh or run.sh, try using "sed -i -e 's/\r$//' startup.sh" as windows uses CR and LF as line encoding when saving file which is not compatible with linux
 - Try running npm rebuild and npm install in the console
 
