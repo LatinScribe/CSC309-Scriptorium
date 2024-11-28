@@ -1,6 +1,7 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+## Getting Started 
+#### (For full guide, jump down to [Deploying this Project Locally](#Deploying-this-project-locally)
 
 First, run the startup file:
 
@@ -41,7 +42,7 @@ Visit: https://scriptorium.henrytchen.com/
 
 -----
 
-### Tips for deploying this project locally:
+## Deploying this project locally:
 
 #### Linux
 - The abouve documentation has been tailored for linux users (we've tested it on Ubuntu)
