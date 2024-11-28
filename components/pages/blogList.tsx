@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/pagination"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "../ui/input";
-
 import { Textarea } from "../ui/textarea";
 import {
     AlertDialog,
@@ -32,11 +31,15 @@ import {
   import { SessionContext } from "@/contexts/session";
 import { Separator } from "../ui/separator";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import AdvancedSearchModal from "../AdvancedSearch";
 
 export default function BlogListPage() {
     const { session } = useContext(SessionContext);
     const [inputValue, setInputValue] = useState<string>(""); // Local input state
     const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchContent, setSearchContent] = useState<string>("");
+    const [searchTag, setSearchTag] = useState<string>("");
+    const [searchTemplate, setSearchTemplate] = useState<string>("");
     const [blogs, setBlogs] = useState<BlogPost[]>([]);     
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -50,41 +53,44 @@ export default function BlogListPage() {
     
     useEffect(() => {
         if (!router.isReady) return;
-        const { search, sort, page } = router.query;
+        const { title, sort, page, content, tag, template } = router.query;
         // initialize state from URL query params
-        if (search) setSearchQuery(search as string);
+        if (title) setSearchQuery(title as string);
         if (sort) setSortOption(sort as string);
         if (page) setCurrentPage(Number(page));
+        if (content) setSearchContent(content as string);
+        if (tag) setSearchTag(tag as string);
+        if (template) setSearchTemplate(template as string);
         
         fetchAndSetBlogs();
     }, [router.query]);
 
     useEffect(() => {
         if (router.isReady) {
-            updateUrl({ search: searchQuery, sort: sortOption, page: currentPage });
+            updateUrl({ title: searchQuery, sort: sortOption, page: currentPage, content: searchContent, tag: searchTag, template: searchTemplate });
             // fetchAndSetBlogs();
         }
         
-    }, [searchQuery, sortOption, currentPage]);
+    }, [searchQuery, sortOption, currentPage, searchContent, searchTag, searchTemplate]);
 
     // useEffect(() => {
     //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
     //     fetchAndSetBlogs();
     // }, [searchQuery, currentPage, sortOption]);
     
-    useEffect(() => {   
-        if (searchQuery) {  // once searchQuery state is updated, get search results
-            fetchAndSetBlogs();
-        }
-    }, [searchQuery]);
+    // useEffect(() => {   
+    //     if (searchQuery) {  // once searchQuery state is updated, get search results
+    //         fetchAndSetBlogs();
+    //     }
+    // }, [searchQuery]);
     
 
     const fetchAndSetBlogs = async () => {
         try {
-            // Fetch the blogs based on the search query and sort option
-            const response = await fetchBlogs(searchQuery, sortOption, currentPage, pageSize, session);
+            
+            const response = await fetchBlogs(sortOption, currentPage, pageSize, session, searchQuery, searchContent, searchTag, searchTemplate);
             setBlogs(response.blogPosts);       // returned blog posts are stored in the blogs state 
-            setPageCount(response.totalPages);  // page count is updated based on totalPages
+            setPageCount(response.totalPages);  
         } catch (error) {
             console.error("Search failed:", error);
             toast.error("Failed to fetch blogs.");
@@ -104,15 +110,20 @@ export default function BlogListPage() {
     };
     const updateUrl = (queryUpdates: { [key: string]: string | number }) => {
         const newQuery = {
-            search: searchQuery || undefined,
+            title: searchQuery || undefined,
             sort: sortOption || undefined,
             page: currentPage || undefined,
+            content: searchContent || undefined,
+            tag: searchTag || undefined,
+            template: searchTemplate || undefined,
             ...queryUpdates,
         };
         router.push({ pathname: "/blogs", query: newQuery }, undefined, {
             shallow: true,
         });
     };
+
+    
 
     const handleSearch = () => {
         setSearchQuery(inputValue);
@@ -151,14 +162,41 @@ export default function BlogListPage() {
                             className="w-36 md:w-48 lg:w-96 xl:w-96"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}        //update local input state
-                        />                                                          
+                        />             
+                        <AdvancedSearchModal showIdFilter={true} onFiltersChange={(filters) => {
+                            if (filters.title) setInputValue(filters.title);
+                            if (filters.content) setSearchContent(filters.content);
+                            if (filters.tags) setSearchTag(filters.tags.join(","));
+                            if (filters.template) setSearchTemplate(filters.template);
+                        }} />
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
                     <div className="flex items-center space-x-6">
-                        <label 
-                            htmlFor="sortOption" 
-                            className="text-sm font-medium whitespace-nowrap"
+                        {/* <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
+                            Search by:
+                        </label>
+                        <Select
+                            value={filterField}
+                            onValueChange={(value: string) => setFilterField(value)}
                         >
+                            <SelectTrigger>
+                            <SelectValue>
+                                    {filterField === "searchTitle" ? "Title"
+                                        : filterField === "searchTag" ? "Tag"
+                                        : filterField === "searchContent"? "Content"
+                                        : filterField === "searchTemplate"? "Template"
+                                        : "All" }
+                                </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value=" ">All</SelectItem>
+                                <SelectItem value="searchTitle">Title</SelectItem>
+                                <SelectItem value="searchTag">Tags</SelectItem>
+                                <SelectItem value="searchContent">Content</SelectItem>
+                                <SelectItem value="searchTemplate">Code Templates</SelectItem>
+                            </SelectContent>
+                        </Select> */}
+                        <label htmlFor="sortOption" className="text-sm font-medium whitespace-nowrap">
                             Sort By:
                         </label>
                         <Select

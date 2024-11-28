@@ -14,14 +14,14 @@ const AdvancedSearchModal = ({ onFiltersChange, showIdFilter }: AdvancedSearchPr
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [tags, setTags] = useState("");
-    const [ids, setIds] = useState("");
+    const [template, setTemplate] = useState("");
 
     const handleApplyFilters = () => {
         onFiltersChange({
             title,
             content,
             tags: tags.split(',').map(tag => tag.trim()),
-            ids: ids.split(',').map(id => id.trim())
+            template,
         });
     };
 
@@ -33,7 +33,7 @@ const AdvancedSearchModal = ({ onFiltersChange, showIdFilter }: AdvancedSearchPr
             <DialogContent className="bg-background">
                 <DialogTitle>Advanced Search</DialogTitle>
                 <DialogDescription>
-                    Define your search terms for titles, content, tags, and code template IDs (as mentioned in blogs).
+                    Define your search terms for titles, content, tags, and code template title (as mentioned in blogs).
                 </DialogDescription>
                 <div className="flex flex-col gap-5">
                     <Label htmlFor="title">Title</Label>
@@ -56,11 +56,11 @@ const AdvancedSearchModal = ({ onFiltersChange, showIdFilter }: AdvancedSearchPr
                     />
                     {showIdFilter && (
                         <>
-                            <Label htmlFor="ids">Code Template IDs (comma separated)</Label>
+                            <Label htmlFor="ids">Code Template Title</Label>
                             <Input
                                 id="ids"
-                                value={ids}
-                                onChange={(e) => setIds(e.target.value)}
+                                value={template}
+                                onChange={(e) => setTemplate(e.target.value)}
                             />
                         </>
                     )}

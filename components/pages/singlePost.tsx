@@ -574,6 +574,55 @@ const BlogPostPage = () => {
 
 
 
+                    <h1 className="text-2xl font-bold break-words md:max-w-[70vw] ">{blogPost.title}</h1>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1 text-gray-600 text-sm">By <UserCard user={blogPost.author} /></div>
+                        <span className="text-sm text-gray-400">•</span>
+                        <p className="text-gray-600 text-sm">{new Date(blogPost.createdAt).toLocaleString()}</p>
+                      </div>
+                    <p className="mt-4">{blogPost.description}</p>
+
+                    {/* Code Templates Section */}
+                    {blogPost && blogPost.codeTemplates && blogPost.codeTemplates.length > 0 && (
+                      <div className="mt-6">
+                        <h2 className="text-xl font-semibold mb-3">Related Code Templates</h2>
+                        <ul className="space-y-2 list-inside list-disc marker:text-slate-400">
+                          {blogPost.codeTemplates.map((template) => (
+                            <li key={template.id}>
+                              <HoverCard>
+                                <HoverCardTrigger asChild>
+                                  <Link
+                                    href={`/templates/${template.id}`}
+                                    className="font-medium hover:underline transition-colors underline"
+                                  >
+                                    <span className="truncate" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {template.title}
+                                  </span>
+                                  </Link>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="max-w-xs sm:max-w-sm lg:max-w-lg">
+                                  <h3 className="font-semibold text-lg">{template.title}</h3>
+                                  {/* <p className="mt-2 text-sm text-slate-700">{template.explanation}</p> */}
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                  {(Array.isArray(template.tags) ? template.tags : []).map((tag, index) => (
+                                    <span
+                                        key={index}
+                                        className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700"
+                                      >
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <p className="mt-2 text-xs text-slate-500">Language: {template.language}</p>
+                                </HoverCardContent>
+                              </HoverCard>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+
           {/* Dropdown for Sorting Comments */}
           <div className="p-4 flex justify-end items-center space-x-2">
             <label
