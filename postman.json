@@ -4,8 +4,8 @@
 		"name": "Scriptorium",
 		"description": "# 📄 Scriptorium API - CSC309 Project\n\nTeam: Henry, Alyssa, York\n\n---\n\nThe Scriptorium API provides all the user management, code template management & execution, blogging and moderation functionalities for Scriptorium.\n\n## **Getting started**\n\n- For some endpoints, you will need a valid Bearer token in the header for authentication purposes. Some functionalities are restricted to users, specific users, or admins only.\n    \n- The base URL of this API is currently defined as `http://localhost:3000/api/` (the API currently does not support HTTPS).\n    \n- The API returns request responses in JSON format. When an API request returns an error, it is sent in the JSON response \\[in the message or error key?\\].\n    \n\n## Authentication\n\nThe Scriptorium API uses JWT for authentication. For endpoints which require this, it must be included in the header. You will receive an access token and a refresh token when logging in at `/api/accounts/login`, which are valid for one hour and one day respectively. If your refresh token is still valid, you may refresh your access token at `api/accounts/refresh`.\n\n### Authentication error response\n\nIf an API key is missing, malformed, or invalid, you will receive an HTTP 401 Unauthorized response code.\n\n### Admin User\n\nA super admin account will have already been created after running `startup.sh`. The credentials of the user are as follows:\n\n- Username: SUDOMASTER\n    \n- Password: SUDOMaSTER123$$$\n    \n\n### Model Design\n\n<img src=\"https://content.pstmn.io/7d801d9c-bc16-455f-948f-4e18905de86e/cHJpc21hLXVtbC5wbmc=\">\n\n**Entities**\n\n- User: Registered users on Scriptorium.\n    \n    - Stores username, salted password, first & last names, email, avatar, phone number, role (USER or ADMIN), created & updated timestamps.\n        \n    - Includes a `deleted` attribute for shadow deletion\n        \n    - Stores list of blog posts, comments and code templates which the user is the author of\n        \n    - Stores a list of saved code templates (possibly authored by others).\n        \n- CodeTemplate: Code templates authored by users on Scriptorium.\n    \n    - Stores title, explanation, tags (comma-separated), author, content (the code itself), language.\n        \n    - Includes a `deleted` attribute for shadow deletion\n        \n    - Linked to the forked source (if forked) through the `forkedSourceId` attribute\n        \n    - Stores a list of blog posts which mention the code template.\n        \n    - Stores a list of `SavedCodeTemplate` objects for each user that has saved the template (see below).\n        \n- SavedCodeTemplate: A join table storing which users have saved which code templates.\n    \n    - Stores a specific user and specific code template, representing the saved relationship.\n        \n- BlogPost: Blog posts authored by users on Scriptorium.\n    \n    - Stores title, description, tags, author, list of upvotes & downvotes, list of code templates that the post mentions, created timestamp.\n        \n    - For moderation, stores a list of `Report` objects made specifically against the blog post. `flagged` attribute becomes true if a report has been made. Moderators hide the blog post from the public with the `hidden` attribute.\n        \n    - Includes a `deleted` attribute for shadow deletion (if the user is deleted)\n        \n    - Stores a list of comments made under the blog post.\n        \n- BlogPostUpvote / BlogPostDownvote: Represents a specific upvote/downvote made by a user against a blog post.\n    \n    - Stores the user's ID and the blog post object.\n        \n- Comment: Comments made under blog posts in Scriptorium.\n    \n    - Stores comment content, author, list of upvotes & downvotes, list of code templates that the post mentions, created timestamp, and the parent comment (if the comment is made as a reply to another comment)\n        \n    - For moderation, stores a list of `Report` objects made specifically against the comment. `flagged` attribute becomes true if a report has been made. Moderators hide the comment from the public with the `hidden` attribute.\n        \n    - Includes a `deleted` attribute for shadow deletion (if the user is deleted)\n        \n    - Stores a list of replies (comments) made under the comment.\n        \n- CommentUpvote / CommentDownvote: Represents a specific upvote/downvote made by a user against a comment.\n    \n    - Stores the user's ID and the comment object.\n        \n- Report: A report made by a user against a blog post or comment on Scriptorium.\n    \n    - Stores the explanation for the report, and the created timestamp.\n        \n    - Stores the blog post object, or comment object, that the report is made against.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "36537815",
-		"_collection_link": "https://scriptorium-7289.postman.co/workspace/Scriptorium-Workspace~82528def-1a2c-4879-b303-982f6da8107f/collection/36537815-66c70816-6dfc-4869-85f4-06adf2e36766?action=share&source=collection_link&creator=36537815"
+		"_exporter_id": "39438726",
+		"_collection_link": "https://scriptorium-7289.postman.co/workspace/82528def-1a2c-4879-b303-982f6da8107f/collection/36537815-66c70816-6dfc-4869-85f4-06adf2e36766?action=share&source=collection_link&creator=39438726"
 	},
 	"item": [
 		{
@@ -68,15 +68,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/login",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/login",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"login"
 									]
 								}
@@ -400,15 +396,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/register",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/register",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"register"
 									]
 								}
@@ -972,15 +964,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/admin/admin_register",
-									"protocol": "http",
+									"raw": "{{baseUrl}}admin/admin_register",
 									"host": [
-										"localhost"
+										"{{baseUrl}}admin"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"admin",
 										"admin_register"
 									]
 								}
@@ -1304,15 +1292,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/admin/admin_users",
-									"protocol": "http",
+									"raw": "{{baseUrl}}admin/admin_users",
 									"host": [
-										"localhost"
+										"{{baseUrl}}admin"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"admin",
 										"admin_users"
 									]
 								}
@@ -1438,15 +1422,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/profile",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/profile",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"profile"
 									]
 								}
@@ -1572,15 +1552,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/admin/admin_users",
-									"protocol": "http",
+									"raw": "{{baseUrl}}admin/admin_users",
 									"host": [
-										"localhost"
+										"{{baseUrl}}admin"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"admin",
 										"admin_users"
 									]
 								}
@@ -1847,15 +1823,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/users",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/users",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"users"
 									]
 								}
@@ -2239,15 +2211,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/profile",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/profile",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"profile"
 									]
 								}
@@ -2511,15 +2479,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/admin/admin_users",
-									"protocol": "http",
+									"raw": "{{baseUrl}}admin/admin_users",
 									"host": [
-										"localhost"
+										"{{baseUrl}}admin"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"admin",
 										"admin_users"
 									]
 								}
@@ -2825,15 +2789,11 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/profile",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/profile",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"profile"
 									]
 								}
@@ -2959,15 +2919,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/admin/admin_users",
-									"protocol": "http",
+									"raw": "{{baseUrl}}admin/admin_users",
 									"host": [
-										"localhost"
+										"{{baseUrl}}admin"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"admin",
 										"admin_users"
 									]
 								}
@@ -3162,15 +3118,11 @@
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api/accounts/refresh",
-									"protocol": "http",
+									"raw": "{{baseUrl}}accounts/refresh",
 									"host": [
-										"localhost"
+										"{{baseUrl}}accounts"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"accounts",
 										"refresh"
 									]
 								}
@@ -3302,7 +3254,7 @@
 								"execute"
 							]
 						},
-						"description": "Executes code, passing in provided input to the program and returning the program output.\n\n**Body**\n\n- code (string) _(required)_: the code to execute.\n    \n- language (string) _(required)_: the language which the code is written in. Accepts any of \\[\"python\", \"javascript\", \"c\", \"cpp\", \"java\"\\].\n    \n- input (array of strings) _(required)_: the inputs to be passed, individually, into stdin of the process. Should be an empty array if no input is to be passed in."
+						"description": "Executes code, passing in provided input to the program and returning the program output.\n\n**Body**\n\n- code (string) _(required)_: the code to execute.\n    \n- language (string) _(required)_: the language which the code is written in. Accepts any of \\[\"python\", \"javascript\", \"c\", \"c++\", \"java\"\\].\n    \n- input (array of strings) _(required)_: the inputs to be passed, individually, into stdin of the process. Should be an empty array if no input is to be passed in."
 					},
 					"response": [
 						{
@@ -3383,7 +3335,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"error\": \"Invalid language, supported languages are: python, javascript, java, c, cpp\"\n}"
+							"body": "{\n    \"error\": \"Invalid language, supported languages are: python, javascript, java, c, c++\"\n}"
 						}
 					]
 				},
@@ -3434,15 +3386,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/templates/",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										""
 									]
 								}
@@ -3597,15 +3545,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api/templates/?page=1&pageSize=10",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/?page=1&pageSize=10",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										""
 									],
 									"query": [
@@ -3728,15 +3672,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/templates/",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										""
 									]
 								}
@@ -3880,15 +3820,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/templates/",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										""
 									]
 								}
@@ -3938,15 +3874,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api//template/content?id =1",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/template/content?id =1",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"",
 										"template",
 										"content"
 									],
@@ -4015,15 +3947,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/templates/save",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/save",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										"save"
 									]
 								}
@@ -4035,7 +3963,6 @@
 								{
 									"key": "Content-Type",
 									"value": "application/json",
-									"name": "Content-Type",
 									"description": "",
 									"type": "text"
 								}
@@ -4103,7 +4030,6 @@
 								{
 									"key": "Content-Type",
 									"value": "application/json",
-									"name": "Content-Type",
 									"description": "",
 									"type": "text"
 								}
@@ -4142,7 +4068,6 @@
 								{
 									"key": "Content-Type",
 									"value": "application/json",
-									"name": "Content-Type",
 									"description": "",
 									"type": "text"
 								}
@@ -4185,15 +4110,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:3000/api/templates/save?page=1&pageSize=10",
-									"protocol": "http",
+									"raw": "{{baseUrl}}templates/save?page=1&pageSize=10",
 									"host": [
-										"localhost"
+										"{{baseUrl}}templates"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"templates",
 										"save"
 									],
 									"query": [
@@ -4213,7 +4134,6 @@
 								{
 									"key": "Content-Type",
 									"value": "application/json",
-									"name": "Content-Type",
 									"description": "",
 									"type": "text"
 								}
@@ -4799,15 +4719,11 @@
 											}
 										},
 										"url": {
-											"raw": "http://localhost:3000/api/blogs/comments/7",
-											"protocol": "http",
+											"raw": "{{baseUrl}}blogs/comments/7",
 											"host": [
-												"localhost"
+												"{{baseUrl}}blogs"
 											],
-											"port": "3000",
 											"path": [
-												"api",
-												"blogs",
 												"comments",
 												"7"
 											]
@@ -5200,15 +5116,9 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/blogs",
-									"protocol": "http",
+									"raw": "{{baseUrl}}blogs",
 									"host": [
-										"localhost"
-									],
-									"port": "3000",
-									"path": [
-										"api",
-										"blogs"
+										"{{baseUrl}}blogs"
 									]
 								}
 							},
@@ -5282,83 +5192,27 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}blogs?page=1&pageSize=10",
+							"raw": "{{baseUrl}}blogs?query=description&page=1&pageSize=3",
 							"host": [
 								"{{baseUrl}}blogs"
 							],
 							"query": [
+								{
+									"key": "query",
+									"value": "description"
+								},
 								{
 									"key": "page",
 									"value": "1"
 								},
 								{
 									"key": "pageSize",
-									"value": "10"
+									"value": "3"
 								}
 							]
 						}
 					},
 					"response": [
-						{
-							"name": "Search Blogs",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:3000/api/blogs?query=description&page=1&pageSize=3",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "3000",
-									"path": [
-										"api",
-										"blogs"
-									],
-									"query": [
-										{
-											"key": "query",
-											"value": "description"
-										},
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "pageSize",
-											"value": "3"
-										}
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
-						{
-							"name": "Search Blogs Sort by Most Valuable",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}blogs?sort=mostValuable",
-									"host": [
-										"{{baseUrl}}blogs"
-									],
-									"query": [
-										{
-											"key": "sort",
-											"value": "mostValuable"
-										}
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
 						{
 							"name": "Search Blog (by description)",
 							"originalRequest": {
@@ -5420,6 +5274,122 @@
 							],
 							"cookie": [],
 							"body": "[\n    {\n        \"id\": 5,\n        \"title\": \"My First Blog Post\",\n        \"description\": \"This is the description of my first blog post.\",\n        \"tags\": \"example, first\",\n        \"createdAt\": \"2024-11-03T13:59:53.139Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 0,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 0,\n        \"hidden\": false,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": []\n    },\n    {\n        \"id\": 4,\n        \"title\": \"Updated Blog Post Title\",\n        \"description\": \"Update: new description\",\n        \"tags\": \"new,blog,post\",\n        \"createdAt\": \"2024-11-03T13:29:05.479Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 0,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 0,\n        \"hidden\": false,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": []\n    },\n    {\n        \"id\": 1,\n        \"title\": \"Updated Blog Post Title\",\n        \"description\": \"This is the description of my first blog post.\",\n        \"tags\": \"example, first\",\n        \"createdAt\": \"2024-11-01T18:31:01.580Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 0,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 0,\n        \"hidden\": true,\n        \"authorId\": 1,\n        \"deleted\": true,\n        \"codeTemplates\": []\n    }\n]"
+						},
+						{
+							"name": "Search Blogs",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}blogs?query=description&page=1&pageSize=3",
+									"host": [
+										"{{baseUrl}}blogs"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "description"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"2pb3sefocll\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "777"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 23:03:16 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 2,\n        \"title\": \"My First Blog Post\",\n        \"description\": \"This is the description of my first blog post.\",\n        \"tags\": \"example, first\",\n        \"createdAt\": \"2024-11-04T22:30:07.076Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 0,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 0,\n        \"hidden\": false,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": []\n    },\n    {\n        \"id\": 1,\n        \"title\": \"New Blog Post Title\",\n        \"description\": \"This is a description of the new blog post.\",\n        \"tags\": \"JavaScript, Tutorial\",\n        \"createdAt\": \"2024-11-04T02:50:05.385Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 0,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 1,\n        \"hidden\": true,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": [\n            {\n                \"id\": 2,\n                \"title\": \"hello world\",\n                \"explanation\": null,\n                \"tags\": null,\n                \"forkedSourceId\": null,\n                \"authorId\": 1,\n                \"modifiedAt\": \"2024-11-04T02:43:12.192Z\",\n                \"content\": \"\",\n                \"language\": \"python\",\n                \"deleted\": false\n            }\n        ]\n    }\n]"
+						},
+						{
+							"name": "Search Blogs Sort by Most Valuable",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}blogs?sort=mostValuable",
+									"host": [
+										"{{baseUrl}}blogs"
+									],
+									"query": [
+										{
+											"key": "sort",
+											"value": "mostValuable"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"2pb3sefocll\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "777"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 23:03:43 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 2,\n        \"title\": \"My First Blog Post\",\n        \"description\": \"This is the description of my first blog post.\",\n        \"tags\": \"example, first\",\n        \"createdAt\": \"2024-11-04T22:30:07.076Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 4,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 0,\n        \"hidden\": false,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": []\n    },\n    {\n        \"id\": 1,\n        \"title\": \"New Blog Post Title\",\n        \"description\": \"This is a description of the new blog post.\",\n        \"tags\": \"JavaScript, Tutorial\",\n        \"createdAt\": \"2024-11-04T02:50:05.385Z\",\n        \"flagged\": false,\n        \"upvoteCount\": 1,\n        \"downvoteCount\": 0,\n        \"reportsCount\": 1,\n        \"hidden\": true,\n        \"authorId\": 1,\n        \"deleted\": false,\n        \"codeTemplates\": [\n            {\n                \"id\": 2,\n                \"title\": \"hello world\",\n                \"explanation\": null,\n                \"tags\": null,\n                \"forkedSourceId\": null,\n                \"authorId\": 1,\n                \"modifiedAt\": \"2024-11-04T02:43:12.192Z\",\n                \"content\": \"\",\n                \"language\": \"python\",\n                \"deleted\": false\n            }\n        ]\n    }\n]"
 						},
 						{
 							"name": "No Results",
@@ -5756,15 +5726,11 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:3000/api/blogs/4",
-									"protocol": "http",
+									"raw": "{{baseUrl}}blogs/4",
 									"host": [
-										"localhost"
+										"{{baseUrl}}blogs"
 									],
-									"port": "3000",
 									"path": [
-										"api",
-										"blogs",
 										"4"
 									]
 								}
@@ -6162,17 +6128,6 @@
 					},
 					"response": [
 						{
-							"name": "No Posts Found",
-							"originalRequest": {
-								"method": "GET",
-								"header": []
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
-						{
 							"name": "Get Blogs by Template",
 							"originalRequest": {
 								"method": "GET",
@@ -6197,6 +6152,63 @@
 							"header": null,
 							"cookie": [],
 							"body": "[\r\n    {\r\n        \"id\": 1,\r\n        \"title\": \"Blog Post 1\",\r\n        \"description\": \"This is blog post 1.\",\r\n        \"createdAt\": \"2024-10-01T10:30:00Z\",\r\n        \"updatedAt\": \"2024-10-02T12:15:00Z\",\r\n        \"authorId\": 2,\r\n        \"codeTemplates\": [\r\n            {\r\n                \"id\": 101,\r\n                \"title\": \"useState Example\",\r\n                \"content\": \"const [count, setCount] = useState(0);\",\r\n                \"language\": \"javascript\",\r\n                \"tags\": [\"React\", \"Hooks\"],\r\n                \"deleted\": false,\r\n                \"authorId\": 2,\r\n                \"createdAt\": \"2024-09-25T08:00:00Z\",\r\n                \"updatedAt\": \"2024-09-26T09:00:00Z\"\r\n            }\r\n        ]\r\n    },\r\n    {\r\n        \"id\": 2,\r\n        \"title\": \"Blog Post 2\",\r\n        \"description\": \"An in-depth description of blog post 2.\",\r\n        \"createdAt\": \"2024-10-03T09:00:00Z\",\r\n        \"updatedAt\": \"2024-10-05T11:20:00Z\",\r\n        \"authorId\": 3,\r\n        \"codeTemplates\": [\r\n            {\r\n                \"id\": 102,\r\n                \"title\": \"Redux Store Setup\",\r\n                \"content\": \"content;\",\r\n                \"language\": \"javascript\",\r\n                \"tags\": [\"Redux\", \"JavaScript\"],\r\n                \"deleted\": false,\r\n                \"authorId\": 3,\r\n                \"createdAt\": \"2024-09-27T07:45:00Z\",\r\n                \"updatedAt\": \"2024-09-28T08:30:00Z\"\r\n            }\r\n        ]\r\n    }\r\n]"
+						},
+						{
+							"name": "No Posts Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}blogs/byTemplate?templateId=1",
+									"host": [
+										"{{baseUrl}}blogs"
+									],
+									"path": [
+										"byTemplate"
+									],
+									"query": [
+										{
+											"key": "templateId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"uijgbs0zui1l\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "57"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 23:11:45 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"No blog posts found for this code template.\"\n}"
 						}
 					]
 				}
@@ -6613,6 +6625,66 @@
 					},
 					"response": [
 						{
+							"name": "Hide Comment",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": 1,\r\n    \"type\": \"comment\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}moderation/reportedContent",
+									"host": [
+										"{{baseUrl}}moderation"
+									],
+									"path": [
+										"reportedContent"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"fqz49uilsc15\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "41"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 23:00:58 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Content hidden successfully\"\n}"
+						},
+						{
 							"name": "Hide Blog Post",
 							"originalRequest": {
 								"method": "PATCH",
@@ -6642,39 +6714,41 @@
 									]
 								}
 							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
-						{
-							"name": "Hide Content",
-							"originalRequest": {
-								"method": "PATCH",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"id\": 3,\r\n    \"type\": \"comment\"\r\n}\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
 								},
-								"url": {
-									"raw": "{{baseUrl}}moderation/hide",
-									"host": [
-										"{{baseUrl}}moderation"
-									],
-									"path": [
-										"hide"
-									]
+								{
+									"key": "ETag",
+									"value": "\"fqz49uilsc15\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "41"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 23:00:01 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
 								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
+							],
 							"cookie": [],
-							"body": null
+							"body": "{\n    \"message\": \"Content hidden successfully\"\n}"
 						},
 						{
 							"name": "Unauthorized",
@@ -6831,44 +6905,118 @@
 					},
 					"response": [
 						{
-							"name": "Sort Reported Content",
+							"name": "Sort Reported Comments",
 							"originalRequest": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}moderation/sorted",
+									"raw": "{{baseUrl}}moderation/reportedContent?type=comment",
 									"host": [
 										"{{baseUrl}}moderation"
 									],
 									"path": [
-										"sorted"
+										"reportedContent"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "comment"
+										}
 									]
 								}
 							},
-							"_postman_previewlanguage": null,
-							"header": null,
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"l97ee692kvbq\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "422"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 22:56:41 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
 							"cookie": [],
-							"body": null
+							"body": "{\n    \"comments\": [\n        {\n            \"id\": 2,\n            \"blogPostId\": 2,\n            \"createdAt\": \"2024-11-04T22:31:52.021Z\",\n            \"authorId\": 1,\n            \"content\": \"miao\",\n            \"upvoteCount\": 0,\n            \"downvoteCount\": 0,\n            \"reportsCount\": 5,\n            \"hidden\": false,\n            \"parentCommentId\": 1,\n            \"deleted\": false\n        },\n        {\n            \"id\": 1,\n            \"blogPostId\": 2,\n            \"createdAt\": \"2024-11-04T22:30:23.121Z\",\n            \"authorId\": 1,\n            \"content\": \"Hi. super cool post\",\n            \"upvoteCount\": 0,\n            \"downvoteCount\": 0,\n            \"reportsCount\": 2,\n            \"hidden\": false,\n            \"parentCommentId\": null,\n            \"deleted\": false\n        }\n    ]\n}"
 						},
 						{
-							"name": "Error",
+							"name": "Sort ReportedPOsts",
 							"originalRequest": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}moderation/sorted",
+									"raw": "{{baseUrl}}moderation/reportedContent?type=post",
 									"host": [
 										"{{baseUrl}}moderation"
 									],
 									"path": [
-										"sorted"
+										"reportedContent"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "post"
+										}
 									]
 								}
 							},
-							"_postman_previewlanguage": null,
-							"header": null,
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "ETag",
+									"value": "\"48wmxd9hab8k\""
+								},
+								{
+									"key": "Content-Length",
+									"value": "308"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 04 Nov 2024 22:58:41 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
 							"cookie": [],
-							"body": null
+							"body": "{\n    \"blogPosts\": [\n        {\n            \"id\": 1,\n            \"title\": \"New Blog Post Title\",\n            \"description\": \"This is a description of the new blog post.\",\n            \"tags\": \"JavaScript, Tutorial\",\n            \"createdAt\": \"2024-11-04T02:50:05.385Z\",\n            \"flagged\": false,\n            \"upvoteCount\": 0,\n            \"downvoteCount\": 0,\n            \"reportsCount\": 1,\n            \"hidden\": false,\n            \"authorId\": 1,\n            \"deleted\": false,\n            \"comments\": []\n        }\n    ]\n}"
 						}
 					]
 				}

@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -47,7 +47,7 @@ model CodeTemplate {
   language       String
   deleted        Boolean
 
-  blogPosts BlogPost[]    @relation("BlogPostCodeTemplates")
+  blogPosts BlogPost[]
   savedUsers SavedCodeTemplate[]
 }
 
@@ -70,7 +70,7 @@ model BlogPost {
   downvoteCount    Int              @default(0)
   upvotes          BlogPostUpvote[]
   downvotes        BlogPostDownvote[]
-  codeTemplates    CodeTemplate[]   @relation("BlogPostCodeTemplates")
+  codeTemplates    CodeTemplate[]
   reportsCount     Int              @default(0)
   hidden           Boolean          @default(false)
   author           User             @relation(fields: [authorId], references: [id])
