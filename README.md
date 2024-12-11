@@ -81,5 +81,5 @@ Visit: https://scriptorium.henrytchen.com/
 - Try running npm rebuild and npm install in the console.
 
 ## Deploying this project as a production build:
-Simply put, you deploy this project as you would any other project. However, we suggest (thought not required) that you run the startup.sh file first before using 'npm run build' and 'npm start' to ensure the database is pre-populated with a starter admin user and the nesscary docker images are prepped as well!
+Simply put, you deploy this project as you would any other Next.js project. However, we suggest (though not required) that you run the startup.sh file first before using 'npm run build' and 'npm start' to ensure the database is pre-populated with a starter admin user and the nesscary docker images are prepped as well!
 
