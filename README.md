@@ -41,8 +41,9 @@ UML diagram of our model is available in prisma-UML.png
 Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
 
 ## Live deployment:
-Visit: https://scriptorium.henrytchen.com/
+Visit: https://scriptorium.henrytchen.com/ 
 
+(Note that the site is currently http, so you might recieve a warning popup that you will have to "procceed" with.
 -----
 
 ## Deploying this project locally:
