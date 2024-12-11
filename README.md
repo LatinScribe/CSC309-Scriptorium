@@ -60,8 +60,8 @@ Visit: https://scriptorium.henrytchen.com/
 -----
 
 ## Deploying this project locally:
-1) Ensure that your system has [node](https://nodejs.org/en/download/package-manager) installed (we also recommend using linux).
-2) Ensure that your system has docker installed and set up (nesscary for code execution).
+1) Ensure that your system has [Node](https://nodejs.org/en/download/package-manager) installed (we also recommend using linux).
+2) Ensure that your system has [Docker](https://docs.docker.com/desktop/setup/install/linux/) installed and set up (nesscary for code execution).
 3) Download the source files into a folder of your choice.
 4.1) Open this folder in your code editor of choice (we recommend Visual Studio Code).
 4.2) Alternatively, in the terminal of choice, navigate (i.e cd) to the folder.
