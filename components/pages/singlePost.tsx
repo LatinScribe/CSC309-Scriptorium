@@ -97,9 +97,11 @@ const BlogPostPage = () => {
     const getComments = async () => {
       try {
         console.log("Fetching comments for post:", postId);
-        const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+        const commentsResponse = await fetchComments(postId, sortOption, 1, session);
         if (Array.isArray(commentsResponse.comments)) {
           setComments(commentsResponse.comments);
+          setCurrentPage(1);
+          setTotalPages(commentsResponse.totalPages); 
         } else {
           console.error("Expected an array of comments, but got:", commentsResponse.comments);
           setComments([]);
@@ -666,7 +668,6 @@ const nestComments = (comments: Comment[]) => {
 };
 
 export default BlogPostPage;
-
 
 
 
