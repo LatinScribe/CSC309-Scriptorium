@@ -5,7 +5,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## What is Scriptorium?
 
-An online platform where you can write, execute, and share code in multiple programming languages (you can support more languages in your own deployment easily). Inspired by the ancient concept of a scriptorium, a place where manuscripts were crafted and preserved, Scriptorium modernizes this idea for the digital age. It offers a secure environment for geeks, nerds, and coding enthusiasts to experiment, refine, and save their work as reusable templates. Whether you’re testing a quick snippet or building a reusable code example, Scriptorium is what you need to bring your ideas to life.
+An online platform where you can write, execute, and share code in multiple programming languages (you can easily support more languages in your own deployment). Inspired by the ancient concept of a scriptorium, a place where manuscripts were crafted and preserved, Scriptorium modernizes this idea for the digital age. It offers a secure environment for geeks, nerds, and coding enthusiasts to experiment, refine, and save their work as reusable templates. Whether you’re testing a quick snippet or building a reusable code example, Scriptorium is what you need to bring your ideas to life.
 
 ## Key features:
 - Online code execution: Quickly test out any publicly available code template on the platform (in a Dockerised setting, so no naughty business!).
