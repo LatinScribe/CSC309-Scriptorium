@@ -3,6 +3,19 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 
+## What is this project?
+
+An online platform where you can write, execute, and share code in multiple programming languages (you can support more languages in your own deployment easily). Inspired by the ancient concept of a scriptorium, a place where manuscripts were crafted and preserved, Scriptorium modernizes this idea for the digital age. It offers a secure environment for geeks, nerds, and coding enthusiasts to experiment, refine, and save their work as reusable templates. Whether you’re testing a quick snippet or building a reusable code example, Scriptorium is what you need to bring your ideas to life.
+
+## Key features:
+- Online code execution: Quickly test out any publicly available code template on the platform (in a Dockerised setting, so no naughty business!).
+- Create, edit, save, and share your own code templates, with built in language specific syntax highlighting.
+- Web forum where you can blog about your creations, and comment on other's work.
+- Like a template? You can easily Fork your own instance and start building from there.
+- For platform Administrators, a simple yet powerful moderation toolkit is available out of the box.
+- All delivered in a seamless, user-friendly Next.js project using Prisma ORM and REST API framework that is easily customizable.
+
+
 ## Getting Started 
 #### (For full guide, jump down to [Deploying this Project Locally](#Deploying-this-project-locally)
 
@@ -40,10 +53,10 @@ UML diagram of our model is available in prisma-UML.png
 
 Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
 
-## Live deployment:
+## Live deployment (Demo):
 Visit: https://scriptorium.henrytchen.com/ 
 
-(Note that the site is currently http, so you might recieve a warning popup that you will have to "procceed" with.
+#### Note that the demo-site is currently using http, so you might recieve a warning popup that you will have to "procceed" with!
 -----
 
 ## Deploying this project locally:
@@ -66,4 +79,7 @@ Visit: https://scriptorium.henrytchen.com/
 - We recommend running this in WSL (Linux) with docker preconfigured for WSL: https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers.
 - IF you receive errors when running startup.sh or run.sh, try using "sed -i -e 's/\r$//' startup.sh" as windows uses CR and LF as line encoding when saving file which is not compatible with linux.
 - Try running npm rebuild and npm install in the console.
+
+## Deploying this project as a production build:
+Simply put, you deploy this project as you would any other project. However, we suggest (thought not required) that you run the startup.sh file first before using 'npm run build' and 'npm start' to ensure the database is pre-populated with a starter admin user and the nesscary docker images are prepped as well!
 
