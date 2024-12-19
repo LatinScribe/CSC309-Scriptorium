@@ -74,7 +74,6 @@ const BlogPostPage = () => {
         setBlogPost(responseBlog);
 
         const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
-        // const nestedComments = nestComments(commentsResponse.comments);
         setComments(commentsResponse.comments);
         setTotalPages(commentsResponse.totalPages);
 
@@ -98,10 +97,11 @@ const BlogPostPage = () => {
     const getComments = async () => {
       try {
         console.log("Fetching comments for post:", postId);
-        const commentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+        const commentsResponse = await fetchComments(postId, sortOption, 1, session);
         if (Array.isArray(commentsResponse.comments)) {
-          const nestedComments = nestComments(commentsResponse.comments);
-          setComments(nestedComments);
+          setComments(commentsResponse.comments);
+          setCurrentPage(1);
+          setTotalPages(commentsResponse.totalPages); 
         } else {
           console.error("Expected an array of comments, but got:", commentsResponse.comments);
           setComments([]);
@@ -127,10 +127,16 @@ const BlogPostPage = () => {
       const nextPage = currentPage + 1;
       setCurrentPage(nextPage); 
       try{
-        const newCommentsResponse = await fetchComments(postId, sortOption, currentPage, session);
+        const newCommentsResponse = await fetchComments(postId, sortOption, currentPage + 1, session);
         const newComments = newCommentsResponse.comments;
 
-        setComments((prevComments) => [...prevComments, ...newComments]);
+        setComments((prevComments) => {
+          const existingCommentIds = new Set(prevComments.map((comment) => comment.id));
+          const filteredNewComments = newComments.filter(
+            (comment: Comment) => !existingCommentIds.has(comment.id)
+          );
+          return [...prevComments, ...filteredNewComments];
+        });
       } catch (error) {
         console.error("Failed to load more comments:", error);
         toast.error("Failed to load more comments.");
@@ -662,7 +668,6 @@ const nestComments = (comments: Comment[]) => {
 };
 
 export default BlogPostPage;
-
 
 
 
