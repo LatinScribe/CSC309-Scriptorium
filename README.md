@@ -16,9 +16,10 @@ An online platform where you can write, execute, and share code in multiple prog
 - All delivered in a seamless, user-friendly Next.js project using Prisma ORM and REST API framework that is easily customizable.
 
 ## Live deployment (Demo):
-Visit: https://scriptorium.henrytchen.com/ 
+Visit: [https://scriptorium.henrytchen.com](https://scriptorium.henrytchen.com)
 
-#### Note that the demo-site is currently using http, so you might recieve a warning popup that you will have to "procceed" with!
+> [!TIP]
+> The site has now been updated to support HTTPS connections!
 
 ## Getting Started 
 #### (For full guide, jump down to [Deploying this Project Locally](#Deploying-this-project-locally)
