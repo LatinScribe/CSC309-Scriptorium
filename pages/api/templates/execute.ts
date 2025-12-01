@@ -36,7 +36,8 @@ const dockerImages = {
 };
 
 const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
-const MEMORY_LIMIT = '512m';
+const MEMORY_LIMIT = '128m';
+const CPU_LIMIT = 0.5
 
 function getDockerCommand(language: keyof typeof dockerImages, directory: string, fileName: string) {
     const image = dockerImages[language];
@@ -94,7 +95,7 @@ function getDockerCommand(language: keyof typeof dockerImages, directory: string
             throw new Error("Unsupported language");
     }
 
-    return `docker run --rm -i -v ${directory}:/code --memory=${MEMORY_LIMIT} ${image} sh -c "${command}"`;
+    return `docker run --rm -it -v ${directory}:/code:ro --user 1000 --memory=${MEMORY_LIMIT} --cpus=${CPU_LIMIT} --security-opt no-new-privileges ${image} sh -c "${command}"`;
 }
 
 interface ExecuteRequest {
