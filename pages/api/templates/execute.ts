@@ -35,9 +35,9 @@ const dockerImages = {
     brainfuck: "sergiomtzlosa/brainfuck"
 };
 
-const TIME_LIMIT = 20000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
-const MEMORY_LIMIT = '128m';
-const CPU_LIMIT = 0.5
+const TIME_LIMIT = process.env.EXECUTION_TIMELIMIT_MS ? parseInt(process.env.EXECUTION_TIMELIMIT_MS) : 20000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
+const MEMORY_LIMIT = process.env.EXECUTION_MEMORYLIMIT_MB || '128m';
+const CPU_LIMIT = process.env.EXEUCTION_CPULIMIT_PERCENT ? parseFloat(process.env.EXEUCTION_CPULIMIT_PERCENT) : 0.5
 
 function getDockerCommand(language: keyof typeof dockerImages, directory: string, fileName: string) {
     const image = dockerImages[language];
