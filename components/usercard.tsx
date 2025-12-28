@@ -8,7 +8,7 @@ import { CalendarIcon, ClockIcon, MailIcon, UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge"
 
 export default function UserCard({ user }: { user: User }) {
-    console.log(user);
+    // console.log(user);
     return (
         <HoverCard>
             <HoverCardTrigger>
