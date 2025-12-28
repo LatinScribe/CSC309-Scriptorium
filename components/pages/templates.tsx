@@ -335,7 +335,7 @@ export default function TemplatesPage() {
                 </div>
                 <div className='flex flex-col gap-5'>
                     {templates.map((template) => (
-                        <a key={template.id} className="flex flex-col gap-2 p-4 border rounded-lg" href={`/templates/${template.id}`}>
+                        <Link key={template.id} className="flex flex-col gap-2 p-4 border rounded-lg" href={`/templates/${template.id}`}>
                             <div className="text-xl truncate">{template.title}</div>
                             <div className="text-sm truncate">{template.explanation}</div>
                             <div className="flex h-5 items-center space-x-4 text-sm">
@@ -359,7 +359,7 @@ export default function TemplatesPage() {
                                     {template.language}
                                 </div>
                             </div>
-                        </a>
+                        </Link>
                     ))}
                 </div>
                 <Pagination>

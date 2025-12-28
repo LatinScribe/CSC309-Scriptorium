@@ -71,7 +71,7 @@ export default function BlogListPage() {
             // fetchAndSetBlogs();
         }
         
-    }, [searchQuery, sortOption, currentPage, searchContent, searchTag, searchTemplate]);
+    }, [searchQuery, sortOption, currentPage]);
 
     // useEffect(() => {
     //     // updateUrl({ search: searchQuery, sort: sortOption, page: 1 });
@@ -127,7 +127,11 @@ export default function BlogListPage() {
 
     const handleSearch = () => {
         setSearchQuery(inputValue);
-        setCurrentPage(1); // Reset to first page 
+        // setCurrentPage(1); // Reset to first page 
+        if (router.isReady) {
+            updateUrl({ title: searchQuery, sort: sortOption, page: currentPage, content: searchContent, tag: searchTag, template: searchTemplate });
+            // fetchAndSetBlogs();
+        }
         // fetchAndSetBlogs(searchQuery); 
     };
 
@@ -164,10 +168,10 @@ export default function BlogListPage() {
                             onChange={(e) => setInputValue(e.target.value)}        //update local input state
                         />             
                         <AdvancedSearchModal showIdFilter={true} onFiltersChange={(filters) => {
-                            if (filters.title) setInputValue(filters.title);
-                            if (filters.content) setSearchContent(filters.content);
-                            if (filters.tags) setSearchTag(filters.tags.join(","));
-                            if (filters.template) setSearchTemplate(filters.template);
+                            if (filters.title) setInputValue(filters.title); else setInputValue("");
+                            if (filters.content) setSearchContent(filters.content); else setSearchContent("");
+                            if (filters.tags) setSearchTag(filters.tags.join(",")); else setSearchTag("");
+                            if (filters.template) setSearchTemplate(filters.template); else setSearchTemplate("");
                         }} />
                         <Button onClick={handleSearch}>Search</Button>            
                     </div>
@@ -210,7 +214,7 @@ export default function BlogListPage() {
                                     sortOption === 'createdAt' ? 'Newest' : 'Select Sort'
                                 }</SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className='bg-background'>
                                 <SelectItem value="mostUpvoted">Most Upvoted</SelectItem>
                                 <SelectItem value="mostDownvoted">Most Downvoted</SelectItem>
                                 <SelectItem value="createdAt">Newest</SelectItem>

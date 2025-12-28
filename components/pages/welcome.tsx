@@ -25,16 +25,20 @@ interface ContentCardProps {
     title: string;
     content: string;
     tags: string[];
+    link: string;
 }
 
-function ContentCard({ user, title, content, tags }: ContentCardProps) {
+function ContentCard({ user, title, content, tags, link }: ContentCardProps) {
+    if (!user) {
+        return null;
+    }
     return (
-        <div className="flex flex-col gap-2 p-4 border border-gray-300 rounded-lg w-full md:max-w-[33%]">
+        <Link className="flex flex-col gap-2 p-4 border border-gray-300 rounded-lg w-full md:max-w-[33%]" href={link}>
             <div className="text-lg font-semibold truncate">{title}</div>
             <div className="text-gray-500 truncate">{content}</div>
             <div className="flex gap-2 items-center flex-wrap">
                 <div className="text-gray-500">Tags:</div>
-                {tags.map((tag) => (
+                {tags && tags.map((tag) => (
                     <div key={tag} className="text-gray-500 bg-secondary rounded-full px-3 py-1">{tag}</div>
                 ))}
             </div>
@@ -42,7 +46,7 @@ function ContentCard({ user, title, content, tags }: ContentCardProps) {
                 <UserIcon className="h-4 w-4" />
                 <UserCard user={user} />
             </div>
-        </div>
+        </Link>
     );
 }
 
@@ -54,8 +58,8 @@ export default function WelcomePage() {
     const [featuredBlogs, setFeaturedBlogs] = useState<ContentCardProps[]>([]);
     const router = useRouter();
 
-    const featuredTemplatesIds = [1, 1, 29];
-    const featuredBlogsIds = [1, 1, 1];
+    const featuredTemplatesIds = [15, 22, 25];
+    const featuredBlogsIds = [14, 4, 17];
 
     const handleFiltersChange = (newFilters: Filters) => {
         setFilters(newFilters);
@@ -92,6 +96,7 @@ export default function WelcomePage() {
                             title: template.title,
                             content: template.explanation || '',
                             tags: template.tags,
+                            link: `/templates/${id}`,
                         };
                     })
                 );
@@ -109,6 +114,7 @@ export default function WelcomePage() {
                         title: blog.title,
                         content: blog.content,
                         tags: blog.tags,
+                        link: `/post?id=${id}`,
                     };
                 })
             );

@@ -15,6 +15,11 @@ An online platform where you can write, execute, and share code in multiple prog
 - For platform Administrators, a simple yet powerful moderation toolkit is available out of the box.
 - All delivered in a seamless, user-friendly Next.js project using Prisma ORM and REST API framework that is easily customizable.
 
+## Live deployment (Demo):
+Visit: [https://scriptorium.henrytchen.com](https://scriptorium.henrytchen.com)
+
+> [!TIP]
+> The site has now been updated to support HTTPS connections!
 
 ## Getting Started 
 #### (For full guide, jump down to [Deploying this Project Locally](#Deploying-this-project-locally)
@@ -53,11 +58,6 @@ UML diagram of our model is available in prisma-UML.png
 
 Use our provided postman collection (see sciptorium.post_collection) to test the available API endpoints! That's all. 
 
-## Live deployment (Demo):
-Visit: https://scriptorium.henrytchen.com/ 
-
-#### Note that the demo-site is currently using http, so you might recieve a warning popup that you will have to "procceed" with!
------
 
 ## Deploying this project locally:
 1) Ensure that your system has [Node](https://nodejs.org/en/download/package-manager) installed (we also recommend using linux).

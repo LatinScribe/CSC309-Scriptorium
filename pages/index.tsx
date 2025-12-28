@@ -26,6 +26,7 @@ import AdminAccount from "@/components/pages/admin-account";
 import AdminProfile from "@/components/pages/admin-profile";
 import MyTemplatesPage from "@/components/pages/mytemplates";
 import AdminContentPage from "@/components/pages/admin-content";
+import About from "@/components/pages/about";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -87,6 +88,8 @@ export default function Home() {
         return <MyTemplatesPage />;
       case "/admin-content":
         return <AdminContentPage />;
+      case "/about-us":
+        return <About />;
       default:
       if (router.asPath.startsWith("/templates?")) {
         return <TemplatesPage />;

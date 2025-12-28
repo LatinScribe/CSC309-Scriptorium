@@ -35,8 +35,9 @@ const dockerImages = {
     brainfuck: "sergiomtzlosa/brainfuck"
 };
 
-const TIME_LIMIT = 60000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
-const MEMORY_LIMIT = '512m';
+const TIME_LIMIT = 20000; // we're almost as generous as Azure Functions! (i'm throwing shade at them)
+const MEMORY_LIMIT = '128m';
+const CPU_LIMIT = 0.5
 
 function getDockerCommand(language: keyof typeof dockerImages, directory: string, fileName: string) {
     const image = dockerImages[language];
@@ -94,7 +95,7 @@ function getDockerCommand(language: keyof typeof dockerImages, directory: string
             throw new Error("Unsupported language");
     }
 
-    return `docker run --rm -i -v ${directory}:/code --memory=${MEMORY_LIMIT} ${image} sh -c "${command}"`;
+    return `docker run --rm -it -v ${directory}:/code:ro --user 1000 --memory=${MEMORY_LIMIT} --cpus=${CPU_LIMIT} --security-opt no-new-privileges ${image} sh -c "${command}"`;
 }
 
 interface ExecuteRequest {
@@ -160,7 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const timeout = setTimeout(() => {
             child.kill();
-            stderr += "\nExecution timed out. Templates may only run for 60 seconds, including compilation time. To access more resources, please purchase a Scriptorium Plus subscription, now only for $999,999,999.99!";
+            stderr += "\nExecution timed out. Templates may only run for 20 seconds, including compilation time. To access more resources, please purchase a Scriptorium Plus subscription, now only for $999,999,999.99!";
         }, TIME_LIMIT);
 
         child.stdout.on("data", (data) => {
