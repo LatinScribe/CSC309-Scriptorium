@@ -110,6 +110,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: "Method not allowed" });
     }
 
+    // check if execution is allowed from env
+    if (process.env.EXECUTION_ALLOWED !== "true") {
+        return res.status(403).json({ error: "Code execution is disabled for this DEMO! If you would like to see it enabled, please contact us!" });
+    }
+
     // input will be an array of strings (for stdin), or an empty array
 
     const body: ExecuteRequest = req.body;
