@@ -9,6 +9,7 @@ const nextConfig = {
       },
     ];
   },
+  allowedDevOrigins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3011', 'https://scriptorium.henrytchen.com', 'https://www.scriptorium.henrytchen.com'], 
 };
 
 export default nextConfig;
