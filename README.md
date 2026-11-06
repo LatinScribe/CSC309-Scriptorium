@@ -24,7 +24,13 @@ Visit: [https://scriptorium.henrytchen.com](https://scriptorium.henrytchen.com)
 ## Getting Started 
 #### (For full guide, jump down to [Deploying this Project Locally](#Deploying-this-project-locally)
 
-First, run the startup file:
+First, create your settings file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Then, run the startup file:
 
 ```bash
 
@@ -65,6 +71,7 @@ Use our provided postman collection (see sciptorium.post_collection) to test the
 3) Download the source files into a folder of your choice.
 4.1) Open this folder in your code editor of choice (we recommend Visual Studio Code).
 4.2) Alternatively, in the terminal of choice, navigate (i.e cd) to the folder.
+4.3) Create your settings file by running `cp .env.example .env`. The example values are fine for trying this on your own machine, but not for a deployment (see [production](#deploying-this-project-as-a-production-build)).
 5) Run the startup.sh script.
 6) Then run the run.sh script.
 7) Finally, in the browser of choice, use the URL: [http://localhost:3000](http://localhost:3000).
@@ -82,4 +89,18 @@ Use our provided postman collection (see sciptorium.post_collection) to test the
 
 ## Deploying this project as a production build:
 Simply put, you deploy this project as you would any other Next.js project. However, we suggest (though not required) that you run the startup.sh file first before using 'npm run build' and 'npm start' to ensure the database is pre-populated with a starter admin user and the nesscary docker images are prepped as well!
+
+> [!IMPORTANT]
+> Complete these steps before exposing a deployment to the internet. The values in `.env.example` are public, so anyone can use them.
+
+1) Provide your settings, using the names in [`.env.example`](.env.example):
+   - On your own server, run `cp .env.example .env` and edit `.env`.
+   - On a host such as Vercel, add them to the project's environment variables.
+2) Set `JWT_SECRET` to your own random value, which you can generate with `openssl rand -base64 48`. Anyone who knows this value can forge login tokens, including admin ones.
+3) Set `EXECUTION_ALLOWED` to `"true"` only if you intend to let visitors run code, and Docker is set up on that machine. Any other value turns code execution off.
+4) Change the default admin password listed in [Usage](#usage) if you ran startup.sh, as it's public too.
+5) Change `API_URL` in `utils/dataInterface.tsx` to your site's public address. Browsers use that value, and it doesn't come from `.env`.
+
+> [!NOTE]
+> If you're updating a deployment that used `.env.production` or `.env.development`, those files are no longer in this repository, and pulling this change removes them. Set up your settings as above before you restart the app.
 
