@@ -1,2 +1,6 @@
 /.next
 /node_modules
+
+# Real settings stay out of git. Only the example is tracked.
+.env*
+!.env.example
